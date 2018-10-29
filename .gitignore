@@ -1,0 +1,9 @@
+# 临时文件
+*.o
+decolor
+
+# VScode 文件
+.vscode
+
+# MacOS 文件
+.DS_Store
