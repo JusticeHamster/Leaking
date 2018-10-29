@@ -1,3 +1,10 @@
+/*
+ * Created by RailgunHamster
+ * 2018.10.29
+ * 以下代码来自：
+ * https://blog.csdn.net/u012566751/article/details/54289497
+ * 仅测试用途
+ */
 #include <opencv2/core/utility.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
