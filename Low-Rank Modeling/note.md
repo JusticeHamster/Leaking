@@ -29,4 +29,3 @@ $$
 其中$D$为$n$个$m$维数据集。
 
 example: ```Lambertian reflectance```
-
