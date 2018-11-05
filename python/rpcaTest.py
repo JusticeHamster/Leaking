@@ -28,7 +28,7 @@ def videos_path(videos):
 def run(path):
   # 视频压缩的长宽
   m, n = 192, 108
-  # init
+  # ini
   capture = cv2.VideoCapture(path)
   data = None
   # run
@@ -39,16 +39,16 @@ def run(path):
     if not success:
       break
     nframes += 1
-    frame = cv2.resize(frame, (m, n))
+    frame = cv2.resize(frame, (n, m))
     # 转换为灰度图
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    gray = np.array(gray)
-    gray = gray.reshape(-1, 1)
+    gray = np.array(gray).reshape(-1, 1)
     # 加入矩阵列中
     if data is None:
       data = gray
     else:
       data = np.hstack((data, gray))
+      print(data)
   capture.release()
   # 调用RPCA算法
   print('run')
@@ -61,7 +61,7 @@ def run(path):
     X2 = h['X2_admm']
     X3 = h['X3_admm']
     #
-    cv2.imshow('frame', X1[:, count].reshape((m, n)))
+    cv2.imshow(path, X1[:, count].reshape((m, n)))
     #
     count += 1
     if cv2.waitKey(100) & 0xFF == ord('q'):
