@@ -61,3 +61,74 @@ $$
 - Recovery from a few entries.
 
 - Recovery from gross errors.
+
+所以需要RPCA。
+
+## 最小化秩
+
+### 分析
+
+#### 近似
+
+最小化秩是NP-hard问题，所以需要将其转换为一个凸函数。
+
+用核范数代替秩：
+$$
+||\mathbf{X}||_*=\sum_{i=1}^r\sigma_i
+$$
+$\sigma_i$为$\mathbf{X}$的奇异值。
+
+#### 原因：
+
+- 核范数是凸函数
+
+- 核范数被证明是所有秩的近似中最紧的凸函数
+
+### 矩阵补全
+
+#### 近似
+
+以上表达式可以表示为：
+$$
+\min_\mathbf{X}\ rank(\mathbf{X})\\
+s.t.\ \mathcal{P}_\Omega(\mathbf{X})=\mathcal{P}_\Omega(\mathbf{D})
+$$
+其中$\mathcal{P}_\Omega(\mathbf{X})$是将矩阵投影到所有限制在$\Omega$的非零矩阵空间的操作，即$\mathcal{P}_\Omega(\mathbf{X})$对于$\Omega$空间中的项以及$\Omega$空间外的零与$\mathbf{X}$有相同的值。
+
+#### 再近似
+
+根据上一节的讨论，用核范数代替rank：
+$$
+\min_\mathbf{X}\ ||\mathbf{X}||_*\\
+s.t.\ \mathcal{P}_\Omega(\mathbf{X})=\mathcal{P}_\Omega(\mathbf{D})
+$$
+
+#### 再次近似
+
+由于上述约束过强，会导致过拟合，于是一般采用以下更松的形式：
+$$
+\min_\mathbf{X}\ \frac{1}{2}||\mathcal{P}_\Omega(\mathbf{D})-\mathcal{P}_\Omega(\mathbf{X})||_F^2+\lambda||\mathbf{X}||_*
+$$
+
+### RPCA
+
+在轻微的假设下就能讲RPCA问题由下列凸表达式表示，叫做PCP(Principal Component Pursuit)：
+$$
+\min_{X,E}\ ||\mathbf{X}||_*+\lambda||\mathbf{E}||_1\\
+s.t.\ \mathbf{X}+\mathbf{E}=\mathbf{D}
+$$
+详见RPCA相关论文。
+
+#### 放松
+
+上式考虑到高斯噪声，可以将约束放松为：
+$$
+||\mathbf{X}+\mathbf{E}-\mathbf{D}||_F\leq\sigma
+$$
+
+于是：
+$$
+\min_{X,E}\ ||\mathbf{X}||_*+\lambda||\mathbf{E}||_1+\frac{\mu}{2}||\mathbf{X}+\mathbf{E}-\mathbf{D}||_F^2
+$$
+
+### 优化算法
