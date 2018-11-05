@@ -16,6 +16,9 @@ with open('rpca.settings', encoding='utf-8') as f:
 # 设置
 full_path = settings['path']
 videos = settings['videos']
+delay = int(settings.get('delay', 100))
+  # 所需视频的高度
+height = int(settings.get('height', 192))
 # 将设置中的文件转换为绝对地址
 def videos_path(videos):
   return map(
@@ -30,14 +33,18 @@ def run(path):
   if not os.path.exists(path):
     print('no such file: {path}'.format(path=path))
     return
-  # 视频压缩的长宽
-  m, n = 192, 108
   # ini
   capture = cv2.VideoCapture(path)
   data = None
   # run
   print('read {path}'.format(path=path))
   nframes = 0
+  # 放缩
+  m = capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
+  n = capture.get(cv2.CAP_PROP_FRAME_WIDTH)
+  scale = height / m
+  m = height
+  n = int(n * scale)
   while capture.isOpened():
     success, frame = capture.read()
     if not success:
@@ -63,12 +70,17 @@ def run(path):
     X1 = h['X1_admm']
     X2 = h['X2_admm']
     X3 = h['X3_admm']
+    size = (m, n)
     #
-    cv2.imshow(path, X1[:, count].reshape((m, n)))
+    picture = np.hstack((
+      (X1[:, count].reshape(size)),
+      (X2[:, count].reshape(size)),
+      (X3[:, count].reshape(size)),
+    ))
+    cv2.imshow(path, picture)
     #
     count += 1
-    if cv2.waitKey(100) & 0xFF == ord('q'):
-      break
+    cv2.waitKey(delay)
 # run
 if __name__ == '__main__':
   for video in videos_path(videos):
