@@ -8,7 +8,7 @@ import RPCA
 path=XXX
 videos=X.mp4;Y.mp4
 delay=?     // 视频播放延迟
-height=?    // 视频高度限定
+height=?    // 视频高度限定，宽度会自动计算
 maxFrames=? // 取前N帧
 """
 settings = {}
