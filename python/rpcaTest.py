@@ -74,11 +74,13 @@ def run(name, path):
   print('end {path}'.format(path=path))
   # 写入文件
   size = (m, n)
-  videoWriter = cv2.VideoWriter(
+  videoWriter = cv2.VideoWriter()
+  videoWriter.open(
     '{name}.mp4'.format(name=name),
-    cv2.cv.CV_FOURCC('M', 'J', 'P', 'G'),
+    cv2.VideoWriter_fourcc(*'mp4v'),
     fps,
-    size
+    size,
+    False
   )
   count = 0
   while count < nframes:
@@ -94,12 +96,8 @@ def run(name, path):
     videoWriter.write(picture)
     #
     count += 1
-    cv2.waitKey(1000 // fps)
+  videoWriter.release()
 # run
 if __name__ == '__main__':
   for name, video in videos_path(videos):
     run(name, video)
-    # wait
-    input('<enter to continue>')
-    # free
-    cv2.destroyAllWindows()
