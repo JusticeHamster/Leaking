@@ -25,6 +25,7 @@ def run(path):
     success, frame = capture.read()
     if not success:
       break
+    frame = cv2.resize(frame, (320, 240), interpolation=cv2.INTER_LINEAR)
     # gray
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = np.array(gray)
