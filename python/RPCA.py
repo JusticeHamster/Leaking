@@ -161,9 +161,9 @@ def rpcaADMM(data):
         # diagnostics, reporting, termination checks
         h['objval'][k]   = objective(X_1, g2, X_2, g3, X_3)
         h['r_norm'][k]   = norm(x - z,'fro')
-        h['s_norm'][k]   = norm(-rho*(z - zold),'fro');
-        h['eps_pri'][k]  = sqrt(m*n*N)*ABSTOL + RELTOL*maximum(norm(x,'fro'), norm(-z,'fro'));
-        h['eps_dual'][k] = sqrt(m*n*N)*ABSTOL + RELTOL*sqrt(N)*norm(rho*U,'fro');
+        h['s_norm'][k]   = norm(-rho*(z - zold),'fro')
+        h['eps_pri'][k]  = sqrt(m*n*N)*ABSTOL + RELTOL*maximum(norm(x,'fro'), norm(-z,'fro'))
+        h['eps_dual'][k] = sqrt(m*n*N)*ABSTOL + RELTOL*sqrt(N)*norm(rho*U,'fro')
 
         if (k == 0) or (mod(k+1,10) == 0):
             print ('%4d\t%10.4f\t%10.4f\t%10.4f\t%10.4f\t%10.2f' %(k+1,
