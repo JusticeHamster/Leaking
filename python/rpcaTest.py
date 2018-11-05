@@ -65,9 +65,11 @@ def run(path):
     count += 1
     if cv2.waitKey(100) & 0xFF == ord('q'):
       break
-  # free
-  cv2.destroyAllWindows()
 # run
 if __name__ == '__main__':
   for video in videos_path(videos):
     run(video)
+  # quit?
+  input('<enter to exit>')
+  # free
+  cv2.destroyAllWindows()
