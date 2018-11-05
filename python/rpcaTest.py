@@ -2,9 +2,19 @@
 import numpy as np
 import cv2
 import RPCA
+# load
+settings = {}
+with open('rpca.settings', encoding='utf-8') as f:
+  for line in f.readlines():
+    strs = line.split('=')
+    settings[strs[0].strip()] = strs[1].strip()
+"""rpca.settings 格式要求:
+path=XXX
+videos=X.mp4;Y.mp4
+"""
 # def
-full_path = '/Users/wangyuxin/Movies/data'
-videos = ['fire.mov']#, 'water.mp4']
+full_path = settings['path']
+videos = settings['videos']
 # pre
 def videos_path(videos):
   return map(
@@ -12,7 +22,7 @@ def videos_path(videos):
       path=full_path,
       name=n
     ),
-    videos
+    videos.split(';')
   )
 # func
 def run(path):
@@ -53,7 +63,6 @@ def run(path):
     cv2.imshow('frame', X1[:, count].reshape((m, n)))
     #
     count += 1
-    print(count/nframes)
     if cv2.waitKey(100) & 0xFF == ord('q'):
       break
   # free
