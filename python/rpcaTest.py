@@ -3,15 +3,15 @@ import numpy as np
 import cv2
 import RPCA
 # 读取设置
+"""{rpca.settings 格式要求:}
+path=XXX
+videos=X.mp4;Y.mp4
+"""
 settings = {}
 with open('rpca.settings', encoding='utf-8') as f:
   for line in f.readlines():
     strs = line.split('=')
     settings[strs[0].strip()] = strs[1].strip()
-"""rpca.settings 格式要求:
-path=XXX
-videos=X.mp4;Y.mp4
-"""
 # 设置
 full_path = settings['path']
 videos = settings['videos']
@@ -70,7 +70,7 @@ def run(path):
 if __name__ == '__main__':
   for video in videos_path(videos):
     run(video)
-  # quit?
-  input('<enter to exit>')
-  # free
-  cv2.destroyAllWindows()
+    # wait
+    input('<enter to continue>')
+    # free
+    cv2.destroyAllWindows()
