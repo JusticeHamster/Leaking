@@ -1,16 +1,15 @@
 # import
 import numpy as np
 import cv2
-from os.path import abspath
-
 import RPCA
 # def
-videos = ['火花.mov', '流水.mp4']
+full_path = '/Users/wangyuxin/Movies/data'
+videos = ['fire.mov', 'water.mp4']
 # pre
 def videos_path(videos):
   return map(
     lambda n: '{path}/{name}'.format(
-      path=abspath('../video'),
+      path=full_path,
       name=n
     ),
     videos
@@ -19,19 +18,28 @@ def videos_path(videos):
 def run(path):
   # init
   capture = cv2.VideoCapture(path)
-  data = np.array([])
+  data = None
   # run
-  print('start')
+  print('read {path}'.format(path=path))
   while capture.isOpened():
-    _, frame = capture.read()
+    success, frame = capture.read()
+    if not success:
+      break
     # gray
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     gray = np.array(gray)
-    #
-    cv2.imshow('frame', gray)
+    gray = gray.reshape(-1, 1)
+    # stack
+    if data is None:
+      data = gray
+    else:
+      data = np.hstack((data, gray))
   capture.release()
   # cal
-  # RPCA.rpcaADMM(data)
+  print('run')
+  h = RPCA.rpcaADMM(data)
+  print(h)
+  print('end {path}'.format(path=path))
   # free
   cv2.destroyAllWindows()
 # run

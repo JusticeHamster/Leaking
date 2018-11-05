@@ -130,7 +130,7 @@ def rpcaADMM(data):
         return pm(x - b, l*g, pl)
 
     def update(func,item):
-        return map(func,[item])[0]
+        return next(map(func,[item]))
 
     for k in range(MAX_ITER):
 
