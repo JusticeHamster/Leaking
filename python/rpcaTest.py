@@ -58,13 +58,13 @@ def run(name, path):
     nframes += 1
     frame = cv2.resize(frame, (n, m))
     # 转换为灰度图
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    gray = np.array(gray).reshape(-1, 1)
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # 加入矩阵列中
+    frame = np.array(frame).reshape(-1, 1)
     if data is None:
-      data = gray
+      data = frame
     else:
-      data = np.hstack((data, gray))
+      data = np.hstack((data, frame))
   capture.release()
   # 调用RPCA算法
   print('run')
