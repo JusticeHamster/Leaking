@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 import RPCA
 # def
-full_path = '/Users/wangyuxin/Movies/data'
+full_path = '/Users/wzy/Movies/data'
 videos = ['fire.mov', 'water.mp4']
 # pre
 def videos_path(videos):
