@@ -1,6 +1,7 @@
 # import
 import numpy as np
 import cv2
+import os
 import RPCA
 # 读取设置
 """{rpca.settings 格式要求:}
@@ -26,6 +27,9 @@ def videos_path(videos):
   )
 # 运行
 def run(path):
+  if not os.path.exists(path):
+    print('no such file: {path}'.format(path=path))
+    return
   # 视频压缩的长宽
   m, n = 192, 108
   # ini
@@ -48,7 +52,6 @@ def run(path):
       data = gray
     else:
       data = np.hstack((data, gray))
-      print(data)
   capture.release()
   # 调用RPCA算法
   print('run')
