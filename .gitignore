@@ -1,5 +1,6 @@
 # 临时文件
 *.o
+*.pyc
 decolor
 
 # VScode 文件
