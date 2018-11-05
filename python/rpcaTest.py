@@ -10,6 +10,7 @@ videos=X.mp4;Y.mp4
 delay=?     // 视频播放延迟，默认100
 height=?    // 视频高度限定，宽度会自动计算，默认192
 maxFrames=? // 取前N帧，默认100
+fps=?       // 导出视频帧数，默认60
 """
 settings = {}
 with open('rpca.settings', encoding='utf-8') as f:
@@ -23,6 +24,7 @@ delay = int(settings.get('delay', 100))
   # 所需视频的高度
 height = int(settings.get('height', 192))
 maxFrames = int(settings.get('maxFrames', 100))
+fps = int(settings.get('fps', 60))
 # 将设置中的文件转换为绝对地址
 def videos_path(videos):
   return map(
@@ -70,23 +72,29 @@ def run(name, path):
   print('run')
   h = RPCA.rpcaADMM(data)
   print('end {path}'.format(path=path))
-  # 展示
+  # 写入文件
+  size = (m, n)
+  videoWriter = cv2.VideoWriter(
+    '{name}.mp4'.format(name=name),
+    cv2.cv.CV_FOURCC('M', 'J', 'P', 'G'),
+    fps,
+    size
+  )
   count = 0
   while count < nframes:
     X1 = h['X1_admm']
     X2 = h['X2_admm']
     X3 = h['X3_admm']
-    size = (m, n)
     #
     picture = np.hstack((
       (X1[:, count].reshape(size)),
       (X2[:, count].reshape(size)),
       (X3[:, count].reshape(size)),
     ))
-    cv2.imshow(name, picture)
+    videoWriter.write(picture)
     #
     count += 1
-    cv2.waitKey(delay)
+    cv2.waitKey(1000 // fps)
 # run
 if __name__ == '__main__':
   for name, video in videos_path(videos):
