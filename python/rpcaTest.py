@@ -1,5 +1,6 @@
 # import
 import numpy as np
+import time
 import cv2
 import os
 import RPCA
@@ -76,7 +77,7 @@ def run(name, path):
   size = (m, n)
   videoWriter = cv2.VideoWriter()
   videoWriter.open(
-    '{name}.mp4'.format(name=name),
+    '{name}.mp4'.format(name=name.split('.')[0]),
     cv2.VideoWriter_fourcc(*'mp4v'),
     fps,
     size,
@@ -93,6 +94,7 @@ def run(name, path):
       (X2[:, count].reshape(size)),
       (X3[:, count].reshape(size)),
     ))
+    picture = np.uint8(picture)
     videoWriter.write(picture)
     #
     count += 1
@@ -100,4 +102,7 @@ def run(name, path):
 # run
 if __name__ == '__main__':
   for name, video in videos_path(videos):
+    start = time.perf_counter()
     run(name, video)
+    end = time.perf_counter()
+    print('time: {time:.2f}s'.format(time=end - start))
