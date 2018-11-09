@@ -9,8 +9,7 @@ path=XXX
 videos=X.mp4;Y.mp4
 delay=?     // 视频播放延迟，默认100
 height=?    // 视频高度限定，宽度会自动计算，默认192
-maxFrames=? // 取前N帧，默认100
-fps=?       // 导出视频帧数，默认60
+frame_range=a-b// 取a-b帧，默认0-100
 img_path=?  // 图片存取路径，默认tmp/
 """
 settings = {}
@@ -25,7 +24,11 @@ videos = settings['videos']
 delay = int(settings.get('delay', 100))
   # 所需视频的高度
 height = int(settings.get('height', 192))
-maxFrames = int(settings.get('maxFrames', 100))
+frame_range = settings['frame_range']
+if frame_range is None:
+  frame_range = (0, 100)
+else:
+  frame_range = tuple(map(lambda s: int(s), frame_range.split('-')))
 fps = int(settings.get('fps', 60))
 # 将设置中的文件转换为绝对地址
 def videos_path(videos):
@@ -55,12 +58,14 @@ def run(name, path):
   # BS
   fgbg = cv2.createBackgroundSubtractorMOG2()
   while capture.isOpened():
-    if nframes >= maxFrames:
+    if nframes >= frame_range[1]:
       break
     success, frame = capture.read()
     if not success:
       break
     nframes += 1
+    if nframes < frame_range[0]:
+      continue
     frame = cv2.resize(frame, (n, m))
     # 转换为灰度图
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -75,6 +80,6 @@ if __name__ == '__main__':
   os.mkdir(img_path)
   for name, video in videos_path(videos):
     start = time.perf_counter()
-    run(name, video)
+    run(name.split('.')[0], video)
     end = time.perf_counter()
     print('time: {time:.2f}s'.format(time=end - start))
