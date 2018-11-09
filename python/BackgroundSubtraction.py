@@ -75,6 +75,6 @@ if __name__ == '__main__':
   os.mkdir(img_path)
   for name, video in videos_path(videos):
     start = time.perf_counter()
-    run(name, video)
+    run(name.split('.')[0], video)
     end = time.perf_counter()
     print('time: {time:.2f}s'.format(time=end - start))
