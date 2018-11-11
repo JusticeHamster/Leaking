@@ -67,12 +67,14 @@ def run(name, path):
     if nframes < frame_range[0]:
       continue
     frame = cv2.resize(frame, (n, m))
+    img = np.copy(frame)
     # 转换为灰度图
     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     #
     fgmask = fgbg.apply(frame)
+    img = np.hstack((img, cv2.cvtColor(fgmask, cv2.COLOR_GRAY2RGB)))
     #
-    cv2.imwrite('{path}/{name}_{n}.jpg'.format(path=img_path, name=name, n=nframes), fgmask)
+    cv2.imwrite('{path}/{name}_{n}.jpg'.format(path=img_path, name=name, n=nframes), img)
   capture.release()
   cv2.destroyAllWindows()
 # run
