@@ -85,11 +85,11 @@ def run(name, path):
       img = np.copy(frame)
     #
     siftimg_first, *_ = SIFT.siftImageAlignment(first, frame)
-    siftimg_last, *_ = SIFT.siftImageAlignment(last, frame)
     sift_frame_first = sift_fgbg_first.apply(siftimg_first)
     sift_frame_first = cv2.cvtColor(sift_frame_first, cv2.COLOR_GRAY2RGB)
     if not time_test:
-      sift_frame_last = sift_fgbg_first.apply(siftimg_last)
+      siftimg_last, *_ = SIFT.siftImageAlignment(last, frame)
+      sift_frame_last = sift_fgbg_last.apply(siftimg_last)
       sift_frame_last = cv2.cvtColor(sift_frame_last, cv2.COLOR_GRAY2RGB)
       frame = fgbg.apply(frame)
       frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2RGB)
