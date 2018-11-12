@@ -101,10 +101,10 @@ def run(name, path):
     blur = cv2.blur(sift_frame_first,(1,15))
     cv2.namedWindow('blur_demo', cv2.WINDOW_NORMAL)
     cv2.imshow("blur_demo", blur)
-    
+
     sift_frame_first = cv2.cvtColor(sift_frame_first, cv2.COLOR_GRAY2RGB)
     # denoise_img = cv2.fastNlMeansDenoisingColored(sift_frame_first,None,10,10,7,21)
-    
+
     if not time_test:
       siftimg_last, *_ = SIFT.siftImageAlignment(last, frame)
       sift_frame_last = sift_fgbg_last.apply(siftimg_last)
