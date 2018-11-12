@@ -59,11 +59,9 @@ def run(name, path):
       lastn = frame
       continue
     if not time_test:
+      original = frame
+    frame_first, sift_first = run_one_frame(first, frame, fgbg_first)
     if not time_test:
-      siftimg_last, *_ = SIFT.siftImageAlignment(last, frame)
-      sift_frame_last = sift_fgbg_last.apply(siftimg_last)
-      sift_frame_last = cv2.cvtColor(sift_frame_last, cv2.COLOR_GRAY2RGB)
-      frame = fgbg.apply(frame)
       frame_lastn, sift_lastn = run_one_frame(lastn, frame, fgbg_lastn)
       frame = run_one_frame(None, frame, fgbg)
       line1 = np.hstack((
