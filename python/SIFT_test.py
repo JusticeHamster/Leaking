@@ -34,7 +34,9 @@ def run_one_frame(normal, src, fgbg):
 def run(name, path):
   capture, h, w = lktools.PreProcess.video_capture_size(path, settings['height'])
   # run
-  print('read {path}'.format(path=path))
+  print('read {path}. total: {frames:.0f} frames'.format(
+    path=path, frames=capture.get(cv2.CAP_PROP_FRAME_COUNT)
+  ))
   nframes = 0
   # init
   first = None
