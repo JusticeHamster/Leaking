@@ -3,6 +3,7 @@ import numpy as np
 import time
 import cv2
 import os
+import shutil
 
 import SIFT
 # 读取设置
@@ -25,7 +26,7 @@ full_path = settings['path']
 img_path = settings.get('img_path', 'tmp/')
 videos = settings['videos']
 delay = int(settings.get('delay', 100))
-  # 所需视频的高度
+# 所需视频的高度
 height = int(settings.get('height', 192))
 frame_range = settings['frame_range']
 if frame_range is None:
@@ -44,6 +45,16 @@ def videos_path(videos):
     )),
     videos.split(';')
   )
+# 去除孤立的像素点
+def denoise(img,threshold):
+  _,binary = cv2.threshold(img,0.1,1,cv2.THRESH_BINARY)
+  image,contours,hierarch=cv2.findContours(binary,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
+  for i in range(len(contours)):
+    area = cv2.contourArea(contours[i])
+    if area < threshold:
+        cv2.drawContours(image,[contours[i]],0,0,-1)
+  cv2.imshow("image",image)
+  return image
 # 运行
 def run(name, path):
   if not os.path.exists(path):
@@ -86,7 +97,14 @@ def run(name, path):
     #
     siftimg_first, *_ = SIFT.siftImageAlignment(first, frame)
     sift_frame_first = sift_fgbg_first.apply(siftimg_first)
+    # denoise_img = denoise(sift_frame_first,10)
+    blur = cv2.blur(sift_frame_first,(1,15))
+    cv2.namedWindow('blur_demo', cv2.WINDOW_NORMAL)
+    cv2.imshow("blur_demo", blur)
+    
     sift_frame_first = cv2.cvtColor(sift_frame_first, cv2.COLOR_GRAY2RGB)
+    # denoise_img = cv2.fastNlMeansDenoisingColored(sift_frame_first,None,10,10,7,21)
+    
     if not time_test:
       siftimg_last, *_ = SIFT.siftImageAlignment(last, frame)
       sift_frame_last = sift_fgbg_last.apply(siftimg_last)
@@ -99,6 +117,7 @@ def run(name, path):
         ),
         np.hstack((
           img, frame,
+          # img, blur,
           siftimg_first, sift_frame_first,
           siftimg_last, sift_frame_last
         ))
@@ -109,6 +128,8 @@ def run(name, path):
 # run
 if __name__ == '__main__':
   if not time_test:
+    if os.path.exists(img_path):
+      shutil.rmtree(img_path)    #递归删除文件夹
     os.mkdir(img_path)
   for name, video in videos_path(videos):
     start = time.perf_counter()
