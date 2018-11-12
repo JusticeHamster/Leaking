@@ -122,6 +122,9 @@ def run(name, path):
           siftimg_last, sift_frame_last
         ))
       )
+      if nframes == 15:
+        print("save frash picture!")
+        cv2.imwrite('frash.jpg',sift_frame_first)
     last = img
   capture.release()
   cv2.destroyAllWindows()
@@ -136,3 +139,4 @@ if __name__ == '__main__':
     run(name.split('.')[0], video)
     end = time.perf_counter()
     print('time: {time:.2f}s'.format(time=end - start))
+    os.system("pause")
