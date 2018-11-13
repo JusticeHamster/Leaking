@@ -8,6 +8,7 @@ import lktools
 settings = lktools.Loader.get_settings()
 time_test = settings['time_test']
 img_path = settings['img_path']
+video_path = settings['video_path']
 frame_range = settings['frame_range']
 lastn_interval = settings['lastn']
 def run_one_frame(normal, src, fgbg):
@@ -32,7 +33,7 @@ def run_one_frame(normal, src, fgbg):
 # 计时运行
 @lktools.Timer.timer_decorator
 def run(name, path):
-  capture, h, w = lktools.PreProcess.video_capture_size(path, settings['height'])
+  capture, h, w, fps = lktools.PreProcess.video_capture_size(path, settings['height'])
   # run
   print('read {path}. total: {frames:.0f} frames'.format(
     path=path, frames=capture.get(cv2.CAP_PROP_FRAME_COUNT)
@@ -45,6 +46,12 @@ def run(name, path):
   if not time_test:
     fgbg_lastn = cv2.createBackgroundSubtractorMOG2()
     fgbg = cv2.createBackgroundSubtractorMOG2()
+  # 保存视频的fps与存储位置等
+  # fps = 10    #保存视频的FPS，可以适当调整
+  fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+  # TODO: 读入的图片像素大小需要设置，由于排列方式不固定，因此尚未根据配置文件修改
+  videoWriter = cv2.VideoWriter(video_path,fourcc,fps,(1620,960))#最后一个是保存图片的尺寸
+
   # 对每一帧
   while capture.isOpened():
     if nframes >= frame_range[1]:
@@ -83,10 +90,17 @@ def run(name, path):
         ),
         np.vstack((line1, line2))
       )
-    # 更新last
-    if nframes % lastn_interval == 0:
-      lastn = original
+      # 每一帧导入保存的视频中，TODO:取消重新读取保存的图片这一流程
+      frame = cv2.imread('{path}/{name}_{n}.jpg'.format(
+          path=img_path, name=name, n=nframes
+        ))
+      videoWriter.write(frame)
+      # 更新last
+      if nframes % lastn_interval == 0:
+        lastn = original
   capture.release()
+  # 导出视频
+  videoWriter.release()
   cv2.destroyAllWindows()
 
 def main():
