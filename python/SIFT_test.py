@@ -16,15 +16,14 @@ def run_one_frame(normal, src, fgbg):
   # MOG2 BS
   sift = fgbg.apply(sift)
   # Denoise
-  ''' 仅显示原图与滤波后结果
-  sift = lktools.Denoise.denoise(sift, 'bilater')
-  sift = lktools.FindObject.findObject(sift)
-  return sift, sift_save
-  '''
+    # 仅显示原图与滤波后结果
+    # sift = lktools.Denoise.denoise(sift, 'bilater')
   # 显示所有结果
-  sifts = lktools.Denoise.denoise(sift)
-  sifts = map(lambda img: lktools.FindObject.findObject(img), sifts)
-  return tuple(sifts), sift_save
+  sift = lktools.Denoise.denoise(sift)
+  # findObject
+  sift = lktools.FindObject.findObject(sift)
+  # return
+  return sift, sift_save
 # 计时运行
 @lktools.Timer.timer_decorator
 def run(name, path):
