@@ -4,3 +4,4 @@ import lktools.PreProcess
 import lktools.RPCA
 import lktools.SIFT
 import lktools.Timer
+import lktools.FindObject
