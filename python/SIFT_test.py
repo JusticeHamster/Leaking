@@ -1,8 +1,6 @@
 # import
 import numpy as np
 import cv2
-import os
-import shutil
 import lktools
 # load
 settings = lktools.Loader.get_settings()
@@ -118,15 +116,7 @@ def run(name, path):
   # 导出视频
   videoWriter.release()
   cv2.destroyAllWindows()
-
-def main():
-  # 清空输出文件夹
-  if not time_test:
-    if os.path.exists(img_path):
-      shutil.rmtree(img_path)
-    os.mkdir(img_path)
-  for name, video in settings['videos']:
-    run(name.split('.')[0], video)
 # run
 if __name__ == '__main__':
-  main()
+  for name, video in settings['videos']:
+    run(name.split('.')[0], video)

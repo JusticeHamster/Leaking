@@ -1,3 +1,5 @@
+import shutil
+import os
 # 读取设置
 """{rpca.settings 格式要求:}
 path=XXX
@@ -35,4 +37,10 @@ def get_settings():
     )),
     settings['videos'].split(';')
   ))
+  # 清空输出文件夹
+  img_path = settings['img_path']
+  if not settings['time_test']:
+    if os.path.exists(img_path):
+      shutil.rmtree(img_path)
+    os.mkdir(img_path)
   return settings
