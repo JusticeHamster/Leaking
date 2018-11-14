@@ -23,6 +23,8 @@ def run_one_frame(normal, src, fgbg):
   # findObject
   sift = lktools.FindObject.findObject(sift)
   # return
+  if isinstance(sift, map):
+    sift = tuple(sift)
   return sift, sift_save
 # 计时运行
 @lktools.Timer.timer_decorator
