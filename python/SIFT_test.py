@@ -11,28 +11,20 @@ frame_range = settings['frame_range']
 lastn_interval = settings['lastn']
 def run_one_frame(normal, src, fgbg):
   # sift alignment
-  sift_save = None
-  if normal is None:
-    sift = src
-  else:
-    sift, *_ = lktools.SIFT.siftImageAlignment(normal, src)
-    sift_save = sift
+  sift, *_ = lktools.SIFT.siftImageAlignment(normal, src)
+  sift_save = sift
   # MOG2 BS
   sift = fgbg.apply(sift)
-
   # Denoise
-  if normal is None:
-    return lktools.FindObject.findObject(sift)
-  else:
-    ''' 仅显示原图与滤波后结果
-    sift = lktools.Denoise.denoise(sift, 'bilater')
-    sift = lktools.FindObject.findObject(sift)
-    return sift, sift_save
-    '''
-    # 显示所有结果
-    sifts = lktools.Denoise.denoise(sift)
-    sifts = map(lambda img: lktools.FindObject.findObject(img), sifts)
-    return tuple(sifts), sift_save
+  ''' 仅显示原图与滤波后结果
+  sift = lktools.Denoise.denoise(sift, 'bilater')
+  sift = lktools.FindObject.findObject(sift)
+  return sift, sift_save
+  '''
+  # 显示所有结果
+  sifts = lktools.Denoise.denoise(sift)
+  sifts = map(lambda img: lktools.FindObject.findObject(img), sifts)
+  return tuple(sifts), sift_save
 # 计时运行
 @lktools.Timer.timer_decorator
 def run(name, path):
@@ -48,7 +40,6 @@ def run(name, path):
   fgbg_first = cv2.createBackgroundSubtractorMOG2()
   if not time_test:
     fgbg_lastn = cv2.createBackgroundSubtractorMOG2()
-    fgbg = cv2.createBackgroundSubtractorMOG2()
   # 将图像保存为视频
   fourcc = cv2.VideoWriter_fourcc(*'MJPG')
   # fps = 10    #保存视频的FPS，可以适当调整
@@ -77,10 +68,9 @@ def run(name, path):
     frame_first, sift_first = run_one_frame(first, frame, fgbg_first)
     if not time_test:
       frame_lastn, sift_lastn = run_one_frame(lastn, frame, fgbg_lastn)
-      frame = run_one_frame(None, frame, fgbg)
       # 显示所有结果
       line1 = np.hstack((
-        original, frame,
+        original, np.zeros(original.shape),
         sift_first, frame_first[0],
         sift_lastn, frame_lastn[0]
       ))
