@@ -88,7 +88,7 @@ def run(name, path):
         img
       )
       # 每一帧导入保存的视频中
-      videoWriter.write(img)
+      videoWriter.write(np.uint8(img))
       # 更新last
       if nframes % lastn_interval == 0:
         lastn = original
