@@ -80,28 +80,15 @@ def run(name, path):
         frame_first[3], frame_first[4],
         frame_first[5], frame_first[6],
       ))
+      img = np.vstack((line1, line2))
       cv2.imwrite(
         '{path}/{name}_{n}.jpg'.format(
           path=img_path, name=name, n=nframes
         ),
-        np.vstack((line1, line2))
+        img
       )
-      ''' 只显示原图与滤波后结果
-      line = np.hstack((
-        original, frame_first
-      ))
-      cv2.imwrite(
-        '{path}/{name}_{n}.jpg'.format(
-          path=img_path, name=name, n=nframes
-        ),
-        line
-      )
-      '''
-      # 每一帧导入保存的视频中，TODO:取消重新读取保存的图片这一流程
-      frame = cv2.imread('{path}/{name}_{n}.jpg'.format(
-          path=img_path, name=name, n=nframes
-        ))
-      videoWriter.write(frame)
+      # 每一帧导入保存的视频中
+      videoWriter.write(img)
       # 更新last
       if nframes % lastn_interval == 0:
         lastn = original

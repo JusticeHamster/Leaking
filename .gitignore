@@ -3,6 +3,7 @@
 *.pyc
 tmp/
 decolor
+saveVideo.avi
 
 # VScode 文件
 .vscode
