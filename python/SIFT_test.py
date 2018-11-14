@@ -25,7 +25,7 @@ def run_one_frame(normal, src, fgbg):
     return lktools.FindObject.findObject(sift)
   else:
     ''' 仅显示原图与滤波后结果
-    sift = lktools.Denoise.denoise(sift,which='bilater')
+    sift = lktools.Denoise.denoise(sift, 'bilater')
     sift = lktools.FindObject.findObject(sift)
     return sift, sift_save
     '''
@@ -97,7 +97,7 @@ def run(name, path):
       )
       ''' 只显示原图与滤波后结果
       line = np.hstack((
-        original,frame_first
+        original, frame_first
       ))
       cv2.imwrite(
         '{path}/{name}_{n}.jpg'.format(
