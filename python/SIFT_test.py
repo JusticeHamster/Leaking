@@ -26,13 +26,15 @@ def run_one_frame(normal, src, fgbg):
   if normal is None:
     return lktools.FindObject.findObject(sift)
   else:
-    sift = lktools.Denoise.denoise(sift,which='median')
-    sift = lktools.FindObject.findObject(sift)
-    return sift, sift_save
-    # sifts = lktools.Denoise.denoise(sift)
-    # sifts = map(lambda img: lktools.FindObject.findObject(sift), sifts)
-    # #
-    # return tuple(sifts), sift_save
+    # 仅显示原图与滤波后结果
+    # sift = lktools.Denoise.denoise(sift,which='bilater')
+    # sift = lktools.FindObject.findObject(sift)
+    # return sift, sift_save
+
+    # 显示所有结果
+    sifts = lktools.Denoise.denoise(sift)
+    sifts = map(lambda img: lktools.FindObject.findObject(img), sifts)
+    return tuple(sifts), sift_save
 # 计时运行
 @lktools.Timer.timer_decorator
 def run(name, path):
@@ -55,9 +57,9 @@ def run(name, path):
   # fps = 10    #保存视频的FPS，可以适当调整
   # TODO: 读入的图片像素大小需要设置，由于排列方式不固定，因此尚未根据配置文件修改
   # 显示所有结果时的分辨率
-  # videoWriter = cv2.VideoWriter(video_path,fourcc,fps,(1620,960))#最后一个是保存图片的尺寸
+  videoWriter = cv2.VideoWriter(video_path,fourcc,fps,(1620,960))#最后一个是保存图片的尺寸
   # 只显示原图与双边滤波结果的分辨率
-  videoWriter = cv2.VideoWriter(video_path,fourcc,fps,(540,480))#最后一个是保存图片的尺寸
+  # videoWriter = cv2.VideoWriter(video_path,fourcc,fps,(540,480))#最后一个是保存图片的尺寸
   # 对每一帧
   while capture.isOpened():
     if nframes >= frame_range[1]:
@@ -80,33 +82,34 @@ def run(name, path):
       frame_lastn, sift_lastn = run_one_frame(lastn, frame, fgbg_lastn)
       frame = run_one_frame(None, frame, fgbg)
       # 显示所有结果
-      # line1 = np.hstack((
-      #   original, frame,
-      #   sift_first, frame_first[0],
-      #   sift_lastn, frame_lastn[0]
-      # ))
-      # line2 = np.hstack((
-      #   np.zeros(original.shape),
-      #   frame_first[1], frame_first[2],
-      #   frame_first[3], frame_first[3],
-      #   np.zeros(original.shape),
-      # ))
-      # cv2.imwrite(
-      #   '{path}/{name}_{n}.jpg'.format(
-      #     path=img_path, name=name, n=nframes
-      #   ),
-      #   np.vstack((line1, line2))
-      # )
-      # 只显示原图与双边滤波后结果
-      line = np.hstack((
-        original,frame_first
+      line1 = np.hstack((
+        original, frame,
+        sift_first, frame_first[0],
+        sift_lastn, frame_lastn[0]
+      ))
+      line2 = np.hstack((
+        # np.zeros(original.shape),
+        frame_first[1], frame_first[2],
+        frame_first[3], frame_first[4],
+        frame_first[5], frame_first[6],
       ))
       cv2.imwrite(
         '{path}/{name}_{n}.jpg'.format(
           path=img_path, name=name, n=nframes
         ),
-        line
+        np.vstack((line1, line2))
       )
+
+      # 只显示原图与滤波后结果
+      # line = np.hstack((
+      #   original,frame_first
+      # ))
+      # cv2.imwrite(
+      #   '{path}/{name}_{n}.jpg'.format(
+      #     path=img_path, name=name, n=nframes
+      #   ),
+      #   line
+      # )
       # 每一帧导入保存的视频中，TODO:取消重新读取保存的图片这一流程
       frame = cv2.imread('{path}/{name}_{n}.jpg'.format(
           path=img_path, name=name, n=nframes

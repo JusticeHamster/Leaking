@@ -3,6 +3,7 @@ import cv2
 # 计算图像中目标的轮廓并且返回彩色图像
 def findObject(gray):
     # gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)  
+    # 图像二值化
     ret, binary = cv2.threshold(gray,127,255,cv2.THRESH_BINARY)  
     image, contours, hierarchy = cv2.findContours(binary,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE) 
     img = cv2.cvtColor(gray, cv2.COLOR_GRAY2RGB) 
