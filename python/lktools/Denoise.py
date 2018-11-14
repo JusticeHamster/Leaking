@@ -23,18 +23,18 @@ def denoise(img, which=None):
     # 定义结构元素
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(5, 5))
     # 图像二值化
-    ret, binary = cv2.threshold(img,127,255,cv2.THRESH_BINARY)  
+    _, binary = cv2.threshold(img,127,255,cv2.THRESH_BINARY)
     # 形态学腐蚀
-    binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel) 
+    binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
     return binary
   def morph2(img):
     # 定义结构元素
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(5, 5))
     # 图像二值化
-    ret, binary = cv2.threshold(img,127,255,cv2.THRESH_BINARY)  
+    _, binary = cv2.threshold(img,127,255,cv2.THRESH_BINARY)
     # 形态学腐蚀两次
-    binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel) 
-    binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel) 
+    binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
+    binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
     return binary
   global denoise_funcs
   if denoise_funcs is None:

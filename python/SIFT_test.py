@@ -30,7 +30,6 @@ def run_one_frame(normal, src, fgbg):
     # sift = lktools.Denoise.denoise(sift,which='bilater')
     # sift = lktools.FindObject.findObject(sift)
     # return sift, sift_save
-
     # 显示所有结果
     sifts = lktools.Denoise.denoise(sift)
     sifts = map(lambda img: lktools.FindObject.findObject(img), sifts)
@@ -51,7 +50,6 @@ def run(name, path):
   if not time_test:
     fgbg_lastn = cv2.createBackgroundSubtractorMOG2()
     fgbg = cv2.createBackgroundSubtractorMOG2()
-  
   # 将图像保存为视频
   fourcc = cv2.VideoWriter_fourcc(*'MJPG')
   # fps = 10    #保存视频的FPS，可以适当调整
@@ -88,7 +86,6 @@ def run(name, path):
         sift_lastn, frame_lastn[0]
       ))
       line2 = np.hstack((
-        # np.zeros(original.shape),
         frame_first[1], frame_first[2],
         frame_first[3], frame_first[4],
         frame_first[5], frame_first[6],
@@ -99,7 +96,6 @@ def run(name, path):
         ),
         np.vstack((line1, line2))
       )
-
       # 只显示原图与滤波后结果
       # line = np.hstack((
       #   original,frame_first
