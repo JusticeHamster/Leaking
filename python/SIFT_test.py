@@ -46,9 +46,20 @@ def run(name, path):
   # fps = 10    #保存视频的FPS，可以适当调整
   # TODO: 读入的图片像素大小需要设置，由于排列方式不固定，因此尚未根据配置文件修改
   # 显示所有结果时的分辨率
-  videoWriter = cv2.VideoWriter(video_path,fourcc,fps,(1620,960))#最后一个是保存图片的尺寸
+  videoWriter = cv2.VideoWriter(
+    '{path}/{name}.avi'.format(path=video_path, name=name),
+    fourcc,
+    fps,
+    (1620, 960)
+  ) # 最后一个是保存图片的尺寸
   # 只显示原图与双边滤波结果的分辨率
-  # videoWriter = cv2.VideoWriter(video_path,fourcc,fps,(540,480))#最后一个是保存图片的尺寸
+  ''' videoWriter = cv2.VideoWriter(
+    '{path}/{name}.avi'.format(path=video_path, name=name),
+    fourcc,
+    fps,
+    (540, 480)
+  ) # 最后一个是保存图片的尺寸
+  '''
   # 对每一帧
   while capture.isOpened():
     if nframes >= frame_range[1]:
@@ -71,9 +82,9 @@ def run(name, path):
       frame_lastn, sift_lastn = run_one_frame(lastn, frame, fgbg_lastn)
       # 显示所有结果
       line1 = np.hstack((
-        original, np.zeros(original.shape),
+        np.zeros(original.shape), original,
         sift_first, frame_first[0],
-        sift_lastn, frame_lastn[0]
+        sift_lastn, frame_lastn[0],
       ))
       line2 = np.hstack((
         frame_first[1], frame_first[2],
@@ -87,7 +98,7 @@ def run(name, path):
         ),
         img
       )
-      # 每一帧导入保存的视频中
+      # 每一帧导入保存的视频中，uint8
       videoWriter.write(np.uint8(img))
       # 更新last
       if nframes % lastn_interval == 0:
