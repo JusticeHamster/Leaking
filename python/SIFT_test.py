@@ -24,10 +24,11 @@ def run_one_frame(normal, src, fgbg):
   if normal is None:
     return lktools.FindObject.findObject(sift)
   else:
-    # 仅显示原图与滤波后结果
-    # sift = lktools.Denoise.denoise(sift,which='bilater')
-    # sift = lktools.FindObject.findObject(sift)
-    # return sift, sift_save
+    ''' 仅显示原图与滤波后结果
+    sift = lktools.Denoise.denoise(sift,which='bilater')
+    sift = lktools.FindObject.findObject(sift)
+    return sift, sift_save
+    '''
     # 显示所有结果
     sifts = lktools.Denoise.denoise(sift)
     sifts = map(lambda img: lktools.FindObject.findObject(img), sifts)
@@ -94,16 +95,17 @@ def run(name, path):
         ),
         np.vstack((line1, line2))
       )
-      # 只显示原图与滤波后结果
-      # line = np.hstack((
-      #   original,frame_first
-      # ))
-      # cv2.imwrite(
-      #   '{path}/{name}_{n}.jpg'.format(
-      #     path=img_path, name=name, n=nframes
-      #   ),
-      #   line
-      # )
+      ''' 只显示原图与滤波后结果
+      line = np.hstack((
+        original,frame_first
+      ))
+      cv2.imwrite(
+        '{path}/{name}_{n}.jpg'.format(
+          path=img_path, name=name, n=nframes
+        ),
+        line
+      )
+      '''
       # 每一帧导入保存的视频中，TODO:取消重新读取保存的图片这一流程
       frame = cv2.imread('{path}/{name}_{n}.jpg'.format(
           path=img_path, name=name, n=nframes
