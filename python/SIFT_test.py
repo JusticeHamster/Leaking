@@ -75,8 +75,11 @@ def run(name, path):
       first = frame
       lastn = frame
       continue
+    # 上面是循环变量，下面是正式计算
+    # 保存原图
     if not time_test:
       original = frame
+    # 处理一帧
     frame_first, sift_first = run_one_frame(first, frame, fgbg_first)
     if not time_test:
       frame_lastn, sift_lastn = run_one_frame(lastn, frame, fgbg_lastn)
