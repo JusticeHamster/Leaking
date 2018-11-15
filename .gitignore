@@ -3,7 +3,7 @@
 *.pyc
 cpp/*.jpg
 tmp/
-decolor
+runnable
 
 # VScode 文件
 .vscode
