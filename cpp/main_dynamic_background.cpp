@@ -6,45 +6,35 @@
 #include "tools/FileSystem.hpp"
 #include "tools/StringExtend.hpp"
 
+#include "main_dynamic_background.hpp"
+
 using namespace cv;
 using namespace std;
 
-#define UNKNOWN_FLOW_THRESH 1e9
+int main(int, char**) {
+	DynamicBackgroundOpticalFlow of;
+	of.run("water2");
+}
 
-const int N = 1500;
-int flag[N][N];
+DynamicBackgroundOpticalFlow::DynamicBackgroundOpticalFlow() {
+	videos = loader.get_videos();
+	output = loader.get_output();
+	vehicle_speed = loader.get("vehicle_speed");
+	limit_of_check = loader.get("limit_of_check");
+	scale = loader.get("scale");
+	margin = round(loader.get("margin"));
+	limit_dis_epi = loader.get("limit_dis_epi");
 
-Mat prevgray, gray, flow, cflow, frame, pre_frame, img_scale, img_temp, mask = Mat(Size(1, 300), CV_8UC1);;
-Size dsize;
-vector<Point2f> prepoint, nextpoint;
-vector<Point2f> F_prepoint, F_nextpoint;
-vector<uchar> state;
-vector<float> err;
-double dis[N];
-int cal = 0;
-int width = 100, height = 100;
-int rec_width = 40;
-int Harris_num = 0;
-int flag2 = 0;
+	if (!FileSystem::exists(output))
+		FileSystem::mkdir(output);
+}
 
-/// 参数
-FileSystem::Loader loader;
-
-double vehicle_speed = 1;
-double limit_of_check = 2120;
-double scale = 1; //设置缩放倍数
-int margin = 4; //帧间隔
-double limit_dis_epi =2; //距离极线的距离
-///
-
-bool ROI_mod(int x1, int y1)
-{
+bool DynamicBackgroundOpticalFlow::ROI_mod(int x1, int y1) {
 	if (x1 >= width / 16 && x1 <= width - width / 16 && y1 >= height / 3 && y1 <= height - height / 6) return 1;
 	return 0;
 }
 
-void ready()
-{
+void DynamicBackgroundOpticalFlow::ready() {
 	//图像预处理
 	Harris_num = 0;
 	F_prepoint.clear();
@@ -63,66 +53,53 @@ void ready()
 	cout << " cal :   " << cal << endl;
 	cout << "行: " << img_scale.rows << "    列: " << img_scale.cols << endl;
 	//equalizeHist(gray, gray); //直方图均衡
-	return;
 }
 
-void optical_flow_check()
-{
+void DynamicBackgroundOpticalFlow::optical_flow_check() {
 	int limit_edge_corner = 5;
 	for (int i = 0; i < state.size(); i++)
-		if (state[i] != 0)
-		{
-		   int dx[10] = { -1, 0, 1, -1, 0, 1, -1, 0, 1 };
-		   int dy[10] = { -1, -1, -1, 0, 0, 0, 1, 1, 1 };
-		   int x1 = prepoint[i].x, y1 = prepoint[i].y;
-		   int x2 = nextpoint[i].x, y2 = nextpoint[i].y;
-		   if ((x1 < limit_edge_corner || x1 >= gray.cols - limit_edge_corner || x2 < limit_edge_corner || x2 >= gray.cols - limit_edge_corner
+		if (state[i] != 0) {
+			int dx[10] = { -1, 0, 1, -1, 0, 1, -1, 0, 1 };
+			int dy[10] = { -1, -1, -1, 0, 0, 0, 1, 1, 1 };
+			int x1 = prepoint[i].x, y1 = prepoint[i].y;
+			int x2 = nextpoint[i].x, y2 = nextpoint[i].y;
+			if ((x1 < limit_edge_corner || x1 >= gray.cols - limit_edge_corner || x2 < limit_edge_corner || x2 >= gray.cols - limit_edge_corner
 			|| y1 < limit_edge_corner || y1 >= gray.rows - limit_edge_corner || y2 < limit_edge_corner || y2 >= gray.rows - limit_edge_corner))
-		   {
-			   state[i] = 0;
-			   continue;
-		   }
-		double sum_check = 0;
-		for (int j = 0; j < 9; j++)
-			sum_check += abs(prevgray.at<uchar>(y1 + dy[j], x1 + dx[j]) - gray.at<uchar>(y2 + dy[j], x2 + dx[j]));
-		if (sum_check>limit_of_check) state[i] = 0;
+			{
+				state[i] = 0;
+				continue;
+			}
+			double sum_check = 0;
+			for (int j = 0; j < 9; j++)
+				sum_check += abs(prevgray.at<uchar>(y1 + dy[j], x1 + dx[j]) - gray.at<uchar>(y2 + dy[j], x2 + dx[j]));
+			if (sum_check>limit_of_check) state[i] = 0;
 
-		if (state[i])
-		 {
-			Harris_num++;
-			F_prepoint.push_back(prepoint[i]);
-			F_nextpoint.push_back(nextpoint[i]);
-		 }
+			if (state[i])
+			{
+				Harris_num++;
+				F_prepoint.push_back(prepoint[i]);
+				F_nextpoint.push_back(nextpoint[i]);
+			}
 		}
-	return;
 }
 
-bool stable_judge()
-{
+bool DynamicBackgroundOpticalFlow::stable_judge() {
 	int stable_num = 0;
 	double limit_stalbe = 0.5;
 	for (int i = 0; i < state.size(); i++)
-		if (state[i])
-		{
-		if (sqrt((prepoint[i].x - nextpoint[i].x)*(prepoint[i].x - nextpoint[i].x) + (prepoint[i].y - nextpoint[i].y)*(prepoint[i].y - nextpoint[i].y)) < limit_stalbe) stable_num++;
+		if (state[i]) {
+			if (sqrt((prepoint[i].x - nextpoint[i].x)*(prepoint[i].x - nextpoint[i].x) + (prepoint[i].y - nextpoint[i].y)*(prepoint[i].y - nextpoint[i].y)) < limit_stalbe) stable_num++;
 		}
 	if (stable_num*1.0 / Harris_num > 0.2) return 1;
 	return 0;
 }
 
-int main(int, char**)
-{
-	const auto videos = loader.get_videos();
-	const auto path = loader.get_output();
-
-	if (!FileSystem::exists(path))
-		FileSystem::mkdir(path);
-
+void DynamicBackgroundOpticalFlow::run(string video_name) {
 	VideoCapture cap;
-	cap.open(videos[3].second);
+	cap.open(videos[video_name]);
 
 	if (!cap.isOpened())
-		return -1;
+		return;
 
 	for (;;)
 	{
@@ -356,8 +333,8 @@ int main(int, char**)
 
 				//输出结果图
 				string a = StringExtend::itos(cal / margin), b = ".jpg";
-				imwrite(path + "result2_" + a + b, pre_frame);
-				imwrite(path + "result3_" + a + b, frame);
+				imwrite(output + video_name + "2_" + a + b, pre_frame);
+				imwrite(output + video_name + "3_" + a + b, frame);
 				cvNamedWindow("img_scale", 0);
 				imshow("img_scale", img_scale);
 				cvNamedWindow("pre", 0);
@@ -374,6 +351,4 @@ int main(int, char**)
 		cout << "cost time: " << t / ((double)cvGetTickFrequency()*1000.) << "ms" << endl;
 		cout << "-----" << flag2 << endl;
 	}
-
-	return 0;
 }

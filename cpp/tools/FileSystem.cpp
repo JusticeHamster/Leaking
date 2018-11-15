@@ -9,7 +9,7 @@
 #include <optional>
 #include <memory>
 #include <stdexcept>
-#include <vector>
+#include <map>
 
 namespace FileSystem {
   using namespace std;
@@ -28,10 +28,10 @@ namespace FileSystem {
       throw invalid_argument(name + " doesn't exist");
   }
 
-  vector<pair<string, string>> Loader::get_videos() {
+  map<string, string> Loader::get_videos() {
     check_empty_throw("path");
     check_empty_throw("videos");
-    vector<pair<string, string>> n;
+    map<string, string> m;
     stringstream ss;
     string name;
     const auto& path = raw["path"].asString();
@@ -40,9 +40,11 @@ namespace FileSystem {
       ss.clear();
       ss << s;
       getline(ss, name, '.');
-      n.push_back(make_pair(name, path + s));
+      m[name] = path + s;
+      cout << name << path << s << endl;
+      getline(ss, name, '.');
     }
-    return n;
+    return m;
   }
 
   string Loader::get_output() {
@@ -50,9 +52,9 @@ namespace FileSystem {
     return raw["output"].asString();
   }
 
-  int Loader::get(string name) {
+  double Loader::get(string name) {
     check_empty_throw(name);
-    return raw[name].asInt();
+    return raw[name].asDouble();
   }
 
   Loader::Loader() {
