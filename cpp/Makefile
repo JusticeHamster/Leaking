@@ -6,18 +6,22 @@
 OPENCV_HOME := /usr/local/Cellar/opencv/3.4.3
 #
 CC := g++
-CPPVERSION := -std=c++1y
+CPPVERSION := -std=c++2a
 # include
 OPENCV_INCLUDE = -I$(OPENCV_HOME)/include
-INCLUDE := -I. $(OPENCV_INCLUDE)
+INCLUDE := -I. -Itools/ $(OPENCV_INCLUDE)
 # lib
 OPENCV_LIBRARY = `pkg-config opencv --cflags --libs`
 LIBRARY := $(OPENCV_LIBRARY)
 # tmp
 TEMP_DIR := tmp
+TOOLS_DIR := tools
+JSON_DIR := $(TOOLS_DIR)/json
 # depend
-DYNAMIC_DEPEND := $(TEMP_DIR)/main_dynamic_background.o
-STATIC_DEPEND := $(TEMP_DIR)/main_static_background.o
+JSON_DEPEND := $(TEMP_DIR)/json_reader.o $(TEMP_DIR)/json_writer.o $(TEMP_DIR)/json_value.o
+TOOLS_DEPEND := $(TEMP_DIR)/FileSystem.o $(TEMP_DIR)/StringHash.o $(JSON_DEPEND)
+DYNAMIC_DEPEND := $(TEMP_DIR)/main_dynamic_background.o $(TOOLS_DEPEND)
+STATIC_DEPEND := $(TEMP_DIR)/main_static_background.o $(TOOLS_DEPEND)
 
 temp_dir :
 	mkdir -p $(TEMP_DIR)
@@ -33,6 +37,21 @@ $(TEMP_DIR)/main_dynamic_background.o : main_dynamic_background.cpp temp_dir
 
 $(TEMP_DIR)/main_static_background.o : main_static_background.cpp temp_dir
 	$(CC) -c $(CPPVERSION) $(INCLUDE) main_static_background.cpp -o $@
+
+$(TEMP_DIR)/json_reader.o : $(JSON_DIR)/json_reader.cpp
+	$(CC) -c $(CPPVERSION) $(INCLUDE) $(JSON_DIR)/json_reader.cpp -o $@
+
+$(TEMP_DIR)/json_writer.o : $(JSON_DIR)/json_writer.cpp
+	$(CC) -c $(CPPVERSION) $(INCLUDE) $(JSON_DIR)/json_writer.cpp -o $@
+
+$(TEMP_DIR)/json_value.o : $(JSON_DIR)/json_value.cpp
+	$(CC) -c $(CPPVERSION) $(INCLUDE) $(JSON_DIR)/json_value.cpp -o $@
+
+$(TEMP_DIR)/FileSystem.o : $(TOOLS_DIR)/FileSystem.cpp
+	$(CC) -c $(CPPVERSION) $(INCLUDE) $(TOOLS_DIR)/FileSystem.cpp -o $@
+
+$(TEMP_DIR)/StringHash.o : $(TOOLS_DIR)/StringHash.cpp
+	$(CC) -c $(CPPVERSION) $(INCLUDE) $(TOOLS_DIR)/StringHash.cpp -o $@
 
 .PHONY : all clean dynamic static
 

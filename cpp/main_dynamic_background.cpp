@@ -121,8 +121,8 @@ int main(int, char**)
 {
 	string path = "output/";
 
-	if (!os_exists(path.c_str()))
-		os_mkdir(path.c_str());
+	if (!FileSystem::exists(path))
+		FileSystem::mkdir(path);
 
 	VideoCapture cap;
 	//cap.open(0);

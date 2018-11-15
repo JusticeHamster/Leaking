@@ -4,27 +4,30 @@
 #include <map>
 #include <exception>
 #include <opencv2/opencv.hpp>
+#include <optional>
 
-using namespace std;
-using namespace cv;
+#include "json/json.h"
 
-int os_mkdir(string path);
-bool os_exists(string path);
+namespace FileSystem {
+  using namespace std;
+  using namespace cv;
 
-class Loader {
-private:
-  constexpr string settings("settings.json");
-  map<string, string> m_str;
-  map<string, int> m_int;
-  map<string, Size> m_size;
-public:
-  Loader();
-  string get(string name);
-  int get_property(string name);
-  Size get_size(string name);
-};
+  int mkdir(string path);
+  bool exists(string path);
 
-class settings_not_found_exception: public exception {
-public:
-  settings_not_found_exception(string message): exception(message) {}
-};
+  class Loader {
+  private:
+    static constexpr auto settings = "settings.json";
+    map<string, string> m;
+    map<string, optional<int>> m_i;
+    map<string, Size> m_s;
+    Json::Value raw;
+    //
+    void check_empty_throw(string name);
+  public:
+    Loader();
+    string get(string name);
+    int get_property(string name);
+    Size get_size(string name);
+  };
+}

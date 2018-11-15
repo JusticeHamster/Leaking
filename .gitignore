@@ -15,8 +15,5 @@ cpp/static
 # windows bash
 *.bash
 
-# 操作系统相关文件
-cpp/environment.hpp
-
 # 设置文件
-*.settings
+*settings*
