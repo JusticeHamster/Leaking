@@ -11,20 +11,21 @@ CPPVERSION := -std=c++1y
 OPENCV_INCLUDE = -I$(OPENCV_HOME)/include
 INCLUDE := -I. $(OPENCV_INCLUDE)
 # lib
-OPENCV_LIBRARY = -L$(OPENCV_HOME)/lib -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs -lopencv_ml
+# OPENCV_LIBRARY = -L$(OPENCV_HOME)/lib -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs -lopencv_ml
+OPENCV_LIBRARY = `pkg-config opencv --cflags --libs`
 LIBRARY := $(OPENCV_LIBRARY)
 # depend
-DEPEND := decolor.o
+DEPEND := main_dynamic_background.o
 
-decolor : $(DEPEND)
+runnable : $(DEPEND)
 	$(CC) $(CPPVERSION) $(LIBRARY) $(DEPEND) -o $@
 
-decolor.o : decolor.cpp
-	$(CC) -c $(CPPVERSION) $(INCLUDE) decolor.cpp -o $@
+main_dynamic_background.o : main_dynamic_background.cpp
+	$(CC) -c $(CPPVERSION) $(INCLUDE) main_dynamic_background.cpp -o $@
 
 .PHONY : all clean
 
-all : decolor
+all : runnable
 
 clean :
-	rm -rf *.o decolor
+	rm -rf *.o *.jpg runnable
