@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture('/Users/wangyuxin/Movies/data/water2.mp4')
 
 
 # ShiTomasi 角点检测参数
@@ -21,17 +21,22 @@ color = np.random.randint(0,255,(100,3))
 
 # 获取第一帧，找到角点
 ret, old_frame = cap.read()
-#找到原始灰度图
+# 找到原始灰度图
 old_gray = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
 
-#获取图像中的角点，返回到p0中
+# 获取图像中的角点，返回到p0中
 p0 = cv2.goodFeaturesToTrack(old_gray, mask = None, **feature_params)
 
 # 创建一个蒙版用来画轨迹
 mask = np.zeros_like(old_frame)
 
-while(1):
-    ret,frame = cap.read()
+count = 0
+while True:
+    count += 1
+
+    success, frame = cap.read()
+    if not success:
+        break
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     # 计算光流
@@ -48,13 +53,10 @@ while(1):
         frame = cv2.circle(frame,(a,b),5,color[i].tolist(),-1)
     img = cv2.add(frame,mask)
 
-    cv2.imshow('frame',img)
-    k = cv2.waitKey(30) & 0xff
-    if k == 27:
-        break
+    cv2.imwrite('tmp/frame_{}.jpg'.format(count), cv2.resize(img, (520, 960)))
 
     # 更新上一帧的图像和追踪点
-    old_gray = frame_gray.copy()
+    old_gray = frame_gray
     p0 = good_new.reshape(-1,1,2)
 
 cv2.destroyAllWindows()

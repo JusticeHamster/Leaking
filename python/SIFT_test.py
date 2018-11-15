@@ -10,22 +10,23 @@ video_path = settings['video_path']
 frame_range = settings['frame_range']
 lastn_interval = settings['lastn']
 def run_one_frame(normal, src, fgbg):
+  frame = src
   # sift alignment
-  sift, *_ = lktools.SIFT.siftImageAlignment(normal, src)
-  sift_save = sift
+  # frame, *_ = lktools.SIFT.siftImageAlignment(normal, frame)
+  sift_save = frame
   # MOG2 BS
-  sift = fgbg.apply(sift)
+  frame = fgbg.apply(frame)
   # Denoise
     # 仅显示原图与滤波后结果
-    # sift = lktools.Denoise.denoise(sift, 'bilater')
+    # frame = lktools.Denoise.denoise(frame, 'bilater')
   # 显示所有结果
-  sift = lktools.Denoise.denoise(sift)
+  frame = lktools.Denoise.denoise(frame)
   # findObject
-  sift = lktools.FindObject.findObject(sift)
+  frame = lktools.FindObject.findObject(frame)
   # return
-  if isinstance(sift, map):
-    sift = tuple(sift)
-  return sift, sift_save
+  if isinstance(frame, map):
+    frame = tuple(frame)
+  return frame, sift_save
 # 计时运行
 @lktools.Timer.timer_decorator
 def run(name, path):
