@@ -8,15 +8,15 @@ def run(name, video):
     cap = cv2.VideoCapture(video)
 
     # ShiTomasi 角点检测参数
-    feature_params = dict( maxCorners = 100,
-                        qualityLevel = 0.3,
-                        minDistance = 7,
-                        blockSize = 7 )
+    feature_params = dict( maxCorners = 200,
+                        qualityLevel = 0.01,
+                        minDistance = 8,
+                        blockSize = 3 )
 
     # lucas kanade光流法参数
-    lk_params = dict( winSize  = (15,15),
-                    maxLevel = 2,
-                    criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
+    lk_params = dict( winSize  = (22,22),
+                    maxLevel = 5,
+                    criteria = (cv2.TERM_CRITERIA_EPS | cv2.CV_TERMCRIT_ITER, 20, 0.01))
 
     # 创建随机颜色
     color = np.random.randint(0,255,(100,3))
@@ -34,9 +34,10 @@ def run(name, video):
 
     count = 0
     while True:
-        count += 1
-
         success, frame = cap.read()
+        count += 1
+        if count % 5 == 0:
+            continue
         if not success:
             break
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
