@@ -4,6 +4,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "tools/FileSystem.hpp"
+#include "tools/StringExtend.hpp"
 
 using namespace cv;
 using namespace std;
@@ -26,7 +27,7 @@ int rec_width = 40;
 int Harris_num = 0;
 int flag2 = 0;
 
-///调参点
+/// 参数
 FileSystem::Loader loader;
 
 double vehicle_speed = 1;
@@ -35,14 +36,6 @@ double scale = 1; //设置缩放倍数
 int margin = 4; //帧间隔
 double limit_dis_epi =2; //距离极线的距离
 ///
-
-// 将int 转换成string 
-string itos(int i)
-{
-	stringstream s;
-	s << i;
-	return s.str();
-}
 
 bool ROI_mod(int x1, int y1)
 {
@@ -120,37 +113,13 @@ bool stable_judge()
 int main(int, char**)
 {
 	const auto videos = loader.get_videos();
-
-	string path = loader.get_output();
+	const auto path = loader.get_output();
 
 	if (!FileSystem::exists(path))
 		FileSystem::mkdir(path);
 
 	VideoCapture cap;
-	//cap.open(0);
-	cap.open(videos[0].second);
-
-	/*
-	VideoWriter videoWriter2, videoWriter3;
-
-	Size size(cap.get(3), cap.get(4));
-
-	videoWriter2.open(
-		path + "video2.mov",
-		CV_FOURCC('8','B','P','S'),
-		30.0,
-		size,
-		true
-	);
-
-	videoWriter3.open(
-		path + "video3.mov",
-		CV_FOURCC('8','B','P','S'),
-		30.0,
-		size,
-		true
-	);
-	*/
+	cap.open(videos[3].second);
 
 	if (!cap.isOpened())
 		return -1;
@@ -386,11 +355,9 @@ int main(int, char**)
 				rectangle(frame, Point(width / 16 / scale, height * 5 / 6 / scale), Point((width - width / 16) / scale, height / 3 / scale), Scalar(255, 0, 0), 1, 0);
 
 				//输出结果图
-				string a = itos(cal / margin), b = ".jpg";
+				string a = StringExtend::itos(cal / margin), b = ".jpg";
 				imwrite(path + "result2_" + a + b, pre_frame);
-				//videoWriter2 << pre_frame;
 				imwrite(path + "result3_" + a + b, frame);
-				//videoWriter3 << pre_frame;
 				cvNamedWindow("img_scale", 0);
 				imshow("img_scale", img_scale);
 				cvNamedWindow("pre", 0);
@@ -407,9 +374,6 @@ int main(int, char**)
 		cout << "cost time: " << t / ((double)cvGetTickFrequency()*1000.) << "ms" << endl;
 		cout << "-----" << flag2 << endl;
 	}
-
-	//videoWriter2.release();
-	//videoWriter3.release();
 
 	return 0;
 }

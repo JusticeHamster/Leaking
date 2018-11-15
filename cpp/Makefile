@@ -19,9 +19,15 @@ TOOLS_DIR := tools
 JSON_DIR := $(TOOLS_DIR)/json
 # depend
 JSON_DEPEND := $(TEMP_DIR)/json_reader.o $(TEMP_DIR)/json_writer.o $(TEMP_DIR)/json_value.o
-TOOLS_DEPEND := $(TEMP_DIR)/FileSystem.o $(TEMP_DIR)/StringHash.o $(JSON_DEPEND)
+TOOLS_DEPEND := $(TEMP_DIR)/FileSystem.o $(TEMP_DIR)/StringExtend.o $(JSON_DEPEND)
 DYNAMIC_DEPEND := $(TEMP_DIR)/main_dynamic_background.o $(TOOLS_DEPEND)
 STATIC_DEPEND := $(TEMP_DIR)/main_static_background.o $(TOOLS_DEPEND)
+
+drun : dynamic
+	./dynamic
+
+srun : static
+	./static
 
 temp_dir :
 	mkdir -p $(TEMP_DIR)
@@ -50,10 +56,10 @@ $(TEMP_DIR)/json_value.o : $(JSON_DIR)/json_value.cpp
 $(TEMP_DIR)/FileSystem.o : $(TOOLS_DIR)/FileSystem.cpp
 	$(CC) -c $(CPPVERSION) $(INCLUDE) $(TOOLS_DIR)/FileSystem.cpp -o $@
 
-$(TEMP_DIR)/StringHash.o : $(TOOLS_DIR)/StringHash.cpp
-	$(CC) -c $(CPPVERSION) $(INCLUDE) $(TOOLS_DIR)/StringHash.cpp -o $@
+$(TEMP_DIR)/StringExtend.o : $(TOOLS_DIR)/StringExtend.cpp
+	$(CC) -c $(CPPVERSION) $(INCLUDE) $(TOOLS_DIR)/StringExtend.cpp -o $@
 
-.PHONY : all clean dynamic static
+.PHONY : all clean drun srun dynamic static
 
 all : dynamic static
 

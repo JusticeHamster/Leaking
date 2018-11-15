@@ -2,7 +2,8 @@
 
 #include <string>
 
-namespace StringHash {
+namespace StringExtend {
+  using namespace std;
 
   typedef std::uint64_t hash_t;  
   constexpr hash_t prime = 0x100000001B3ull;  
@@ -25,4 +26,7 @@ namespace StringHash {
   }
 
   hash_t hash_(std::string str);
+
+  // 将int 转换成string 
+  string itos(int i);
 }

@@ -58,14 +58,8 @@ namespace FileSystem {
     builder["collectComments"] = false;
     Json::Value raw;
     JSONCPP_STRING errs;
-    auto ok = Json::parseFromStream(builder, file, &raw, &errs);
+    Json::parseFromStream(builder, file, &raw, &errs);
+    this->raw = raw;
     file.close();
-    /*
-    if (ok)
-      this->raw = raw;
-    else
-      throw Json::Exception(string("Json read '") + settings + "' error");
-    */
-   this->raw = raw;
   }
 }
