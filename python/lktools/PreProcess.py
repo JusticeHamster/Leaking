@@ -9,3 +9,9 @@ def video_capture_size(path, height):
   m = height
   n = int(n * scale)
   return capture, m, n, fps
+
+def gray_to_rgb(img):
+  return cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+
+def bgr_to_gray(img):
+  return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
