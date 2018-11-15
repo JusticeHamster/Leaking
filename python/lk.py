@@ -16,7 +16,7 @@ def run(name, video):
     # lucas kanade光流法参数
     lk_params = dict( winSize  = (22,22),
                     maxLevel = 5,
-                    criteria = (cv2.TERM_CRITERIA_EPS | cv2.CV_TERMCRIT_ITER, 20, 0.01))
+                    criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 20, 0.01))
 
     # 创建随机颜色
     color = np.random.randint(0,255,(100,3))
