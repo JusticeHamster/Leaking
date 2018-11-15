@@ -12,6 +12,9 @@ cpp/static
 # MacOS 文件
 .DS_Store
 
+# windows bash
+*.bash
+
 # 操作系统相关文件
 cpp/environment.hpp
 
