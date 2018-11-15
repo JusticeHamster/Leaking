@@ -50,6 +50,11 @@ namespace FileSystem {
     return raw["output"].asString();
   }
 
+  int Loader::get(string name) {
+    check_empty_throw(name);
+    return raw[name].asInt();
+  }
+
   Loader::Loader() {
     ifstream file(settings);
     if (!file.is_open())

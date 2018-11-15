@@ -16,4 +16,5 @@ cpp/static
 *.bash
 
 # 设置文件
-*settings*
+*.settings
+settings.json

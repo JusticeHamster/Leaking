@@ -26,5 +26,6 @@ namespace FileSystem {
     Loader();
     vector<pair<string, string>> get_videos();
     string get_output();
+    int get(string name);
   };
 }
