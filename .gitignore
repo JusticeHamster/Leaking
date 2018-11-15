@@ -1,7 +1,7 @@
 # 临时文件
 *.o
 *.pyc
-cpp/*.jpg
+output/
 tmp/
 cpp/dynamic
 cpp/static
