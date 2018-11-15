@@ -130,7 +130,7 @@ bool stable_judge()
 
 int main(int, char**)
 {
-	string path = "output";
+	string path = "output/";
 
 	if (!os_exists(path.c_str()))
 		os_mkdir(path.c_str());
@@ -138,6 +138,26 @@ int main(int, char**)
 	VideoCapture cap;
 	//cap.open(0);
 	cap.open(file_name);
+
+	VideoWriter videoWriter2, videoWriter3;
+
+	Size size(cap.get(3), cap.get(4));
+
+	videoWriter2.open(
+		path + "video2.mp4",
+		CV_FOURCC('8','B','P','S'),
+		30.0,
+		size,
+		true
+	);
+
+	videoWriter3.open(
+		path + "video3.mp4",
+		CV_FOURCC('8','B','P','S'),
+		30.0,
+		size,
+		true
+	);
 
 	if (!cap.isOpened())
 		return -1;
@@ -374,8 +394,10 @@ int main(int, char**)
 
 				//输出结果图
 				string a = itos(cal / margin), b = ".jpg";
-				imwrite("output/result2_" + a + b, pre_frame);
-				imwrite("output/result3_" + a + b, frame);
+				imwrite(path + "result2_" + a + b, pre_frame);
+				videoWriter2 << pre_frame;
+				imwrite(path + "result3_" + a + b, frame);
+				videoWriter3 << pre_frame;
 				cvNamedWindow("img_scale", 0);
 				imshow("img_scale", img_scale);
 				cvNamedWindow("pre", 0);
@@ -392,5 +414,9 @@ int main(int, char**)
 		cout << "cost time: " << t / ((double)cvGetTickFrequency()*1000.) << "ms" << endl;
 		cout << "-----" << flag2 << endl;
 	}
+
+	videoWriter2.release();
+	videoWriter3.release();
+
 	return 0;
 }
