@@ -3,18 +3,7 @@
 #include <cstring>
 #include <opencv2/opencv.hpp>
 
-/*
- * 操作系统相关定义
- * 需要有os_mkdir(path)，例(linux)：
-		static inline int os_mkdir(const char *path) {
-			return mkdir(path, 0777);
-		}
- * 还需要os_exists(path):
-		static inline bool os_exists(const char *path) {
-			return access(path, F_OK) != -1;
-		}
- */
-#include "environment.hpp"
+#include "tools/FileSystem.hpp"
 
 using namespace cv;
 using namespace std;
