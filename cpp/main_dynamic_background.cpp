@@ -5,11 +5,11 @@
 
 /*
  * 操作系统相关定义
- * 需要有os_mkdir()，例(linux)：
+ * 需要有os_mkdir(path)，例(linux)：
 		static inline int os_mkdir(const char *path) {
 			return mkdir(path, 777);
 		}
- * exists:
+ * 还需要os_exists(path):
 		static inline bool os_exists(const char *path) {
 			return access(path, F_OK) != -1;
 		}
@@ -374,7 +374,9 @@ int main(int, char**)
 
 				//输出结果图
 				string a = itos(cal / margin), b = ".jpg";
-				imwrite("output/result2_" + a + b, pre_frame);
+				string output = "output/result2_" + a + b;
+				cout << output << endl;
+				imwrite(output, pre_frame);
 				imwrite("output/result3_" + a + b, frame);
 				cvNamedWindow("img_scale", 0);
 				imshow("img_scale", img_scale);
