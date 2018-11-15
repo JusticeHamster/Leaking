@@ -1,13 +1,30 @@
 #pragma once
 
 #include <string>
+#include <map>
+#include <exception>
+#include <opencv2/opencv.hpp>
 
-int os_mkdir(std::string path);
-bool os_exists(std::string path);
+using namespace std;
+using namespace cv;
+
+int os_mkdir(string path);
+bool os_exists(string path);
 
 class Loader {
 private:
-  std::string path;
+  constexpr string settings("settings.json");
+  map<string, string> m_str;
+  map<string, int> m_int;
+  map<string, Size> m_size;
 public:
-  Loader(std::string path): path(path) {}
+  Loader();
+  string get(string name);
+  int get_property(string name);
+  Size get_size(string name);
+};
+
+class settings_not_found_exception: public exception {
+public:
+  settings_not_found_exception(string message): exception(message) {}
 };
