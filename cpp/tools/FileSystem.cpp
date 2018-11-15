@@ -9,6 +9,7 @@
 #include <optional>
 #include <memory>
 #include <stdexcept>
+#include <vector>
 
 namespace FileSystem {
   using namespace std;
@@ -27,38 +28,26 @@ namespace FileSystem {
       throw invalid_argument(name + " doesn't exist");
   }
 
-  string Loader::get(string name) {
-    auto& result = m[name];
-    if (result.empty()) {
-      check_empty_throw(name);
-      result = raw[name].asString();
-      m[name] = result;
+  vector<pair<string, string>> Loader::get_videos() {
+    check_empty_throw("path");
+    check_empty_throw("videos");
+    vector<pair<string, string>> n;
+    stringstream ss;
+    string name;
+    const auto& path = raw["path"].asString();
+    for (auto r = raw["videos"].begin(); r != raw["videos"].end(); r++) {
+      const auto s = r->asString();
+      ss.clear();
+      ss << s;
+      getline(ss, name, '.');
+      n.push_back(make_pair(name, path + s));
     }
-    return result;
+    return n;
   }
 
-  int Loader::get_property(string name) {
-    optional<int>& result = m_i[name];
-    if (!result.has_value()) {
-      check_empty_throw(name);
-      result = optional<int>(raw[name].asInt());
-      m_i[name] = result;
-    }
-    return result.value();
-  }
-
-  Size Loader::get_size(string name) {
-    auto& result = m_s[name];
-    if (result.empty()) {
-      check_empty_throw(name);
-      istringstream is(raw[name].asString());
-      int l, r;
-      char dot;
-      is >> l >> dot >> r;
-      result = Size(l, r);
-      m_s[name] = result;
-    }
-    return result;
+  string Loader::get_output() {
+    check_empty_throw("output");
+    return raw["output"].asString();
   }
 
   Loader::Loader() {
@@ -71,9 +60,12 @@ namespace FileSystem {
     JSONCPP_STRING errs;
     auto ok = Json::parseFromStream(builder, file, &raw, &errs);
     file.close();
+    /*
     if (ok)
       this->raw = raw;
     else
-      throw Json::Exception(string("Json read 《") + settings + "》 error");
+      throw Json::Exception(string("Json read '") + settings + "' error");
+    */
+   this->raw = raw;
   }
 }

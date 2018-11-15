@@ -27,9 +27,8 @@ int Harris_num = 0;
 int flag2 = 0;
 
 ///调参点
-// string file_name = "/Users/wangyuxin/Movies/data/water2.mp4";
-// string file_name = "/Users/wzy/Movies/data/water1.mp4";
-string file_name = "/Users/wzy/Movies/data/fog.mp4";
+FileSystem::Loader loader;
+
 double vehicle_speed = 1;
 double limit_of_check = 2120;
 double scale = 1; //设置缩放倍数
@@ -120,21 +119,24 @@ bool stable_judge()
 
 int main(int, char**)
 {
-	string path = "output/";
+	const auto videos = loader.get_videos();
+
+	string path = loader.get_output();
 
 	if (!FileSystem::exists(path))
 		FileSystem::mkdir(path);
 
 	VideoCapture cap;
 	//cap.open(0);
-	cap.open(file_name);
+	cap.open(videos[0].second);
 
+	/*
 	VideoWriter videoWriter2, videoWriter3;
 
 	Size size(cap.get(3), cap.get(4));
 
 	videoWriter2.open(
-		path + "video2.mp4",
+		path + "video2.mov",
 		CV_FOURCC('8','B','P','S'),
 		30.0,
 		size,
@@ -142,12 +144,13 @@ int main(int, char**)
 	);
 
 	videoWriter3.open(
-		path + "video3.mp4",
+		path + "video3.mov",
 		CV_FOURCC('8','B','P','S'),
 		30.0,
 		size,
 		true
 	);
+	*/
 
 	if (!cap.isOpened())
 		return -1;
@@ -385,9 +388,9 @@ int main(int, char**)
 				//输出结果图
 				string a = itos(cal / margin), b = ".jpg";
 				imwrite(path + "result2_" + a + b, pre_frame);
-				videoWriter2 << pre_frame;
+				//videoWriter2 << pre_frame;
 				imwrite(path + "result3_" + a + b, frame);
-				videoWriter3 << pre_frame;
+				//videoWriter3 << pre_frame;
 				cvNamedWindow("img_scale", 0);
 				imshow("img_scale", img_scale);
 				cvNamedWindow("pre", 0);
@@ -405,8 +408,8 @@ int main(int, char**)
 		cout << "-----" << flag2 << endl;
 	}
 
-	videoWriter2.release();
-	videoWriter3.release();
+	//videoWriter2.release();
+	//videoWriter3.release();
 
 	return 0;
 }
