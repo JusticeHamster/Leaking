@@ -4,7 +4,7 @@
 #
 # 这是你本地opencv安装路径
 OPENCV_HOME := /usr/local/Cellar/opencv/3.4.3
-
+#
 CC := g++
 CPPVERSION := -std=c++1y
 # include
@@ -14,18 +14,30 @@ INCLUDE := -I. $(OPENCV_INCLUDE)
 # OPENCV_LIBRARY = -L$(OPENCV_HOME)/lib -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs -lopencv_ml
 OPENCV_LIBRARY = `pkg-config opencv --cflags --libs`
 LIBRARY := $(OPENCV_LIBRARY)
+# tmp
+TEMP_DIR := tmp
 # depend
-DEPEND := main_dynamic_background.o
+DYNAMIC_DEPEND := $(TEMP_DIR)/main_dynamic_background.o
+STATIC_DEPEND := $(TEMP_DIR)/main_static_background.o
 
-runnable : $(DEPEND)
-	$(CC) $(CPPVERSION) $(LIBRARY) $(DEPEND) -o $@
+temp_dir :
+	mkdir -p $(TEMP_DIR)
 
-main_dynamic_background.o : main_dynamic_background.cpp
+dynamic : $(DYNAMIC_DEPEND)
+	$(CC) $(CPPVERSION) $(LIBRARY) $(DYNAMIC_DEPEND) -o $@
+
+static : $(STATIC_DEPEND)
+	$(CC) $(CPPVERSION) $(LIBRARY) $(STATIC_DEPEND) -o $@
+
+$(TEMP_DIR)/main_dynamic_background.o : main_dynamic_background.cpp temp_dir
 	$(CC) -c $(CPPVERSION) $(INCLUDE) main_dynamic_background.cpp -o $@
 
-.PHONY : all clean
+$(TEMP_DIR)/main_static_background.o : main_static_background.cpp temp_dir
+	$(CC) -c $(CPPVERSION) $(INCLUDE) main_static_background.cpp -o $@
 
-all : runnable
+.PHONY : all clean dynamic static
+
+all : dynamic static
 
 clean :
-	rm -rf *.o *.jpg runnable
+	rm -rf tmp *.o *.jpg dynamic static
