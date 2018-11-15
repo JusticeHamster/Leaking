@@ -41,7 +41,6 @@ namespace FileSystem {
       ss << s;
       getline(ss, name, '.');
       m[name] = path + s;
-      cout << name << path << s << endl;
       getline(ss, name, '.');
     }
     return m;
