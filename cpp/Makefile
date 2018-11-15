@@ -11,7 +11,6 @@ CPPVERSION := -std=c++1y
 OPENCV_INCLUDE = -I$(OPENCV_HOME)/include
 INCLUDE := -I. $(OPENCV_INCLUDE)
 # lib
-# OPENCV_LIBRARY = -L$(OPENCV_HOME)/lib -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_imgcodecs -lopencv_ml
 OPENCV_LIBRARY = `pkg-config opencv --cflags --libs`
 LIBRARY := $(OPENCV_LIBRARY)
 # tmp
