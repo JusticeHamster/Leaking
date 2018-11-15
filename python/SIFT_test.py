@@ -12,7 +12,7 @@ lastn_interval = settings['lastn']
 def run_one_frame(normal, src, fgbg):
   frame = src
   # sift alignment
-  # frame, *_ = lktools.SIFT.siftImageAlignment(normal, frame)
+  frame, *_ = lktools.SIFT.siftImageAlignment(normal, frame)
   sift_save = frame
   # MOG2 BS
   frame = fgbg.apply(frame)
