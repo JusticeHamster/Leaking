@@ -15,7 +15,6 @@ ESC - exit
  
 import numpy as np
 import cv2
-#from common import anorm2, draw_str
 from time import clock
  
 lk_params = dict( winSize  = (15, 15), 
@@ -79,12 +78,15 @@ class App:
 
             self.frame_idx += 1
             self.prev_gray = frame_gray
-            cv2.imwrite('tmp/frame_{}.jpg'.format(count), cv2.resize(vis, (540, 960)))
+            cv2.imwrite(
+                'tmp/frame_{}.jpg'.format(count),
+                vis
+            )
  
 def main():
     import sys
     try: video_src = sys.argv[1]
-    except: video_src = '/Users/wangyuxin/Movies/data/water2.mp4'
+    except: video_src = 0
  
     print(__doc__)
     App(video_src).run()
