@@ -114,4 +114,4 @@ def run(name, path):
 # run
 if __name__ == '__main__':
   for name, video in settings['videos']:
-    run(name.split('.')[0], video)
+    run(name, video)

@@ -31,7 +31,7 @@ def get_settings():
   settings['time_test'] = settings.get('time_test') == 'true'
   # 将设置中的文件转换为绝对地址
   settings['videos'] = tuple(map(
-    lambda n: (n, '{path}/{name}'.format(
+    lambda n: (n.split('.')[0], '{path}/{name}'.format(
       path=settings['path'],
       name=n
     )),
