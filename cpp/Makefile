@@ -40,4 +40,4 @@ $(TEMP_DIR)/main_static_background.o : main_static_background.cpp temp_dir
 all : dynamic static
 
 clean :
-	rm -rf tmp *.o *.jpg dynamic static
+	rm -rf *.o tmp output dynamic static

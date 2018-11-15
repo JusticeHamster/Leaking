@@ -1,8 +1,20 @@
-
 #include <iostream>
 #include <cstdio>
-#include "opencv2/opencv.hpp"
 #include <cstring>
+#include <opencv2/opencv.hpp>
+
+/*
+ * 操作系统相关定义
+ * 需要有os_mkdir()，例(linux)：
+		static inline int os_mkdir(const char *path) {
+			return mkdir(path, 777);
+		}
+ * exists:
+		static inline bool os_exists(const char *path) {
+			return access(path, F_OK) != -1;
+		}
+ */
+#include "environment.hpp"
 
 using namespace cv;
 using namespace std;
@@ -28,13 +40,12 @@ int flag2 = 0;
 ///调参点
 string file_name = "/Users/wangyuxin/Movies/data/water2.mp4";
 
-
 double vehicle_speed = 1;
 double limit_of_check = 2120;
 double scale = 1; //设置缩放倍数
 int margin = 4; //帧间隔
 double limit_dis_epi =2; //距离极线的距离
-/// 
+///
 
 // 将int 转换成string 
 string itos(int i)
@@ -43,7 +54,6 @@ string itos(int i)
 	s << i;
 	return s.str();
 }
-
 
 bool ROI_mod(int x1, int y1)
 {
@@ -80,7 +90,6 @@ void optical_flow_check()
 	for (int i = 0; i < state.size(); i++)
 		if (state[i] != 0)
 		{
-
 		   int dx[10] = { -1, 0, 1, -1, 0, 1, -1, 0, 1 };
 		   int dy[10] = { -1, -1, -1, 0, 0, 0, 1, 1, 1 };
 		   int x1 = prepoint[i].x, y1 = prepoint[i].y;
@@ -119,16 +128,19 @@ bool stable_judge()
 	return 0;
 }
 
-
 int main(int, char**)
 {
+	string path = "output";
+
+	if (!os_exists(path.c_str()))
+		os_mkdir(path.c_str());
+
 	VideoCapture cap;
 	//cap.open(0);
 	cap.open(file_name);
 
 	if (!cap.isOpened())
 		return -1;
-
 
 	for (;;)
 	{
@@ -147,7 +159,6 @@ int main(int, char**)
 		{
 			continue;
 		}
-
 
 		if (prevgray.data)
 		{
@@ -171,20 +182,16 @@ int main(int, char**)
 			//找角点
 			for (int i = 0; i < state.size(); i++)
 			{
-
 				double x1 = prepoint[i].x, y1 = prepoint[i].y;
 				double x2 = nextpoint[i].x, y2 = nextpoint[i].y;
 				if (state[i] != 0)
 				{
-
 					//画出所有角点
 					circle(img_scale, nextpoint[i], 3, Scalar(255, 0, 255));
 					circle(pre_frame, prepoint[i], 2, Scalar(255, 0, 255));
 				}
 			}
 			cout << Harris_num << endl;
-
-
 
 			//-----------------------------计算 F-Matrix
 				Mat F = Mat(3, 3, CV_32FC1);
@@ -231,19 +238,9 @@ int main(int, char**)
 					cout << "--------------       " << ppp << "      ---------------" << endl;
 				}
 
-
-
-
-
-
-
-
-
 				//T：异常角点集
 				vector<Point2f> T;
 				T.clear();
-
-
 
 				for (int i = 0; i < prepoint.size(); i++)
 				{
@@ -261,13 +258,11 @@ int main(int, char**)
 						line(img_scale, Point((int)prepoint[i].x, (int)prepoint[i].y), Point((int)nextpoint[i].x, (int)nextpoint[i].y), Scalar{ 255, 255, 0 }, 2);
 						line(pre_frame, Point((int)prepoint[i].x, (int)prepoint[i].y), Point((int)nextpoint[i].x, (int)nextpoint[i].y), Scalar{ 0, 255, 0 }, 1);
 
-
 						//距离的极线阈值
 						if (dd <= limit_dis_epi) continue;
 						cout << "dis: " << dd << endl;
 						dis[T.size()] = dd;
 						T.push_back(nextpoint[i]);
-
 
 						//画异常角点
 						//circle(img_scale, nextpoint[i], 7, Scalar(255, 255, 255),3);
@@ -293,11 +288,8 @@ int main(int, char**)
 						}
 						line(img_scale, Point(xx, yy), Point(xxx, yyy), Scalar::all(-1));
 						line(pre_frame, Point(xx, yy), Point(xxx, yyy), Scalar::all(-1));
-
-
 					}
 				}
-
 
 				//画框(一） 异常点
 				/*
@@ -380,20 +372,17 @@ int main(int, char**)
 				//绘制ROI
 				rectangle(frame, Point(width / 16 / scale, height * 5 / 6 / scale), Point((width - width / 16) / scale, height / 3 / scale), Scalar(255, 0, 0), 1, 0);
 
-
 				//输出结果图
 				string a = itos(cal / margin), b = ".jpg";
-				imwrite("F:\\data\\result2_" + a + b, pre_frame);
-				imwrite("F:\\data\\result3_" + a + b, frame);
+				imwrite("output/result2_" + a + b, pre_frame);
+				imwrite("output/result3_" + a + b, frame);
 				cvNamedWindow("img_scale", 0);
 				imshow("img_scale", img_scale);
 				cvNamedWindow("pre", 0);
 				imshow("pre", pre_frame);
 				cvNamedWindow("frame", 0);
 				imshow("frame", frame);
-			
 		}
-
 
 		if (waitKey(27) >= 0)
 			break;
