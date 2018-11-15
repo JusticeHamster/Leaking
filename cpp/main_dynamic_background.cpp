@@ -38,8 +38,9 @@ int Harris_num = 0;
 int flag2 = 0;
 
 ///调参点
-string file_name = "/Users/wangyuxin/Movies/data/water2.mp4";
-
+// string file_name = "/Users/wangyuxin/Movies/data/water2.mp4";
+// string file_name = "/Users/wzy/Movies/data/water1.mp4";
+string file_name = "/Users/wzy/Movies/data/fog.mp4";
 double vehicle_speed = 1;
 double limit_of_check = 2120;
 double scale = 1; //设置缩放倍数
