@@ -4,19 +4,21 @@ import lktools
 
 settings = lktools.Loader.get_settings()
 img_path = settings['img_path']
+video_path = settings['video_path']
+
 def run(name, video):
     cap = cv2.VideoCapture(video)
 
     # ShiTomasi 角点检测参数
     feature_params = dict( maxCorners = 100,
-                        qualityLevel = 0.3,
-                        minDistance = 7,
-                        blockSize = 7 )
+                        qualityLevel = 0.01,
+                        minDistance = 8,
+                        blockSize = 3 )
 
     # lucas kanade光流法参数
-    lk_params = dict( winSize  = (15,15),
-                    maxLevel = 2,
-                    criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
+    lk_params = dict( winSize  = (22,22),
+                    maxLevel = 5,
+                    criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 20, 0.01))
 
     # 创建随机颜色
     color = np.random.randint(0,255,(100,3))
@@ -32,11 +34,20 @@ def run(name, video):
     # 创建一个蒙版用来画轨迹
     mask = np.zeros_like(old_frame)
 
+    # 将图像保存为视频
+    videoWriter = cv2.VideoWriter(
+        '{path}/{name}.avi'.format(path=video_path, name=name),
+        cv2.VideoWriter_fourcc(*'MJPG'),
+        30, # fps
+        (520, 960)
+    ) # 最后一个是保存图片的尺寸
+
     count = 0
     while True:
-        count += 1
-
         success, frame = cap.read()
+        count += 1
+        if count % 5 == 0:
+            continue
         if not success:
             break
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -54,21 +65,26 @@ def run(name, video):
             mask = cv2.line(mask, (a,b),(c,d), color[i].tolist(), 2)
             frame = cv2.circle(frame,(a,b),5,color[i].tolist(),-1)
         img = cv2.add(frame,mask)
+        img = cv2.resize(img, (520, 960))
+        # 将结果保存为图片
+        # cv2.imwrite(
+        #     '{path}/{name}_{i}.jpg'.format(
+        #         path=img_path,
+        #         name=name,
+        #         i=count
+        #     ),
+        #     img
+        # )
 
-        cv2.imwrite(
-            '{path}/{name}_{i}.jpg'.format(
-                path=img_path,
-                name=name,
-                i=count
-            ),
-            cv2.resize(img, (520, 960))
-        )
+        # 每一帧导入保存的视频中，uint8
+        videoWriter.write(np.uint8(img))
 
         # 更新上一帧的图像和追踪点
         old_gray = frame_gray
         p0 = good_new.reshape(-1,1,2)
 
     cv2.destroyAllWindows()
+    videoWriter.release()
     cap.release()
 # run
 if __name__ == '__main__':
