@@ -10,6 +10,7 @@
 #include <memory>
 #include <stdexcept>
 #include <map>
+#include <string>
 
 namespace FileSystem {
   using namespace std;
@@ -32,16 +33,11 @@ namespace FileSystem {
     check_empty_throw("path");
     check_empty_throw("videos");
     map<string, string> m;
-    stringstream ss;
-    string name;
     const auto& path = raw["path"].asString();
     for (auto r = raw["videos"].begin(); r != raw["videos"].end(); r++) {
       const auto s = r->asString();
-      ss.clear();
-      ss << s;
-      getline(ss, name, '.');
+      const auto name = s.substring(0, s.find('.'));
       m[name] = path + s;
-      getline(ss, name, '.');
     }
     return m;
   }
