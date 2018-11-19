@@ -11,18 +11,18 @@ frame_range = settings['frame_range']
 lastn_interval = settings['lastn']
 fps = settings['fps']
 @lktools.Timer.timer_decorator
-def run_one_frame(first, lastn, src, fgbg, size):
+def run_one_frame(lastn, last, src, fgbg, size):
   frame = src
   # rect
   rect = lktools.PreProcess.get_rect_property(size)
   # optical flow
-  flow_rects, _ = lktools.OpticalFlow.optical_flow_rects(lastn, frame, rect, compression_ratio=0.5)
+  flow_rects, _ = lktools.OpticalFlow.optical_flow_rects(last, frame, rect)
   # sift alignment
-  frame, *_ = lktools.SIFT.siftImageAlignment(first, frame)
+  frame, *_ = lktools.SIFT.siftImageAlignment(lastn, frame)
   # MOG2 BS
   frame = fgbg.apply(frame)
   # Denoise
-  frame = lktools.Denoise.denoise(frame, 'bilater')
+  frame = lktools.Denoise.denoise(frame, 'morph2')
   # findObject
   bs_rects = lktools.FindObject.findObject(frame, rect)
   # draw
@@ -42,7 +42,7 @@ def run(name, path):
   ))
   nframes = 0
   # init
-  first = None
+  last = None
   lastn = None
   fgbg = cv2.createBackgroundSubtractorMOG2()
   # 将图像保存为视频
@@ -64,14 +64,14 @@ def run(name, path):
     if nframes < frame_range[0]:
       continue
     frame = cv2.resize(frame, size)
-    if first is None:
-      first = frame
+    if last is None:
+      last = frame
       lastn = frame
       continue
     # 上面是循环变量，下面是正式计算
     # 保存原图
     original = frame
-    frame = run_one_frame(first, lastn, frame, fgbg, size)
+    frame = run_one_frame(lastn, last, frame, fgbg, size)
     if not time_test:
       cv2.imwrite(
         '{path}/{name}_{n}.jpg'.format(
@@ -84,6 +84,8 @@ def run(name, path):
     # 更新last
     if nframes % lastn_interval == 0:
       lastn = original
+      fgbg = cv2.createBackgroundSubtractorMOG2()
+      fgbg.apply(lastn)
   capture.release()
   # 导出视频
   videoWriter.release()
