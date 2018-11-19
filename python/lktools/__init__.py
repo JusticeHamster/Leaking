@@ -5,3 +5,4 @@ import lktools.RPCA
 import lktools.SIFT
 import lktools.Timer
 import lktools.FindObject
+import lktools.OpticalFlow
