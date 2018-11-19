@@ -11,8 +11,10 @@ frame_range = settings['frame_range']
 lastn_interval = settings['lastn']
 def run_one_frame(normal, src, fgbg, size):
   frame = src
+  # rect
+  rect = lktools.PreProcess.get_rect_property(size)
   # optical flow
-  flow_rects, _ = lktools.OpticalFlow.optical_flow_rects(normal, frame)
+  flow_rects, _ = lktools.OpticalFlow.optical_flow_rects(normal, frame, rect)
   # sift alignment
   frame, *_ = lktools.SIFT.siftImageAlignment(normal, frame)
   # MOG2 BS
@@ -20,10 +22,10 @@ def run_one_frame(normal, src, fgbg, size):
   # Denoise
   frame = lktools.Denoise.denoise(frame, 'bilater')
   # findObject
-  bs_rects = lktools.FindObject.findObject(frame)
+  bs_rects = lktools.FindObject.findObject(frame, rect)
   # draw
   src_rects = src.copy()
-  lktools.PreProcess.draw_rect(src_rects, size)
+  cv2.rectangle(src_rects, *rect)
   for rect in (*flow_rects, *bs_rects):
     cv2.rectangle(src_rects, *rect)
   return src_rects

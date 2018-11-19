@@ -12,7 +12,7 @@ def draw_hsv(flow):
     hsv[..., 2] = np.minimum(v * 4, 0xFF)
     return cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
-def optical_flow_rects(prev, now, limit_size=10):
+def optical_flow_rects(prev, now, rect, limit_size=10):
   prev = cv2.cvtColor(prev, cv2.COLOR_BGR2GRAY)
   now = cv2.cvtColor(now, cv2.COLOR_BGR2GRAY)
   flow = cv2.calcOpticalFlowFarneback(
@@ -29,9 +29,12 @@ def optical_flow_rects(prev, now, limit_size=10):
     cv2.RETR_EXTERNAL,
     cv2.CHAIN_APPROX_SIMPLE
   )
+  (x1, y1), (x2, y2), *_ = rect
   rects = []
   for c in cnts:
     (x, y, w, h) = cv2.boundingRect(c)
+    if x < x1 or x > x2 or y < y1 or y > y2:
+      continue
     if w > limit_size and h > limit_size:
       rects.append(((x, y), (x + w, y + h), (0, 0xFF, 0), 4))
   return rects, binary

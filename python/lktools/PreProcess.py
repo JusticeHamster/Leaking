@@ -21,9 +21,6 @@ def get_rect_property(size):
     1, 0
   )
 
-def draw_rect(img, size):
-  return cv2.rectangle(img, *get_rect_property(size))
-
 def gray_to_rgb(img):
   return cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
 
