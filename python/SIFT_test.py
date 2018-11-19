@@ -11,24 +11,22 @@ frame_range = settings['frame_range']
 lastn_interval = settings['lastn']
 def run_one_frame(normal, src, fgbg, size):
   frame = src
+  # optical flow
+  flow_rects, _ = lktools.OpticalFlow.optical_flow_rects(normal, frame)
   # sift alignment
   frame, *_ = lktools.SIFT.siftImageAlignment(normal, frame)
-  sift_save = lktools.PreProcess.draw_rect(frame, size)
   # MOG2 BS
   frame = fgbg.apply(frame)
   # Denoise
-  # 仅显示原图与滤波后结果
-  if time_test:
-    frame = lktools.Denoise.denoise(frame, 'bilater')
-  # 显示所有结果
-  else:
-    frame = lktools.Denoise.denoise(frame)
+  frame = lktools.Denoise.denoise(frame, 'bilater')
   # findObject
-  frame = lktools.FindObject.findObject(frame)
-  # return
-  if isinstance(frame, map):
-    frame = tuple(frame)
-  return frame, sift_save
+  bs_rects = lktools.FindObject.findObject(frame)
+  # draw
+  src_rects = src.copy()
+  lktools.PreProcess.draw_rect(src_rects, size)
+  for rect in (*flow_rects, *bs_rects):
+    cv2.rectangle(src_rects, *rect)
+  return src_rects
 # 计时运行
 @lktools.Timer.timer_decorator
 def run(name, path):
@@ -84,21 +82,10 @@ def run(name, path):
     if not time_test:
       original = frame
     # 处理一帧
-    frame_first, sift_first = run_one_frame(first, frame, fgbg_first, size)
+    frame_first = run_one_frame(first, frame, fgbg_first, size)
     if not time_test:
-      frame_lastn, sift_lastn = run_one_frame(lastn, frame, fgbg_lastn, size)
-      # 显示所有结果
-      line1 = np.hstack((
-        np.zeros(original.shape), original,
-        sift_first, frame_first[0],
-        sift_lastn, frame_lastn[0],
-      ))
-      line2 = np.hstack((
-        frame_first[1], frame_first[2],
-        frame_first[3], frame_first[4],
-        frame_first[5], frame_first[6],
-      ))
-      img = np.vstack((line1, line2))
+      frame_lastn = run_one_frame(lastn, frame, fgbg_lastn, size)
+      img = np.hstack((frame_first, frame_lastn))
       cv2.imwrite(
         '{path}/{name}_{n}.jpg'.format(
           path=img_path, name=name, n=nframes

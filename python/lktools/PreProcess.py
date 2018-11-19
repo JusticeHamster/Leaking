@@ -16,7 +16,7 @@ def get_rect_property(size):
   width, height = size
   return (
     (width // 16, height * 5 // 6),
-    (width - width // 16, height // 3),
+    (width * 15 // 16, height // 3),
     (255, 0, 0),
     1, 0
   )
