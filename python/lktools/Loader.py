@@ -37,7 +37,7 @@ def get_settings():
   settings['lastn'] = int(settings.get('lastn', 1))
   settings['fps'] = int(settings.get('fps', 10))
   settings['limit_size'] = int(settings.get('limit_size', 10))
-  settings['compression_ratio'] = int(settings.get('compression_ratio', 1))
+  settings['compression_ratio'] = float(settings.get('compression_ratio', 1))
   settings['frame_range'] = tuple(
     map(lambda s: int(s), settings.get('frame_range', '0-100').split('-'))
   )
