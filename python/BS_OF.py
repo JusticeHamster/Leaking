@@ -9,6 +9,7 @@ img_path = settings['img_path']
 video_path = settings['video_path']
 frame_range = settings['frame_range']
 lastn_interval = settings['lastn']
+fps = settings['fps']
 @lktools.Timer.timer_decorator
 def run_one_frame(first, lastn, src, fgbg, size):
   frame = src
@@ -46,23 +47,13 @@ def run(name, path):
   fgbg = cv2.createBackgroundSubtractorMOG2()
   # 将图像保存为视频
   fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-  fps = 30 #保存视频的FPS，可以适当调整
-  # TODO: 读入的图片像素大小需要设置，由于排列方式不固定，因此尚未根据配置文件修改
-  # 显示所有结果时的分辨率
+  # 
   videoWriter = cv2.VideoWriter(
     '{path}/{name}.avi'.format(path=video_path, name=name),
     fourcc,
     fps,
     size # WARNING：尺寸必须与图片的尺寸一致，否则保存后无法播放。
   )
-  # 只显示原图与双边滤波结果的分辨率
-  ''' videoWriter = cv2.VideoWriter(
-    '{path}/{name}.avi'.format(path=video_path, name=name),
-    fourcc,
-    fps,
-    (540, 480)
-  ) # 最后一个是保存图片的尺寸
-  '''
   # 对每一帧
   while capture.isOpened():
     if nframes >= frame_range[1]:
