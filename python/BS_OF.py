@@ -27,7 +27,7 @@ def run_one_frame(lastn, last, src, fgbg, size):
   # MOG2 BS
   frame = fgbg.apply(frame)
   # Denoise
-  frame = lktools.Denoise.denoise(frame, 'morph2')
+  frame = lktools.Denoise.denoise(frame, 'bilater')
   # findObject
   bs_rects = lktools.FindObject.findObject(frame, rect)
   # draw
