@@ -46,7 +46,7 @@ def run(name, path):
   fgbg = cv2.createBackgroundSubtractorMOG2()
   # 将图像保存为视频
   fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-  # fps = 10 #保存视频的FPS，可以适当调整
+  fps = 10 #保存视频的FPS，可以适当调整
   # TODO: 读入的图片像素大小需要设置，由于排列方式不固定，因此尚未根据配置文件修改
   # 显示所有结果时的分辨率
   videoWriter = cv2.VideoWriter(
