@@ -9,8 +9,8 @@ img_path = settings['img_path']
 video_path = settings['video_path']
 frame_range = settings['frame_range']
 lastn_interval = settings['lastn']
-def run_one_frame(normal, src, fgbg):
-  frame = src
+def run_one_frame(normal, src, fgbg, size):
+  frame = lktools.PreProcess.draw_rect(src, size)
   # sift alignment
   frame, *_ = lktools.SIFT.siftImageAlignment(normal, frame)
   sift_save = frame
@@ -31,6 +31,7 @@ def run_one_frame(normal, src, fgbg):
 @lktools.Timer.timer_decorator
 def run(name, path):
   capture, h, w, fps = lktools.PreProcess.video_capture_size(path, settings['height'])
+  size = (w, h)
   # run
   print('read {path}. from frame {frames[0]} to {frames[1]}'.format(
     path=path, frames=frame_range
@@ -71,7 +72,7 @@ def run(name, path):
     nframes += 1
     if nframes < frame_range[0]:
       continue
-    frame = cv2.resize(frame, (w, h))
+    frame = cv2.resize(frame, size)
     if first is None:
       first = frame
       lastn = frame
@@ -81,9 +82,9 @@ def run(name, path):
     if not time_test:
       original = frame
     # 处理一帧
-    frame_first, sift_first = run_one_frame(first, frame, fgbg_first)
+    frame_first, sift_first = run_one_frame(first, frame, fgbg_first, size)
     if not time_test:
-      frame_lastn, sift_lastn = run_one_frame(lastn, frame, fgbg_lastn)
+      frame_lastn, sift_lastn = run_one_frame(lastn, frame, fgbg_lastn, size)
       # 显示所有结果
       line1 = np.hstack((
         np.zeros(original.shape), original,
