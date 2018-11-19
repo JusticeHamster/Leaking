@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import time
 
+
 def draw_hsv(flow):
     (h, w) = flow.shape[:2]
     (fx, fy) = (flow[:, :, 0], flow[:, :, 1])
@@ -15,7 +16,13 @@ def draw_hsv(flow):
     # cv2.imshow('hsv', bgr)
     return bgr
 
-def run_one_frame(prev, img, limit_size=10):
+
+def run_one_frame(prev, img, rect, color=(0, 0xFF, 0), thickness=4, limit_size=10):
+    """
+    Warning:
+        rect: two points same as (x1,y1),(x2,y2), and x1 <= x2 & y1 <= y2
+    """
+    (x1, y1), (x2, y2) = rect
     prev_gray = cv2.cvtColor(prev, cv2.COLOR_BGR2GRAY)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     flow = cv2.calcOpticalFlowFarneback(
@@ -33,14 +40,18 @@ def run_one_frame(prev, img, limit_size=10):
     for c in cnts:
         # if the contour is too small, ignore it
         (x, y, w, h) = cv2.boundingRect(c)
+        # if x,y not in rectange, jump it
+        if x < x1 or x > x2 or y < y1 or y > y2:
+            continue
         if w > limit_size and h > limit_size:
-            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0xFF, 0), 4)
+            cv2.rectangle(img, (x, y), (x + w, y + h), color, thickness)
     return img
 
 
 if __name__ == '__main__':
     import sys
     screen_size = (270, 480)
+    rect = ((20,20),(250,460))
     cam = cv2.VideoCapture('/Users/wzy/Movies/data/water1.mp4')
     success, prev = cam.read()
     if success:
@@ -50,7 +61,8 @@ if __name__ == '__main__':
             if not success:
                 break
             img = cv2.resize(img, screen_size)
-            ans = run_one_frame(prev, img.copy())
+            ans = run_one_frame(prev, img.copy(),rect)
+            cv2.rectangle(ans, *rect, (0, 0xFF, 0), 2)
             cv2.imshow('Image', ans)
             prev = img
             cv2.waitKey(10)
