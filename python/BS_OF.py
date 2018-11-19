@@ -47,7 +47,6 @@ def run(name, path):
   fgbg = cv2.createBackgroundSubtractorMOG2()
   # 将图像保存为视频
   fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-  # 
   videoWriter = cv2.VideoWriter(
     '{path}/{name}.avi'.format(path=video_path, name=name),
     fourcc,
