@@ -42,9 +42,7 @@ def run(name, path):
   # init
   first = None
   lastn = None
-  fgbg_first = cv2.createBackgroundSubtractorMOG2()
-  if not time_test:
-    fgbg_lastn = cv2.createBackgroundSubtractorMOG2()
+  fgbg = cv2.createBackgroundSubtractorMOG2()
   # 将图像保存为视频
   fourcc = cv2.VideoWriter_fourcc(*'MJPG')
   # fps = 10    #保存视频的FPS，可以适当调整
@@ -82,17 +80,16 @@ def run(name, path):
     # 上面是循环变量，下面是正式计算
     # 保存原图
     original = frame
-    frame_lastn = run_one_frame(lastn, frame, fgbg_lastn, size)
-    img = frame_lastn
+    frame = run_one_frame(lastn, frame, fgbg, size)
     if not time_test:
       cv2.imwrite(
         '{path}/{name}_{n}.jpg'.format(
           path=img_path, name=name, n=nframes
         ),
-        img
+        frame
       )
     # 每一帧导入保存的视频中，uint8
-    videoWriter.write(np.uint8(img))
+    videoWriter.write(np.uint8(frame))
     # 更新last
     if nframes % lastn_interval == 0:
       lastn = original
