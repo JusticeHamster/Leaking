@@ -10,17 +10,19 @@ video_path = settings['video_path']
 frame_range = settings['frame_range']
 lastn_interval = settings['lastn']
 def run_one_frame(normal, src, fgbg, size):
-  frame = lktools.PreProcess.draw_rect(src, size)
+  frame = src
   # sift alignment
   frame, *_ = lktools.SIFT.siftImageAlignment(normal, frame)
-  sift_save = frame
+  sift_save = lktools.PreProcess.draw_rect(frame, size)
   # MOG2 BS
   frame = fgbg.apply(frame)
   # Denoise
-    # 仅显示原图与滤波后结果
-    # frame = lktools.Denoise.denoise(frame, 'bilater')
+  # 仅显示原图与滤波后结果
+  if time_test:
+    frame = lktools.Denoise.denoise(frame, 'bilater')
   # 显示所有结果
-  frame = lktools.Denoise.denoise(frame)
+  else:
+    frame = lktools.Denoise.denoise(frame)
   # findObject
   frame = lktools.FindObject.findObject(frame)
   # return
