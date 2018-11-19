@@ -16,10 +16,16 @@ def get_rect_property(size):
   width, height = size
   return (
     (width // 16, height * 5 // 6),
-    (width * 15 // 16, height // 3),
+    (width * 15 // 16, height // 6),
     (255, 0, 0),
     1, 0
   )
+
+def in_rect(point, rect):
+  # TODO: rect不用重复拆包
+  x, y = point
+  (x1, y1), (x2, y2), *_ = rect
+  return x >= x1 and x <= x2 and y <= y1 and y >= y2
 
 def gray_to_rgb(img):
   return cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)

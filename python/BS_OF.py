@@ -99,10 +99,13 @@ def run(name, path):
       # 更新last
       if nframes % lastn_interval == 0:
         lastn = original
+      # 表示还活着
+      print('.', end='', flush=True)
   capture.release()
   # 导出视频
   videoWriter.release()
   cv2.destroyAllWindows()
+  print()
 # run
 if __name__ == '__main__':
   for name, video in settings['videos']:

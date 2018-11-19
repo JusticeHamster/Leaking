@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+from lktools import PreProcess
 
 def draw_hsv(flow):
     (h, w) = flow.shape[:2]
@@ -29,11 +30,10 @@ def optical_flow_rects(prev, now, rect, limit_size=10):
     cv2.RETR_EXTERNAL,
     cv2.CHAIN_APPROX_SIMPLE
   )
-  (x1, y1), (x2, y2), *_ = rect
   rects = []
   for c in cnts:
     (x, y, w, h) = cv2.boundingRect(c)
-    if x < x1 or x > x2 or y < y1 or y > y2:
+    if not PreProcess.in_rect((x, y), rect):
       continue
     if w > limit_size and h > limit_size:
       rects.append(((x, y), (x + w, y + h), (0, 0xFF, 0), 4))
