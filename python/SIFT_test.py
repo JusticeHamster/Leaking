@@ -17,10 +17,12 @@ def run_one_frame(normal, src, fgbg, size):
   # MOG2 BS
   frame = fgbg.apply(frame)
   # Denoise
-    # 仅显示原图与滤波后结果
-    # frame = lktools.Denoise.denoise(frame, 'bilater')
+  # 仅显示原图与滤波后结果
+  if time_test:
+    frame = lktools.Denoise.denoise(frame, 'bilater')
   # 显示所有结果
-  frame = lktools.Denoise.denoise(frame)
+  else:
+    frame = lktools.Denoise.denoise(frame)
   # findObject
   frame = lktools.FindObject.findObject(frame)
   # return
