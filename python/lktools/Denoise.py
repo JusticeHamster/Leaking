@@ -2,8 +2,6 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
-denoise_funcs = None
-
 def denoise(img, which=None):
   ########     四个不同的滤波器    #########
   # 均值滤波
@@ -36,17 +34,15 @@ def denoise(img, which=None):
     binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
     binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
     return binary
-  global denoise_funcs
-  if denoise_funcs is None:
-    denoise_funcs = {
-      'original': lambda img: img,
-      'mean': mean,
-      'guassian': guassian,
-      'median': median,
-      'bilater': bilater,
-      'morph1': morph1,
-      'morph2': morph2,
-    }
+  denoise_funcs = {
+    'original': lambda img: img,
+    'mean': mean,
+    'guassian': guassian,
+    'median': median,
+    'bilater': bilater,
+    'morph1': morph1,
+    'morph2': morph2,
+  }
   if which is None:
     return map(lambda f: f(img), denoise_funcs.values())
   else:
