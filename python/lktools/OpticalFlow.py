@@ -57,17 +57,10 @@ def optical_flow_rects(prev, now, rect, color=(0, 0xFF, 0), thickness=4, limit_s
   rects = []
   for c in cnts:
     (x, y, w, h) = cv2.boundingRect(c)
-    r = (
-      (
-        int(x / compression_ratio),
-        int(y / compression_ratio)
-      ), (
-        int((x + w) / compression_ratio),
-        int((y + h) / compression_ratio)
-      )
-    )
+    r = np.array([[x, y], [(x + w), (y + h)]])
+    r = (r / compression_ratio).astype(int)
     if not PreProcess.rect_in_rect(r, rect):
       continue
     if w > limit_size and h > limit_size:
-      rects.append((*r, color, thickness))
+      rects.append((*map(tuple, r), color, thickness))
   return rects, binary
