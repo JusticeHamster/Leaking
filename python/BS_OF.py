@@ -9,14 +9,15 @@ img_path = settings['img_path']
 video_path = settings['video_path']
 frame_range = settings['frame_range']
 lastn_interval = settings['lastn']
-def run_one_frame(normal, src, fgbg, size):
+@lktools.Timer.timer_decorator
+def run_one_frame(first, lastn, src, fgbg, size):
   frame = src
   # rect
   rect = lktools.PreProcess.get_rect_property(size)
   # optical flow
-  flow_rects, _ = lktools.OpticalFlow.optical_flow_rects(normal, frame, rect)
+  flow_rects, _ = lktools.OpticalFlow.optical_flow_rects(lastn, frame, rect, compression_ratio=0.5)
   # sift alignment
-  frame, *_ = lktools.SIFT.siftImageAlignment(normal, frame)
+  frame, *_ = lktools.SIFT.siftImageAlignment(first, frame)
   # MOG2 BS
   frame = fgbg.apply(frame)
   # Denoise
@@ -80,7 +81,7 @@ def run(name, path):
     # 上面是循环变量，下面是正式计算
     # 保存原图
     original = frame
-    frame = run_one_frame(lastn, frame, fgbg, size)
+    frame = run_one_frame(first, lastn, frame, fgbg, size)
     if not time_test:
       cv2.imwrite(
         '{path}/{name}_{n}.jpg'.format(
@@ -93,13 +94,10 @@ def run(name, path):
     # 更新last
     if nframes % lastn_interval == 0:
       lastn = original
-    # 表示还活着
-    print('.', end='', flush=True)
   capture.release()
   # 导出视频
   videoWriter.release()
   cv2.destroyAllWindows()
-  print()
 # run
 if __name__ == '__main__':
   for name, video in settings['videos']:

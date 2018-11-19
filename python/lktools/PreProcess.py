@@ -21,11 +21,11 @@ def get_rect_property(size):
     1, 0
   )
 
-def in_rect(rect1, rect2):
+def rect_in_rect(rect1, rect2):
   # TODO: rect不用重复拆包
-  x, y = point
-  (x1, y1), (x2, y2), *_ = rect
-  return x >= x1 and x <= x2 and y <= y1 and y >= y2
+  (x11, y11), (x12, y12) = rect1
+  (x21, y21), (x22, y22), *_ = rect2
+  return x11 >= x21 and x12 <= x22 and y12 <= y21 and y11 >= y22
 
 def gray_to_rgb(img):
   return cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)

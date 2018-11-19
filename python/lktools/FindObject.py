@@ -1,6 +1,8 @@
 import cv2
 from lktools import PreProcess
+from lktools import Timer
 
+@Timer.timer_decorator
 def findObject(img, rect):
   # 计算图像中目标的轮廓并且返回彩色图像
   _, binary = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
@@ -13,7 +15,8 @@ def findObject(img, rect):
     if cv2.contourArea(c) < 20:
       continue
     (x, y, w, h) = cv2.boundingRect(c) # 该函数计算矩形的边界框
-    if not PreProcess.in_rect((x, y), rect):
+    r = ((x, y), (x + w, y + h))
+    if not PreProcess.rect_in_rect(r, rect):
       continue
-    rects.append(((x, y), (x + w, y + h), (0, 0, 255), 2))
+    rects.append((*r, (0, 0, 255), 2))
   return rects

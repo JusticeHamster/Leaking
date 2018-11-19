@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 from lktools import PreProcess
+from lktools import Timer
 
 def draw_hsv(flow):
     (h, w) = flow.shape[:2]
@@ -13,7 +14,30 @@ def draw_hsv(flow):
     hsv[..., 2] = np.minimum(v * 4, 0xFF)
     return cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
-def optical_flow_rects(prev, now, rect, limit_size=10):
+@Timer.timer_decorator
+def optical_flow_rects(prev, now, rect, color=(0, 0xFF, 0), thickness=4, limit_size=10, compression_ratio=1):
+  """
+  Params:
+    @prev: 上一帧图片
+    @now: 这一帧图片
+    @rect: 给定检测的范围
+    @color: 标识物体框的颜色
+    @thickness: 标识物体框的粗细
+    @limit_size: 小于此阈值的物体长宽，不予标识
+    @compression_ratio: 识别时的压缩率，越小检测结果越粗糙，速度越快
+  Warning:
+    rect: two points same as (x1,y1),(x2,y2), and x1 <= x2 & y1 <= y2
+  """
+  prev = cv2.resize(
+    prev, None, None,
+    compression_ratio,
+    compression_ratio
+  )
+  now = cv2.resize(
+    now, None, None,
+    compression_ratio,
+    compression_ratio
+  )
   prev = cv2.cvtColor(prev, cv2.COLOR_BGR2GRAY)
   now = cv2.cvtColor(now, cv2.COLOR_BGR2GRAY)
   flow = cv2.calcOpticalFlowFarneback(
@@ -33,8 +57,17 @@ def optical_flow_rects(prev, now, rect, limit_size=10):
   rects = []
   for c in cnts:
     (x, y, w, h) = cv2.boundingRect(c)
-    if not PreProcess.in_rect((x, y), rect):
+    r = (
+      (
+        int(x / compression_ratio),
+        int(y / compression_ratio)
+      ), (
+        int((x + w) / compression_ratio),
+        int((y + h) / compression_ratio)
+      )
+    )
+    if not PreProcess.rect_in_rect(r, rect):
       continue
     if w > limit_size and h > limit_size:
-      rects.append(((x, y), (x + w, y + h), (0, 0xFF, 0), 4))
+      rects.append((*r, color, thickness))
   return rects, binary

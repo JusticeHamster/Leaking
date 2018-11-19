@@ -1,7 +1,9 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
+from lktools import Timer
 
+@Timer.timer_decorator
 def denoise(img, which=None):
   ########     四个不同的滤波器    #########
   # 均值滤波
