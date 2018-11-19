@@ -12,10 +12,17 @@ video_path=?// 视频存取路径，默认tmp
 time_test=? // 是否测试时间，会关闭所有输出，默认false
 lastn=?     // 用前N帧图片作为修正的标准，默认为1
 fps=?       // 保存视频帧数，默认10
+time_debug=?// 是否打印每个函数耗时
 """
 
+settings = None
+
 def get_settings():
-  settings = {}
+  global settings
+  if settings is None:
+    settings = {}
+  else:
+    return settings
   with open('rpca.settings', encoding='utf-8') as f:
     for line in f.readlines():
       strs = line.split('=')
@@ -31,6 +38,7 @@ def get_settings():
     map(lambda s: int(s), settings.get('frame_range', '0-100').split('-'))
   )
   settings['time_test'] = settings.get('time_test') == 'true'
+  settings['time_debug'] = settings.get('time_debug') == 'true'
   # 将设置中的文件转换为绝对地址
   settings['videos'] = tuple(map(
     lambda n: (n.split('.')[0], '{path}/{name}'.format(

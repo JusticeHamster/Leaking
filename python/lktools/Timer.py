@@ -1,6 +1,8 @@
 import time
+from lktools import Loader
 
-DEBUG = False
+settings = Loader.get_settings()
+DEBUG = settings['time_debug']
 
 def timer_decorator(func):
   def wrapper(*args, **kwargs):
