@@ -13,6 +13,8 @@ time_test=? // 是否测试时间，会关闭所有输出，默认false
 lastn=?     // 用前N帧图片作为修正的标准，默认为1
 fps=?       // 保存视频帧数，默认10
 time_debug=?// 是否打印每个函数耗时
+limit_size=?// 光流法的参数，默认10
+compression_ratio=? // 光流法的压缩率，默认1
 """
 
 settings = None
@@ -34,6 +36,8 @@ def get_settings():
   settings['height'] = int(settings.get('height', 192))
   settings['lastn'] = int(settings.get('lastn', 1))
   settings['fps'] = int(settings.get('fps', 10))
+  settings['limit_size'] = int(settings.get('limit_size', 10))
+  settings['compression_ratio'] = int(settings.get('compression_ratio', 1))
   settings['frame_range'] = tuple(
     map(lambda s: int(s), settings.get('frame_range', '0-100').split('-'))
   )

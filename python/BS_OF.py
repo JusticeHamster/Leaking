@@ -10,13 +10,18 @@ video_path = settings['video_path']
 frame_range = settings['frame_range']
 lastn_interval = settings['lastn']
 fps = settings['fps']
+limit_size = settings['limit_size']
+compression_ratio = settings['compression_ratio']
 @lktools.Timer.timer_decorator
 def run_one_frame(lastn, last, src, fgbg, size):
   frame = src
   # rect
   rect = lktools.PreProcess.get_rect_property(size)
   # optical flow
-  flow_rects, _ = lktools.OpticalFlow.optical_flow_rects(last, frame, rect)
+  flow_rects, _ = lktools.OpticalFlow.optical_flow_rects(
+    last, frame, rect,
+    limit_size=limit_size, compression_ratio=compression_ratio
+  )
   # sift alignment
   frame, *_ = lktools.SIFT.siftImageAlignment(lastn, frame)
   # MOG2 BS
