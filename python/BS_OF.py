@@ -53,8 +53,8 @@ def run(name, path):
     '{path}/{name}.avi'.format(path=video_path, name=name),
     fourcc,
     fps,
-    size
-  ) # 最后一个是保存图片的尺寸
+    size # WARNING：尺寸必须与图片的尺寸一致，否则保存后无法播放。
+  )
   # 只显示原图与双边滤波结果的分辨率
   ''' videoWriter = cv2.VideoWriter(
     '{path}/{name}.avi'.format(path=video_path, name=name),
