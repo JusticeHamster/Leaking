@@ -21,7 +21,7 @@ def get_rect_property(size):
     1, 0
   )
 
-def in_rect(point, rect):
+def in_rect(rect1, rect2):
   # TODO: rect不用重复拆包
   x, y = point
   (x1, y1), (x2, y2), *_ = rect

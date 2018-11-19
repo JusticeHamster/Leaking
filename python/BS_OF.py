@@ -81,26 +81,23 @@ def run(name, path):
       continue
     # 上面是循环变量，下面是正式计算
     # 保存原图
+    original = frame
+    frame_lastn = run_one_frame(lastn, frame, fgbg_lastn, size)
+    img = frame_lastn
     if not time_test:
-      original = frame
-    # 处理一帧
-    frame_first = run_one_frame(first, frame, fgbg_first, size)
-    if not time_test:
-      frame_lastn = run_one_frame(lastn, frame, fgbg_lastn, size)
-      img = np.hstack((frame_first, frame_lastn))
       cv2.imwrite(
         '{path}/{name}_{n}.jpg'.format(
           path=img_path, name=name, n=nframes
         ),
         img
       )
-      # 每一帧导入保存的视频中，uint8
-      videoWriter.write(np.uint8(img))
-      # 更新last
-      if nframes % lastn_interval == 0:
-        lastn = original
-      # 表示还活着
-      print('.', end='', flush=True)
+    # 每一帧导入保存的视频中，uint8
+    videoWriter.write(np.uint8(img))
+    # 更新last
+    if nframes % lastn_interval == 0:
+      lastn = original
+    # 表示还活着
+    print('.', end='', flush=True)
   capture.release()
   # 导出视频
   videoWriter.release()
