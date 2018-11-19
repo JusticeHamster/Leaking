@@ -1,35 +1,6 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
-# Python 2/3 compatibility
-from __future__ import print_function
-
-
 import numpy as np
 import cv2
 import time
-
-count = 0
-
-lk_params = dict(winSize=(22, 22),
-                 maxLevel=5,
-                 criteria=(cv2.TERM_CRITERIA_MAX_ITER | cv2.TERM_CRITERIA_EPS, 20, 0.01))
-
-
-def draw_flow(img, flow, step=16):
-
-    # from the beginning to position 2 (excluded channel info at position 3)
-    h, w = img.shape[:2]
-    y, x = np.mgrid[step/2:h:step, step/2:w:step].reshape(2, -1).astype(int)
-    fx, fy = flow[y, x].T
-    lines = np.vstack([x, y, x+fx, y+fy]).T.reshape(-1, 2, 2)
-    lines = np.int32(lines + 0.5)
-    vis = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-    cv2.polylines(vis, lines, 0, (0, 255, 0))
-    for (x1, y1), _ in lines:
-        cv2.circle(vis, (x1, y1), 1, (0, 255, 0), -1)
-    return vis
-
 
 def draw_hsv(flow):
     (h, w) = flow.shape[:2]
@@ -43,16 +14,6 @@ def draw_hsv(flow):
     bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
     # cv2.imshow('hsv', bgr)
     return bgr
-
-
-def warp_flow(img, flow):
-    (h, w) = flow.shape[:2]
-    flow = -flow
-    flow[:, :, 0] += np.arange(w)
-    flow[:, :, 1] += np.arange(h)[:, np.newaxis]
-    res = cv2.remap(img, flow, None, cv2.INTER_LINEAR)
-    return res
-
 
 def run_one_frame(prev, img, limit_size=10):
     prev_gray = cv2.cvtColor(prev, cv2.COLOR_BGR2GRAY)
@@ -72,7 +33,7 @@ def run_one_frame(prev, img, limit_size=10):
     for c in cnts:
         # if the contour is too small, ignore it
         (x, y, w, h) = cv2.boundingRect(c)
-        if w > limit_size and limit_size > 10:
+        if w > limit_size and h > limit_size:
             cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0xFF, 0), 4)
     return img
 
@@ -84,14 +45,14 @@ if __name__ == '__main__':
     success, prev = cam.read()
     if success:
         prev = cv2.resize(prev, screen_size)
-
         while True:
             success, img = cam.read()
             if not success:
                 break
             img = cv2.resize(img, screen_size)
-            img = run_one_frame(prev, img, 10)
-            cv2.imshow('Image', img)
+            ans = run_one_frame(prev, img.copy())
+            cv2.imshow('Image', ans)
             prev = img
+            cv2.waitKey(10)
 
     cv2.destroyAllWindows()
