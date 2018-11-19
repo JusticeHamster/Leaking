@@ -10,10 +10,10 @@ video_path = settings['video_path']
 frame_range = settings['frame_range']
 lastn_interval = settings['lastn']
 def run_one_frame(normal, src, fgbg, size):
-  frame = lktools.PreProcess.draw_rect(src, size)
+  frame = src
   # sift alignment
   frame, *_ = lktools.SIFT.siftImageAlignment(normal, frame)
-  sift_save = frame
+  sift_save = lktools.PreProcess.draw_rect(frame, size)
   # MOG2 BS
   frame = fgbg.apply(frame)
   # Denoise
