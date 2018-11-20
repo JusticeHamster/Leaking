@@ -15,6 +15,9 @@ cpp/static
 # windows bash
 *.bash
 
+# linux nohup
+nohup.*
+
 # 设置文件
 *.settings
 settings.json
