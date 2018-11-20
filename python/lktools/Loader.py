@@ -1,7 +1,7 @@
 import shutil
 import os
 # 读取设置
-"""{rpca.settings 格式要求:}
+"""{lk.settings 格式要求:}
 path=XXX
 videos=X.mp4;Y.mp4
 delay=?     // 视频播放延迟，默认100
