@@ -35,7 +35,7 @@ def get_settings():
   settings.setdefault('video_path', 'tmp')
   settings['delay'] = int(settings.get('delay', 100))
   settings['height'] = int(settings.get('height', 480))
-  settings['lastn'] = int(settings.get('lastn', 1))
+  settings['lastn'] = int(settings.get('lastn', 10))
   settings['fps'] = int(settings.get('fps', 10))
   settings['limit_size'] = int(settings.get('limit_size', 10))
   settings['compression_ratio'] = float(settings.get('compression_ratio', 1))
@@ -59,4 +59,9 @@ def get_settings():
     if os.path.exists(img_path):
       shutil.rmtree(img_path)
     os.mkdir(img_path)
+  video_path = settings['video_path']
+  if video_path != img_path:
+    if os.path.exists(video_path):
+      shutil.rmtree(video_path)
+    os.mkdir(video_path)
   return settings
