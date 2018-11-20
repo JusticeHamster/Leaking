@@ -12,6 +12,7 @@ lastn_interval = settings['lastn']
 fps = settings['fps']
 limit_size = settings['limit_size']
 compression_ratio = settings['compression_ratio']
+linux = settings['linux']
 @lktools.Timer.timer_decorator
 def run_one_frame(lastn, last, src, fgbg, size):
   frame = src
@@ -94,7 +95,8 @@ def run(name, path):
   capture.release()
   # 导出视频
   videoWriter.release()
-  cv2.destroyAllWindows()
+  if not linux:
+    cv2.destroyAllWindows()
 # run
 if __name__ == '__main__':
   for name, video in settings['videos']:

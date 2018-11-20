@@ -15,6 +15,7 @@ fps=?       // 保存视频帧数，默认10
 time_debug=?// 是否打印每个函数耗时
 limit_size=?// 光流法的参数，默认10
 compression_ratio=? // 光流法的压缩率，默认1
+linux=?     // 是不是linux，linux不会执行显示相关的函数
 """
 
 settings = None
@@ -43,6 +44,7 @@ def get_settings():
   )
   settings['time_test'] = settings.get('time_test') == 'true'
   settings['time_debug'] = settings.get('time_debug') == 'true'
+  settings['linux'] = settings.get('linux') == 'true'
   # 将设置中的文件转换为绝对地址
   settings['videos'] = tuple(map(
     lambda n: (n.split('.')[0], '{path}/{name}'.format(
