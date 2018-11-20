@@ -25,7 +25,7 @@ def get_settings():
     settings = {}
   else:
     return settings
-  with open('rpca.settings', encoding='utf-8') as f:
+  with open('lk.settings', encoding='utf-8') as f:
     for line in f.readlines():
       strs = line.split('=')
       settings[strs[0].strip()] = strs[1].strip()
