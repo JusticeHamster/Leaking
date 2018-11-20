@@ -5,7 +5,7 @@ import os
 path=XXX
 videos=X.mp4;Y.mp4
 delay=?     // 视频播放延迟，默认100
-height=?    // 视频高度限定，宽度会自动计算，默认192
+height=?    // 视频高度限定，宽度会自动计算，默认480
 frame_range=a-b// 取a-b帧，默认0-100
 img_path=?  // 图片存取路径，默认tmp
 video_path=?// 视频存取路径，默认tmp
@@ -33,7 +33,7 @@ def get_settings():
   settings.setdefault('img_path', 'tmp')
   settings.setdefault('video_path', 'tmp')
   settings['delay'] = int(settings.get('delay', 100))
-  settings['height'] = int(settings.get('height', 192))
+  settings['height'] = int(settings.get('height', 480))
   settings['lastn'] = int(settings.get('lastn', 1))
   settings['fps'] = int(settings.get('fps', 10))
   settings['limit_size'] = int(settings.get('limit_size', 10))
