@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+from skimage import morphology
 import matplotlib.pyplot as plt
 from lktools import Timer
 
@@ -17,25 +18,20 @@ def denoise(img, which=None):
     return cv2.medianBlur(img, 5)
   # 双边滤波
   def bilater(img):
-    return cv2.bilateralFilter(img,9,75,75)
+    img = cv2.bilateralFilter(img,9,75,75)
+    img = morph1(img)
+    return img
   # 形态学处理
   def morph1(img):
     # 定义结构元素
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(5, 5))
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3, 3))
     # 图像二值化
-    _, binary = cv2.threshold(img,127,255,cv2.THRESH_BINARY)
+    _, binary = cv2.threshold(img,64,255,cv2.THRESH_BINARY)
     # 形态学腐蚀
-    binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
+    binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
     return binary
   def morph2(img):
-    # 定义结构元素
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(5, 5))
-    # 图像二值化
-    _, binary = cv2.threshold(img,127,255,cv2.THRESH_BINARY)
-    # 形态学腐蚀两次
-    binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
-    binary = cv2.morphologyEx(binary, cv2.MORPH_CLOSE, kernel)
-    return binary
+    return img
   denoise_funcs = {
     'original': lambda img: img,
     'mean': mean,
