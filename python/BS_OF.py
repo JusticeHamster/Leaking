@@ -24,15 +24,11 @@ def run_one_frame(lastn, last, src, fgbg, size):
     limit_size=limit_size, compression_ratio=compression_ratio
   )
   # sift alignment
-  frame, *_ = lktools.SIFT.siftImageAlignment(lastn, frame)
-  cv2.imshow('old',frame)
+  # frame, *_ = lktools.SIFT.siftImageAlignment(lastn, frame)
   # MOG2 BS
   frame = fgbg.apply(frame)
   # Denoise
-  cv2.imshow('binary',frame)
   frame = lktools.Denoise.denoise(frame, 'bilater')
-  cv2.imshow('MOG2 BS',frame)
-  # input("PRESS ENTER TO CONTINUE.")
   # findObject
   bs_rects = lktools.FindObject.findObject(frame, rect)
   # draw
