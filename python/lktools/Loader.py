@@ -37,10 +37,7 @@ def get_settings():
     user_settings['path'] = path
   # 将设置中的文件转换为绝对地址
   user_settings['videos'] = tuple(map(
-    lambda n: (n.split('.')[0], '{path}/{name}'.format(
-      path=path,
-      name=n
-    )),
+    lambda n: (n.split('.')[0], '{path}/{n}'),
     user_settings['videos']
   ))
   # 测试的情况下该返回了
