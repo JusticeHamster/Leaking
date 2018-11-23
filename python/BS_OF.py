@@ -31,6 +31,10 @@ def run_one_frame(lastn, last, src, fgbg, size):
   # Denoise
   frame = lktools.Denoise.denoise(frame, 'bilater')
   frame = lktools.Denoise.denoise(frame, 'morph_open')
+  frame = lktools.Denoise.denoise(frame, 'dilation')
+  frame = lktools.Denoise.denoise(frame, 'dilation')
+  frame = lktools.Denoise.denoise(frame, 'erode') 
+
   cv2.imshow('old',src)
   cv2.waitKey(delay)
   cv2.imshow('emmm',frame)

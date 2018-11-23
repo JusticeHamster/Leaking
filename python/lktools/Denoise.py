@@ -19,7 +19,7 @@ def denoise(img, which=None):
   # 双边滤波
   def bilater(img):
     return cv2.bilateralFilter(img,9,75,75)
-  # 形态学处理
+  # 形态学处理——开运算
   def morph_open(img):
     # 定义结构元素
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3, 3))
@@ -28,6 +28,13 @@ def denoise(img, which=None):
     # 形态学腐蚀
     binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
     return binary
+  def dilation(img):
+    kernel = np.ones((5,5),np.uint8)
+    return cv2.dilate(img,kernel,iterations = 1)
+  def erode(img):
+    kernel = np.ones((5,5),np.uint8)
+    return cv2.erode(img,kernel,iterations = 2)
+
   denoise_funcs = {
     'original': lambda img: img,
     'mean': mean,
@@ -35,6 +42,8 @@ def denoise(img, which=None):
     'median': median,
     'bilater': bilater,
     'morph_open': morph_open,
+    'dilation': dilation,
+    'erode':erode,
   }
   if which is None:
     return map(lambda f: f(img), denoise_funcs.values())
