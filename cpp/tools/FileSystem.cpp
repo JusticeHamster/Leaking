@@ -36,7 +36,7 @@ namespace FileSystem {
     const auto& path = raw["path"].asString();
     for (auto r = raw["videos"].begin(); r != raw["videos"].end(); r++) {
       const auto s = r->asString();
-      const auto name = s.substring(0, s.find('.'));
+      const auto name = s.substr(0, s.find('.'));
       m[name] = path + s;
     }
     return m;
