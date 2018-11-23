@@ -11,6 +11,6 @@ def timer_decorator(func):
     result = func(*args, **kwargs)
     if DEBUG:
       end = time.perf_counter()
-      print('{func} time cost: {time:.2f}s'.format(func=func.__name__, time=end - start))
+      print(f'{func.__name__} time cost: {end - start:.2f}s')
     return result
   return wrapper
