@@ -45,9 +45,7 @@ def run(name, path):
   capture, h, w, fps = lktools.PreProcess.video_capture_size(path, settings['height'])
   size = (w, h)
   # run
-  print('read {path}. from frame {frames[0]} to {frames[1]}'.format(
-    path=path, frames=frame_range
-  ))
+  print(f'read {path}. from frame {frame_range[0]} to {frame_range[1]}')
   nframes = 0
   # init
   last = None
@@ -57,7 +55,7 @@ def run(name, path):
   if not time_test:
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
     videoWriter = cv2.VideoWriter(
-      '{path}/{name}.avi'.format(path=video_path, name=name),
+      f'{video_path}/{name}.avi',
       fourcc,
       fps,
       size # WARNING：尺寸必须与图片的尺寸一致，否则保存后无法播放。
