@@ -94,6 +94,7 @@ def run(name, path):
       lastn = original
       fgbg = cv2.createBackgroundSubtractorMOG2()
       fgbg.apply(lastn)
+    last = original
   capture.release()
   # 导出视频
   if not time_test:

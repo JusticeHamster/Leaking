@@ -3,7 +3,7 @@ import cv2
 def video_capture_size(path, height):
   capture = cv2.VideoCapture(path)
   if not capture.isOpened():
-    raise RuntimeError('{path} not found'.format(path=path))
+    raise RuntimeError(f'{path} not found')
   m = capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
   n = capture.get(cv2.CAP_PROP_FRAME_WIDTH)
   fps = capture.get(cv2.CAP_PROP_FPS)
