@@ -18,11 +18,9 @@ def denoise(img, which=None):
     return cv2.medianBlur(img, 5)
   # 双边滤波
   def bilater(img):
-    img = cv2.bilateralFilter(img,9,75,75)
-    img = morph1(img)
-    return img
+    return cv2.bilateralFilter(img,9,75,75)
   # 形态学处理
-  def morph1(img):
+  def morph_open(img):
     # 定义结构元素
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3, 3))
     # 图像二值化
@@ -30,16 +28,13 @@ def denoise(img, which=None):
     # 形态学腐蚀
     binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
     return binary
-  def morph2(img):
-    return img
   denoise_funcs = {
     'original': lambda img: img,
     'mean': mean,
     'guassian': guassian,
     'median': median,
     'bilater': bilater,
-    'morph1': morph1,
-    'morph2': morph2,
+    'morph_open': morph_open,
   }
   if which is None:
     return map(lambda f: f(img), denoise_funcs.values())

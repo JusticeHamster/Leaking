@@ -12,6 +12,7 @@ lastn_interval = settings['lastn']
 fps = settings['fps']
 limit_size = settings['limit_size']
 compression_ratio = settings['compression_ratio']
+delay = settings['delay']
 linux = settings['linux']
 @lktools.Timer.timer_decorator
 def run_one_frame(lastn, last, src, fgbg, size):
@@ -29,6 +30,7 @@ def run_one_frame(lastn, last, src, fgbg, size):
   frame = fgbg.apply(frame)
   # Denoise
   frame = lktools.Denoise.denoise(frame, 'bilater')
+  frame = lktools.Denoise.denoise(frame, 'morph_open')
   # findObject
   bs_rects = lktools.FindObject.findObject(frame, rect)
   # draw
@@ -52,13 +54,14 @@ def run(name, path):
   lastn = None
   fgbg = cv2.createBackgroundSubtractorMOG2()
   # 将图像保存为视频
-  fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-  videoWriter = cv2.VideoWriter(
-    '{path}/{name}.avi'.format(path=video_path, name=name),
-    fourcc,
-    fps,
-    size # WARNING：尺寸必须与图片的尺寸一致，否则保存后无法播放。
-  )
+  if not time_test:
+    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    videoWriter = cv2.VideoWriter(
+      '{path}/{name}.avi'.format(path=video_path, name=name),
+      fourcc,
+      fps,
+      size # WARNING：尺寸必须与图片的尺寸一致，否则保存后无法播放。
+    )
   # 对每一帧
   while capture.isOpened():
     if nframes >= frame_range[1]:
@@ -78,15 +81,16 @@ def run(name, path):
     # 保存原图
     original = frame
     frame = run_one_frame(lastn, last, frame, fgbg, size)
-    if not time_test:
+    if time_test:
+      cv2.imshow(f'{name}', frame)
+      cv2.waitKey(delay)
+    else:
       cv2.imwrite(
-        '{path}/{name}_{n}.jpg'.format(
-          path=img_path, name=name, n=nframes
-        ),
+        f'{img_path}/{name}_{nframes}.jpg',
         frame
       )
-    # 每一帧导入保存的视频中，uint8
-    videoWriter.write(np.uint8(frame))
+      # 每一帧导入保存的视频中，uint8
+      videoWriter.write(np.uint8(frame))
     # 更新last
     if nframes % lastn_interval == 0:
       lastn = original
@@ -94,7 +98,8 @@ def run(name, path):
       fgbg.apply(lastn)
   capture.release()
   # 导出视频
-  videoWriter.release()
+  if not time_test:
+    videoWriter.release()
   if not linux:
     cv2.destroyAllWindows()
 # run

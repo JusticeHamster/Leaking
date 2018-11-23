@@ -5,7 +5,7 @@ import os
 template = """{
   "path": "../video",                     // 视频路径
   "videos": ["???.mp4"],                  // 视频列表
-  "delay": 100,                           // 视频播放延迟，用于cv2.waitKey第一个参数
+  "delay": 10,                            // 视频播放延迟，用于cv2.waitKey第一个参数
   "height": 480,                          // 视频高度限定，宽度会自动计算
   "frame_range": [0, 100],                // 取[a, b]帧
   "img_path": "tmp",                      // 图片存取路径
@@ -16,7 +16,7 @@ template = """{
   "time_debug": false,                    // 是否打印每个函数耗时
   "limit_size": 10,                       // 光流法的参数
   "compression_ratio": 1,                 // 光流法的压缩率
-  "linux": false                          // 是不是linux，linux不会执行显示相关的函数
+  "linux": false,                         // 是不是linux，linux不会执行显示相关的函数
 }"""
 user_settings = None
 
