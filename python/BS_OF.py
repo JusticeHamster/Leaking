@@ -20,6 +20,9 @@ def run_one_frame(lastn, last, src, fgbg, size):
   # rect
   rect = lktools.PreProcess.get_rect_property(size)
   # optical flow
+  # cv2.imshow('old',last)
+  # cv2.imshow('emmm',frame)
+  # cv2.waitKey(delay)
   flow_rects, _ = lktools.OpticalFlow.optical_flow_rects(
     last, frame, rect,
     limit_size=limit_size, compression_ratio=compression_ratio
@@ -35,10 +38,7 @@ def run_one_frame(lastn, last, src, fgbg, size):
   frame = lktools.Denoise.denoise(frame, 'dilation')
   frame = lktools.Denoise.denoise(frame, 'erode') 
 
-  cv2.imshow('old',src)
-  cv2.waitKey(delay)
-  cv2.imshow('emmm',frame)
-  cv2.waitKey(delay)
+
   # findObject
   bs_rects = lktools.FindObject.findObject(frame, rect)
   # draw
