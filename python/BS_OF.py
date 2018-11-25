@@ -14,11 +14,18 @@ limit_size = settings['limit_size']
 compression_ratio = settings['compression_ratio']
 delay = settings['delay']
 linux = settings['linux']
+risk_mode = settings['risk_mode']
+# if risk_mode == True
+# 标记当前状态是否正常，如果False说明正常，如果出现危险，则将risk_state改为True，
+# 并固定lastn为正常帧的最后一帧，接下来的每一帧risk_count+1，直到系统恢复正常或者
+# risk_count超过1000帧时reset。
+risk_count = 0
+risk_state = False
 @lktools.Timer.timer_decorator
 def run_one_frame(lastn, last, src, fgbg, size):
   frame = src
   # rect
-  rect = lktools.PreProcess.get_rect_property(size)
+  rect = lktools.PreProcess.get_rect_property(size) 
   # optical flow
   # cv2.imshow('old',last)
   # cv2.imshow('emmm',frame)
@@ -44,8 +51,19 @@ def run_one_frame(lastn, last, src, fgbg, size):
   # draw
   src_rects = src.copy()
   cv2.rectangle(src_rects, *rect)
+
   for rect in (*flow_rects, *bs_rects):
     cv2.rectangle(src_rects, *rect)
+    if risk_mode:
+      if not risk_state:
+        risk_state = True
+        risk_count = 1
+      else:
+        risk_count = risk_count + 1
+
+  if not bs_rects and risk_mode and risk_state:
+      risk_state = False
+      risk_count = 0
   return src_rects
 # 计时运行
 @lktools.Timer.timer_decorator
@@ -58,6 +76,7 @@ def run(name, path):
   # init
   last = None
   lastn = None
+  risk_state = False
   fgbg = cv2.createBackgroundSubtractorMOG2()
   # 将图像保存为视频
   if not time_test:
@@ -99,7 +118,10 @@ def run(name, path):
       videoWriter.write(np.uint8(frame))
     # 更新last
     if nframes % lastn_interval == 0:
-      lastn = original
+      if risk_mode and risk_state == False and risk_count < 1000:
+        pass
+      else:
+        lastn = original
       fgbg = cv2.createBackgroundSubtractorMOG2()
       fgbg.apply(lastn)
     last = original

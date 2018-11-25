@@ -17,6 +17,7 @@ template = """{
   "limit_size": 10,                       // 光流法的参数
   "compression_ratio": 1,                 // 光流法的压缩率
   "linux": false,                         // 是不是linux，linux不会执行显示相关的函数
+  "risk_mode": true,                      // 如果为true则在有异物出现时，进入警报模式
 }"""
 user_settings = None
 
