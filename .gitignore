@@ -1,8 +1,8 @@
 # 临时文件
 *.o
 *.pyc
+*.tmp
 output/
-tmp/
 cpp/dynamic
 cpp/static
 

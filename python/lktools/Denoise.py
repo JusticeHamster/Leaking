@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-from skimage import morphology
 import matplotlib.pyplot as plt
 from lktools import Timer
 

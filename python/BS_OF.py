@@ -14,6 +14,7 @@ limit_size = settings['limit_size']
 compression_ratio = settings['compression_ratio']
 delay = settings['delay']
 linux = settings['linux']
+sift = settings['sift']
 risk_mode = settings['risk_mode']
 # if risk_mode == True
 # 标记当前状态是否正常，如果False说明正常，如果出现危险，则将risk_state改为True，
@@ -27,15 +28,13 @@ def run_one_frame(lastn, last, src, fgbg, size):
   # rect
   rect = lktools.PreProcess.get_rect_property(size) 
   # optical flow
-  # cv2.imshow('old',last)
-  # cv2.imshow('emmm',frame)
-  # cv2.waitKey(delay)
   flow_rects, _ = lktools.OpticalFlow.optical_flow_rects(
     last, frame, rect,
     limit_size=limit_size, compression_ratio=compression_ratio
   )
   # sift alignment
-  # frame, *_ = lktools.SIFT.siftImageAlignment(lastn, frame)
+  if sift:
+    frame, *_ = lktools.SIFT.siftImageAlignment(lastn, frame)
   # MOG2 BS
   frame = fgbg.apply(frame)
   # Denoise
@@ -44,13 +43,13 @@ def run_one_frame(lastn, last, src, fgbg, size):
   frame = lktools.Denoise.denoise(frame, 'dilation')
   frame = lktools.Denoise.denoise(frame, 'dilation')
   frame = lktools.Denoise.denoise(frame, 'erode') 
-
-
   # findObject
   bs_rects = lktools.FindObject.findObject(frame, rect)
   # draw
   src_rects = src.copy()
   cv2.rectangle(src_rects, *rect)
+  # risk
+  global risk_state, risk_count
 
   for rect in (*flow_rects, *bs_rects):
     cv2.rectangle(src_rects, *rect)
