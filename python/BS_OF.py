@@ -14,6 +14,7 @@ limit_size = settings['limit_size']
 compression_ratio = settings['compression_ratio']
 delay = settings['delay']
 linux = settings['linux']
+OF = settings['OF']
 sift = settings['sift']
 risk_mode = settings['risk_mode']
 # if risk_mode == True
@@ -28,10 +29,11 @@ def run_one_frame(lastn, last, src, fgbg, size):
   # rect
   rect = lktools.PreProcess.get_rect_property(size) 
   # optical flow
-  flow_rects, _ = lktools.OpticalFlow.optical_flow_rects(
-    last, frame, rect,
-    limit_size=limit_size, compression_ratio=compression_ratio
-  )
+  if OF:
+    flow_rects, _ = lktools.OpticalFlow.optical_flow_rects(
+      last, frame, rect,
+      limit_size=limit_size, compression_ratio=compression_ratio
+    )
   # sift alignment
   if sift:
     frame, *_ = lktools.SIFT.siftImageAlignment(lastn, frame)
@@ -48,21 +50,30 @@ def run_one_frame(lastn, last, src, fgbg, size):
   # draw
   src_rects = src.copy()
   cv2.rectangle(src_rects, *rect)
+  # rects
+  rects = bs_rects
+  if OF:
+    rects.extend(flow_rects)
   # risk
-  global risk_state, risk_count
-
-  for rect in (*flow_rects, *bs_rects):
-    cv2.rectangle(src_rects, *rect)
-    if risk_mode:
+  def risk(r):
+    if not risk_mode:
+      return
+    global risk_state, risk_count
+    if r:
       if not risk_state:
         risk_state = True
         risk_count = 1
       else:
         risk_count = risk_count + 1
-
-  if not bs_rects and risk_mode and risk_state:
-      risk_state = False
-      risk_count = 0
+    else:
+      if risk_state:
+        risk_state = False
+        risk_count = 0
+  r = len(rects) != 0
+  for rect in rects:
+    cv2.rectangle(src_rects, *rect)
+    risk(r)
+  risk(r)
   return src_rects
 # 计时运行
 @lktools.Timer.timer_decorator

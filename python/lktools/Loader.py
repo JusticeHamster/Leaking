@@ -19,6 +19,7 @@ template = """{
   "linux": false,                         // 是不是linux，linux不会执行显示相关的函数
   "risk_mode": true,                      // 如果为true则在有异物出现时，进入警报模式
   "sift": true,                           // 是否开启sift对齐
+  "OF": true,                             // 是否开启光流法
 }"""
 user_settings = None
 
