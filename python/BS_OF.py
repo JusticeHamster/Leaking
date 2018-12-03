@@ -17,7 +17,20 @@ linux = settings['linux']
 OF = settings['OF']
 sift = settings['sift']
 @lktools.Timer.timer_decorator
-def run_one_frame(lastn, last, src, fgbg, size):
+def catch_abnormal(lastn, last, src, fgbg, size):
+  """
+  对一帧图像进行处理，找到异常就用框圈出来。
+
+  Args:
+    lastn:  前N帧图片，用于对齐
+    last:   上一帧图片，用于光流法寻找移动物体
+    src:    原图，用于画框，并显示
+    fgbg:   BackgroundSubtractionMOG2方法使用的一个类
+    size:   图片尺寸，生成框使用
+
+  Returns:
+    src_rects:  画上了框的原图
+  """
   frame = src
   # rect
   rect = lktools.PreProcess.get_rect_property(size) 
@@ -89,7 +102,7 @@ def run(name, path):
     # 上面是循环变量，下面是正式计算
     # 保存原图
     original = frame
-    frame = run_one_frame(lastn, last, frame, fgbg, size)
+    frame = catch_abnormal(lastn, last, frame, fgbg, size)
     if time_test:
       cv2.imshow(f'{name}', frame)
       cv2.waitKey(delay)
