@@ -97,7 +97,7 @@ class BSOFModel:
       return
     rects = rects[1:]
     # 对异常框进行处理
-    print(rects)
+    # print(rects)
 
   @lktools.Timer.timer_decorator
   def one_video(self, name, path):
