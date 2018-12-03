@@ -11,6 +11,7 @@ cpp/static
 
 # MacOS 文件
 .DS_Store
+*.icloud
 
 # windows bash
 *.bash
