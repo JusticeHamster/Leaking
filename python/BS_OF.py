@@ -16,13 +16,6 @@ delay = settings['delay']
 linux = settings['linux']
 OF = settings['OF']
 sift = settings['sift']
-risk_mode = settings['risk_mode']
-# if risk_mode == True
-# 标记当前状态是否正常，如果False说明正常，如果出现危险，则将risk_state改为True，
-# 并固定lastn为正常帧的最后一帧，接下来的每一帧risk_count+1，直到系统恢复正常或者
-# risk_count超过1000帧时reset。
-risk_count = 0
-risk_state = False
 @lktools.Timer.timer_decorator
 def run_one_frame(lastn, last, src, fgbg, size):
   frame = src
@@ -54,16 +47,8 @@ def run_one_frame(lastn, last, src, fgbg, size):
   rects = bs_rects
   if OF:
     rects.extend(flow_rects)
-  # risk
-  def risk(length):
-    if not risk_mode:
-      return
-    global risk_state, risk_count
-    risk_state = length != 0
-    risk_count = length
   for rect in rects:
     cv2.rectangle(src_rects, *rect)
-  risk(len(rects))
   return src_rects
 # 计时运行
 @lktools.Timer.timer_decorator
