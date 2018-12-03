@@ -55,25 +55,15 @@ def run_one_frame(lastn, last, src, fgbg, size):
   if OF:
     rects.extend(flow_rects)
   # risk
-  def risk(r):
+  def risk(length):
     if not risk_mode:
       return
     global risk_state, risk_count
-    if r:
-      if not risk_state:
-        risk_state = True
-        risk_count = 1
-      else:
-        risk_count = risk_count + 1
-    else:
-      if risk_state:
-        risk_state = False
-        risk_count = 0
-  r = len(rects) != 0
+    risk_state = length != 0
+    risk_count = length
   for rect in rects:
     cv2.rectangle(src_rects, *rect)
-    risk(r)
-  risk(r)
+  risk(len(rects))
   return src_rects
 # 计时运行
 @lktools.Timer.timer_decorator
