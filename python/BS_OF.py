@@ -61,7 +61,6 @@ def run(name, path):
   # init
   last = None
   lastn = None
-  risk_state = False
   fgbg = cv2.createBackgroundSubtractorMOG2()
   # 将图像保存为视频
   if not time_test:
@@ -103,10 +102,7 @@ def run(name, path):
       videoWriter.write(np.uint8(frame))
     # 更新last
     if nframes % lastn_interval == 0:
-      if risk_mode and risk_state == False and risk_count < 1000:
-        pass
-      else:
-        lastn = original
+      lastn = original
       fgbg = cv2.createBackgroundSubtractorMOG2()
       fgbg.apply(lastn)
     last = original
