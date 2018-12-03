@@ -8,8 +8,8 @@ template = """{
   "delay": 10,                            // 视频播放延迟，用于cv2.waitKey第一个参数
   "height": 480,                          // 视频高度限定，宽度会自动计算
   "frame_range": [0, 100],                // 取[a, b]帧
-  "img_path": "tmp",                      // 图片存取路径
-  "video_path": "tmp",                    // 视频存取路径
+  "img_path": "images.tmp",               // 图片存取路径
+  "video_path": "videos.tmp",             // 视频存取路径
   "time_test": false,                     // 是否测试时间，会关闭所有输出
   "lastn": 10,                            // 用前N帧图片作为修正的标准
   "fps": 10,                              // 保存视频帧数
@@ -17,6 +17,9 @@ template = """{
   "limit_size": 10,                       // 光流法的参数
   "compression_ratio": 1,                 // 光流法的压缩率
   "linux": false,                         // 是不是linux，linux不会执行显示相关的函数
+  "risk_mode": true,                      // 如果为true则在有异物出现时，进入警报模式
+  "sift": true,                           // 是否开启sift对齐
+  "OF": true,                             // 是否开启光流法
 }"""
 user_settings = None
 
