@@ -14,7 +14,7 @@ class BSOFModel:
 
   def __getattribute__(self, name):
     """
-    如果self.NAME访问时，self不含属性NAME，则会在settings(在配置文件json中定义)中查找。
+    如果self.NAME访问时，self不含属性NAME，则会在settings（配置文件json）中查找。
     所以只要self和settings中含有同名属性就会报错。（详见Loader.py template的说明）
 
     请修复。
