@@ -18,10 +18,6 @@ class BSOFModel:
     所以只要self和settings中含有同名属性就会报错。（详见Loader.py template的说明）
 
     请修复。
-
-    例如：
-      json文件中：  { "lastn": 10 }
-      代码中：      self.lastn = frame
     """
     try:
       obj = super().__getattribute__(name)
@@ -33,6 +29,7 @@ class BSOFModel:
         return obj
       else:
         print(BSOFModel.__getattribute__.__doc__)
+        print(f"冲突为：self.{name}及self.settings['{name}']")
         from sys import exit
         exit(1)
 
