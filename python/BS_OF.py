@@ -15,7 +15,7 @@ class BSOFModel:
   def __getattribute__(self, name):
     """
     如果self.NAME访问时，self不含属性NAME，则会在settings(在配置文件json中定义)中查找。
-    所以只要self和settings中含有同名属性就会报错。
+    所以只要self和settings中含有同名属性就会报错。（详见Loader.py template的说明）
 
     请修复。
 
@@ -91,7 +91,7 @@ class BSOFModel:
     Args:
       src:    原图
       rects:  框的list
-    
+
     Self:
       judge_cache:   可长期持有的缓存，如果需要处理多帧的话
     """
