@@ -34,7 +34,7 @@ class BSOFModel:
       else:
         print(BSOFModel.__getattribute__.__doc__)
         from sys import exit
-        exit(-1)
+        exit(1)
 
   @lktools.Timer.timer_decorator
   def catch_abnormal(self, src, size):
