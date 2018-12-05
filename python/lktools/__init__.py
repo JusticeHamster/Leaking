@@ -6,3 +6,5 @@ import lktools.SIFT
 import lktools.Timer
 import lktools.FindObject
 import lktools.OpticalFlow
+import lktools.Checker
+import lktools.LoggerFactory
