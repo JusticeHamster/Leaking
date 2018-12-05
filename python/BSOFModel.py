@@ -6,12 +6,12 @@ class BSOFModel:
   """
   整个模型
   """
-  def __init__(self):
+  def __init__(self, settings):
     """
     初始化必要变量
 
     初始化
-      settings：    来自于Loader，从json文件读取
+      settings：    用户输入，一个字典
       judge_cache： 为judge使用的cache，每个单独的视频有一个单独的cache
       videoWriter： 为视频输出提供video writer，每个单独的视频有一个writer，会在clear中release
       logger：      创建logger
@@ -19,7 +19,7 @@ class BSOFModel:
     做一次clear
     """
     self.logger = lktools.LoggerFactory.LoggerFactory('BS_OF').logger
-    self.settings = lktools.Loader.get_settings()
+    self.settings = settings
     self.judge_cache = None
     self.videoWriter = None
     self.clear()
@@ -266,4 +266,4 @@ class BSOFModel:
       self.clear()
 
 if __name__ == '__main__':
-  BSOFModel().run()
+  BSOFModel(lktools.Loader.get_settings()).run()
