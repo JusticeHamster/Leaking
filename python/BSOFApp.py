@@ -9,7 +9,7 @@ Button:
   text: "I was created by kv codes"
 ''')
 
-class App(kivy.app.App):
+class BSOFApp(kivy.app.App):
   """
   App GUI for BSOFModel
   """
@@ -54,4 +54,4 @@ class App(kivy.app.App):
     return kv
 
 if __name__ == '__main__':
-  App().run()
+  BSOFApp().run()
