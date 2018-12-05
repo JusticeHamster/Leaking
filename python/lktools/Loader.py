@@ -1,6 +1,7 @@
 import json5
 import shutil
 import os
+import logging
 from lktools import LoggerFactory
 from lktools import Checker
 
@@ -91,22 +92,22 @@ def get_settings():
   checker.add_assert('debug_level', _debug_level  )
   checker.add_assert('type',        _type         )
 
-  logger.info('设置')
+  logger.debug('设置')
 
   with open('settings.json', encoding='utf-8') as f:
     user_settings = json5.load(f)
 
-  logger.info('load user setting')
+  logger.debug('load user setting')
 
   checker.add_container('setting', user_settings)
 
-  logger.info('load default')
+  logger.debug('load default')
 
   default_settings = json5.loads(template)
   for item in default_settings.items():
     user_settings.setdefault(*item)
 
-  logger.info('check type')
+  logger.debug('check type')
 
   checker.check(
     (
@@ -133,7 +134,7 @@ def get_settings():
   )
   checker.check('compression_ratio', float)
 
-  logger.info('check legal')
+  logger.debug('check legal')
 
   checker.check('videos', 'not_zero')
   checker.check('frame_range', 'range')
@@ -151,26 +152,37 @@ def get_settings():
     from sys import exit
     exit(1)
 
-  logger.info("去掉路径最后的'/'")
+  logger.debug('将debug_level转换为logging.枚举类型')
+
+  debug_level = user_settings['debug_level']
+  user_settings['debug_level'] = {
+    'debug':    logging.DEBUG,
+    'info':     logging.INFO,
+    'warn':     logging.WARN,
+    'error':    logging.ERROR,
+    'critical': logging.CRITICAL,
+  }[debug_level]
+
+  logger.debug("去掉路径最后的'/'")
 
   path = user_settings['path']
   if path[-1] == '/':
     path = path[:-1]
     user_settings['path'] = path
 
-  logger.info('将设置中的文件转换为绝对地址')
+  logger.debug('将设置中的文件转换为绝对地址')
 
   user_settings['videos'] = tuple(map(
     lambda n: (n.split('.')[0], f'{path}/{n}'),
     user_settings['videos']
   ))
 
-  logger.info('测试的情况下该返回了')
+  logger.debug('测试的情况下该返回了')
 
   if __name__ == '__main__':
     return user_settings
 
-  logger.info('清空输出文件夹')
+  logger.debug('清空输出文件夹')
 
   if not user_settings['time_test']:
     img_path = user_settings['img_path']
@@ -179,7 +191,7 @@ def get_settings():
     os.mkdir(img_path)
     video_path = user_settings['video_path']
 
-    logger.info('img和video在一个路径下就不重复做了')
+    logger.debug('img和video在一个路径下就不重复做了')
 
     if img_path != video_path:
       if os.path.exists(video_path):

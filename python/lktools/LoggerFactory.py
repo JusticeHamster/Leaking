@@ -5,7 +5,7 @@ class LoggerFactory:
   """
   创建默认设置好的logger
   """
-  def __init__(self, name, level=logging.WARN, stream=sys.stdout):
+  def __init__(self, name, level=logging.INFO, stream=sys.stdout):
     logger = logging.getLogger(name)
     logger.setLevel(level)
     handler = logging.StreamHandler(stream)

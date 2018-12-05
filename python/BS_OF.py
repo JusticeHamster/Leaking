@@ -40,8 +40,8 @@ class BSOFModel:
       if setting is None:
         return obj
       else:
-        print(BSOFModel.__getattribute__.__doc__)
-        print(f"冲突为：self.{name}及self.settings['{name}']")
+        self.logger.error(BSOFModel.__getattribute__.__doc__)
+        self.logger.error(f"冲突为：self.{name}及self.settings['{name}']")
         from sys import exit
         exit(1)
 
@@ -64,9 +64,9 @@ class BSOFModel:
       binary: 二值图像的dict，有'OF'和'BS'两个属性
     """
     frame = src
-    # rect
+    self.logger.debug('rect')
     rect = lktools.PreProcess.get_rect_property(size) 
-    # optical flow
+    self.logger.debug('optical flow')
     if self.OF:
       flow_rects, OF_binary = lktools.OpticalFlow.optical_flow_rects(
         self.last, frame, rect,
@@ -74,27 +74,27 @@ class BSOFModel:
       )
     else:
       OF_binary = None
-    # sift alignment
+    self.logger.debug('sift alignment')
     if self.sift:
       frame, *_ = lktools.SIFT.siftImageAlignment(self.lastn, frame)
-    # MOG2 BS
+    self.logger.debug('MOG2 BS')
     frame = self.fgbg.apply(frame)
-    # Denoise
+    self.logger.debug('Denoise')
     frame = lktools.Denoise.denoise(frame, 'bilater')
     frame = lktools.Denoise.denoise(frame, 'morph_open')
     frame = lktools.Denoise.denoise(frame, 'dilation')
     frame = lktools.Denoise.denoise(frame, 'dilation')
     frame = lktools.Denoise.denoise(frame, 'erode')
     BS_binary = frame
-    # findObject
+    self.logger.debug('findObject')
     bs_rects = lktools.FindObject.findObject(frame, rect)
-    # rects
+    self.logger.debug('rects')
     rects = [rect]
-    # rects
+    self.logger.debug('rects')
     rects.extend(bs_rects)
     if self.OF:
       rects.extend(flow_rects)
-    # ret
+    self.logger.debug('return')
     return rects, {
       'OF': OF_binary,
       'BS': BS_binary,
@@ -113,11 +113,13 @@ class BSOFModel:
     Self:
       judge_cache:   可长期持有的缓存，如果需要处理多帧的话
     """
-    # 第一个框是检测范围，不是异常
+    self.logger.debug('第一个框是检测范围，不是异常')
     if len(rects) <= 1:
       return
     rects = rects[1:]
-    # 对异常框进行处理
+    self.logger.debug('对异常框进行处理')
+    if len(rects) <= 1:
+      pass
     # print(rects)
 
   @lktools.Timer.timer_decorator
@@ -125,7 +127,6 @@ class BSOFModel:
     """
     处理一个单独的视频
     """
-    # 循环
     def loop(self, size):
       """
       计数frame
@@ -152,7 +153,6 @@ class BSOFModel:
         self.lastn = frame
         return True
       return frame
-    # 写出
     def output(self, name, frame, size):
       """
       输出一帧
@@ -167,23 +167,24 @@ class BSOFModel:
         cv2.imshow(f'{name}', frame)
         cv2.waitKey(self.delay)
       else:
-        # 每一帧写入图片中
+        self.logger.debug('每一帧写入图片中')
         cv2.imwrite(
           f'{self.img_path}/{name}_{self.nframes}.jpg',
           frame
         )
-        # 将图像保存为视频
+        self.logger.debug('将图像保存为视频')
+        self.logger.debug('WARNING：尺寸必须与图片的尺寸一致，否则保存后无法播放。')
         if self.videoWriter is None:
           fourcc = cv2.VideoWriter_fourcc(*'MJPG')
           self.videoWriter = cv2.VideoWriter(
             f'{self.video_path}/{name}.avi',
             fourcc,
             fps,
-            size # WARNING：尺寸必须与图片的尺寸一致，否则保存后无法播放。
+            size
           )
-        # 每一帧导入保存的视频中。WARNING：像素类型必须为uint8
+        self.logger.debug('每一帧导入保存的视频中。')
+        self.logger.debug('WARNING：像素类型必须为uint8')
         self.videoWriter.write(np.uint8(frame))
-    # 更新
     def update(self, original):
       """
       如果@nframes计数为@interval的整数倍：
@@ -197,22 +198,21 @@ class BSOFModel:
         self.fgbg = cv2.createBackgroundSubtractorMOG2()
         self.fgbg.apply(self.lastn)
       self.last = original
-    #
-    #
-    # 正式开始
-    #
-    #
+    self.logger.debug('''
+
+    正式开始
+
+    ''')
     capture, h, w, fps, count = lktools.PreProcess.video_capture_size(path, self.height)
     size = (w, h)
-    # print_info
-    print(f'''
-read {path}.
-from frame {self.frame_range[0]} to {self.frame_range[1]}.
-total {count} frames.
-''')
-    # 对每一帧
+    self.logger.info(f'''
+      read {path}.
+      from frame {self.frame_range[0]} to {self.frame_range[1]}.
+      total {count} frames.
+    ''')
+    self.logger.debug('对每一帧')
     while capture.isOpened():
-      # 判断是否循环
+      self.logger.debug('判断是否循环')
       l = loop(self, size)
       if type(l) == bool:
         if l:
@@ -220,15 +220,15 @@ total {count} frames.
         else:
           break
       frame = l
-      # 找到异常的矩形（其中第一个矩形为检测范围的矩形）
+      self.logger.debug('找到异常的矩形（其中第一个矩形为检测范围的矩形）')
       rects, binary = self.catch_abnormal(frame, size)
-      # 分类
+      self.logger.debug('分类')
       _ = self.judge(frame, rects, binary)
-      # 绘制矩形
+      self.logger.debug('绘制矩形')
       frame_rects = lktools.PreProcess.draw(frame, rects)
-      # 输出图像
+      self.logger.debug('输出图像')
       output(self, name, frame_rects, size)
-      # 更新变量
+      self.logger.debug('更新变量')
       update(self, frame)
     capture.release()
 
@@ -244,11 +244,11 @@ total {count} frames.
     lastn：       前N帧
     fgbg：        BS_MOG2模型
     """
-    # 导出视频
+    self.logger.debug('导出视频')
     if (not self.time_test) and (self.videoWriter is not None):
       self.videoWriter.release()
       self.videoWriter = None
-    # 销毁窗口
+    self.logger.debug('销毁窗口')
     if not self.linux:
       cv2.destroyAllWindows()
     self.judge_cache = []
@@ -265,6 +265,5 @@ total {count} frames.
       self.one_video(name, video)
       self.clear()
 
-# run
 if __name__ == '__main__':
   BSOFModel().run()
