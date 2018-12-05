@@ -31,7 +31,7 @@ def get_settings():
   if user_settings is not None:
     return user_settings
 
-  logger = LoggerFactory.LoggerFactory('Loader').logger
+  logger = LoggerFactory.LoggerFactory('Loader', level=logging.INFO).logger
   checker = Checker.Checker(logger)
 
   def _exist(name, containers):

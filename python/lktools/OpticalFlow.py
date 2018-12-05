@@ -2,17 +2,20 @@ import numpy as np
 import cv2
 from lktools import PreProcess
 from lktools import Timer
+from lktools import LoggerFactory
+
+logger = LoggerFactory.LoggerFactory('OpticalFlow').logger
 
 def draw_hsv(flow):
-    (h, w) = flow.shape[:2]
-    (fx, fy) = (flow[:, :, 0], flow[:, :, 1])
-    ang = np.arctan2(fy, fx) + np.pi
-    v = np.sqrt(fx * fx + fy * fy)
-    hsv = np.zeros((h, w, 3), np.uint8)
-    hsv[..., 0] = ang * (90 / np.pi)
-    hsv[..., 1] = 0xFF
-    hsv[..., 2] = np.minimum(v * 4, 0xFF)
-    return cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+  (h, w) = flow.shape[:2]
+  (fx, fy) = (flow[:, :, 0], flow[:, :, 1])
+  ang = np.arctan2(fy, fx) + np.pi
+  v = np.sqrt(fx * fx + fy * fy)
+  hsv = np.zeros((h, w, 3), np.uint8)
+  hsv[..., 0] = ang * (90 / np.pi)
+  hsv[..., 1] = 0xFF
+  hsv[..., 2] = np.minimum(v * 4, 0xFF)
+  return cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
 @Timer.timer_decorator
 def optical_flow_rects(prev, now, rect, color=(0, 0xFF, 0), thickness=4, limit_size=10, compression_ratio=1):
@@ -47,7 +50,9 @@ def optical_flow_rects(prev, now, rect, color=(0, 0xFF, 0), thickness=4, limit_s
   )
   flow = cv2.cvtColor(draw_hsv(flow), cv2.COLOR_BGR2GRAY)
   binary = cv2.threshold(flow, 25, 0xFF, cv2.THRESH_BINARY)[1]
-  # 对二值图像进行膨胀
+
+  logger.debug('对二值图像进行膨胀')
+
   binary = cv2.dilate(binary, None, iterations=2)
   _, cnts, _ = cv2.findContours(
     binary,
