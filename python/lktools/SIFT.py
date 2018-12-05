@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from lktools import Timer
+import lktools.Timer
  
 def sift_kp(image):
   gray_image = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
@@ -19,7 +19,7 @@ def get_good_match(des1,des2):
       good.append(m)
   return good
 
-@Timer.timer_decorator
+@lktools.Timer.timer_decorator
 def siftImageAlignment(img1,img2):
   _,kp1,des1 = sift_kp(img1)
   _,kp2,des2 = sift_kp(img2)

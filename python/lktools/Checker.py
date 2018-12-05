@@ -1,11 +1,11 @@
-from lktools import LoggerFactory
+import lktools.LoggerFactory
 
 class Checker:
   """
   用于类型、值合法性检查
   """
   def __init__(self, logger):
-    self.logger = LoggerFactory.LoggerFactory.getChild(logger, 'Checker')
+    self.logger = lktools.LoggerFactory.LoggerFactory.getChild(logger, 'Checker')
     self.dirty = False
     self.containers = {}
     self.asserts = {}

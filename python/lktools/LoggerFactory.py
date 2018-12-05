@@ -1,6 +1,6 @@
 import logging
 import sys
-from lktools import Loader
+import lktools.Loader
 
 class LoggerFactory:
   """
@@ -14,15 +14,15 @@ class LoggerFactory:
       但如果是从Loader中调用的Logger.init，则会循环调用，所以在这种情况下请提供level
     """
     if level is None:
-      settings = Loader.get_settings()
+      settings = lktools.Loader.get_settings()
       level = settings['debug_level']
     logger = logging.getLogger(name)
     logger.setLevel(level)
     handler = logging.StreamHandler(stream)
     handler.setLevel(level)
     formatter = logging.Formatter(
-      '%(asctime)-15s %(levelname)s %(filename)s %(lineno)d %(process)d %(name)s %(message)s',
-      '%a %d %b %Y %H:%M:%S'
+      '[%(levelname)-7s] [%(asctime)-15s] [%(filename)s: %(lineno)d, @%(process)d] %(name)s: %(message)s',
+      '%Y-%m-%d %H:%M:%S'
     )
     handler.setFormatter(formatter)
     logger.addHandler(handler)

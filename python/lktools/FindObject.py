@@ -1,11 +1,11 @@
 import cv2
-from lktools import PreProcess
-from lktools import Timer
-from lktools import LoggerFactory
+import lktools.PreProcess
+import lktools.Timer
+import lktools.LoggerFactory
 
-logger = LoggerFactory.LoggerFactory('FindObject').logger
+logger = lktools.LoggerFactory.LoggerFactory('FindObject').logger
 
-@Timer.timer_decorator
+@lktools.Timer.timer_decorator
 def findObject(img, rect):
 
   logger.debug('计算图像中目标的轮廓并且返回彩色图像')
@@ -25,7 +25,7 @@ def findObject(img, rect):
     logger.debug('该函数计算矩形的边界框')
 
     r = ((x, y), (x + w, y + h))
-    if not PreProcess.rect_in_rect(r, rect):
+    if not lktools.PreProcess.rect_in_rect(r, rect):
       continue
     rects.append((*r, (0, 0, 255), 2))
   return rects

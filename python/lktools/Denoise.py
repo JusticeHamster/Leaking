@@ -1,12 +1,12 @@
 import numpy as np
 import cv2
 import matplotlib.pyplot as plt
-from lktools import Timer
-from lktools import LoggerFactory
+import lktools.Timer
+import lktools.LoggerFactory
 
-logger = LoggerFactory.LoggerFactory('Denoise').logger
+logger = lktools.LoggerFactory.LoggerFactory('Denoise').logger
 
-@Timer.timer_decorator
+@lktools.Timer.timer_decorator
 def denoise(img, which=None):
   """
   四个不同的滤波器

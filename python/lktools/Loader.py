@@ -2,8 +2,8 @@ import json5
 import shutil
 import os
 import logging
-from lktools import LoggerFactory
-from lktools import Checker
+import lktools.LoggerFactory
+import lktools.Checker
 
 template = """{
   "path": "../video",                     // 视频路径
@@ -18,7 +18,7 @@ template = """{
   "fps": 10,                              // 保存视频帧数
   "time_debug": false,                    // 是否打印每个函数耗时
   "limit_size": 10,                       // 光流法的参数
-  "compression_ratio": 1,                 // 光流法的压缩率
+  "compression_ratio": 1.0,               // 光流法的压缩率
   "linux": false,                         // 是不是linux，linux不会执行显示相关的函数
   "sift": true,                           // 是否开启sift对齐
   "OF": true,                             // 是否开启光流法
@@ -31,8 +31,8 @@ def get_settings():
   if user_settings is not None:
     return user_settings
 
-  logger = LoggerFactory.LoggerFactory('Loader', level=logging.INFO).logger
-  checker = Checker.Checker(logger)
+  logger = lktools.LoggerFactory.LoggerFactory('Loader', level=logging.INFO).logger
+  checker = lktools.Checker.Checker(logger)
 
   def _exist(name, containers):
     item = containers['setting'].get(name)

@@ -1,10 +1,10 @@
 import time
-from lktools import Loader
-from lktools import LoggerFactory
+import lktools.Loader
+import lktools.LoggerFactory
 
-settings = Loader.get_settings()
+settings = lktools.Loader.get_settings()
 DEBUG = settings['time_debug']
-logger = LoggerFactory.LoggerFactory('Timer').logger
+logger = lktools.LoggerFactory.LoggerFactory('Timer').logger
 
 def timer_decorator(func):
   def wrapper(*args, **kwargs):

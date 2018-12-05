@@ -1,28 +1,33 @@
 # import
 import numpy as np
 import cv2
-import lktools
+import lktools.Timer
+import lktools.PreProcess
+import lktools.Denoise
+import lktools.FindObject
+import lktools.OpticalFlow
+import lktools.SIFT
 class BSOFModel:
   """
   整个模型
   """
-  def __init__(self, settings, opencv_output):
+  def __init__(self, opencv_output):
     """
     初始化必要变量
 
     初始化
-      settings：      用户输入，一个字典
       opencv_output： 是否利用cv2.imgshow()显示每一帧图片
+      settings：      一个字典，由Loader从用户自定义json文件中读取
       judge_cache：   为judge使用的cache，每个单独的视频有一个单独的cache
       videoWriter：   为视频输出提供video writer，每个单独的视频有一个writer，会在clear中release
       logger：        创建logger
 
     做一次clear
     """
-    self.settings = settings
     self.opencv_output = opencv_output
+    self.settings = lktools.Loader.get_settings()
     self.logger = lktools.LoggerFactory.LoggerFactory(
-      'BS_OF', level=settings['debug_level']
+      'BS_OF', level=self.settings['debug_level']
     ).logger
     self.judge_cache = None
     self.videoWriter = None
@@ -125,10 +130,10 @@ class BSOFModel:
     self.logger.debug('对异常框进行处理')
     if len(rects) <= 1:
       pass
-    # print(rects)
+    return None
 
   @lktools.Timer.timer_decorator
-  def one_video(self, name, path):
+  def one_video(self, path):
     """
     处理一个单独的视频
     """
@@ -158,9 +163,22 @@ class BSOFModel:
         self.lastn = frame
         return True
       return frame
-    def save(self, name, frame, frame_rects, binary):
-      pass
-    def output(self, name, frame, size):
+    def save(self, frame, frame_rects, binary, classes):
+      """
+      保存相关信息至self.now，便于其它类使用（如App）
+
+      Args:
+        frame：             当前帧
+        frame_rects：       当前帧（包含圈出异常的框）
+        binary：            当前帧的二值图像，是一个dict，有两个值{'OF', 'BS'}
+                            分别代表光流法、高斯混合模型产生的二值图像
+        classes：           当前帧的类别
+      """
+      self.now['frame']       = frame
+      self.now['frame_rects'] = frame_rects
+      self.now['binary']      = binary
+      self.now['classes']     = classes
+    def output(self, frame, size):
       """
       输出一帧
 
@@ -170,6 +188,7 @@ class BSOFModel:
         将图片写入文件，地址为@img_path，图片名为@name_@nframes.jpg
         将图片写入视频，videoWriter会初始化，地址为@video_path，视频名为@name.avi，格式为'MJPG'
       """
+      name = self.now['name']
       if self.time_test and self.opencv_output:
         cv2.imshow(f'{name}', frame)
         cv2.waitKey(self.delay)
@@ -205,11 +224,11 @@ class BSOFModel:
         self.fgbg = cv2.createBackgroundSubtractorMOG2()
         self.fgbg.apply(self.lastn)
       self.last = original
-    self.logger.debug('''
 
-    正式开始
+    self.logger.debug('正式开始')
 
-    ''')
+    self.logger.debug('首先读取视频信息，包括capture类，高度h，宽度w，fps，帧数count')
+
     capture, h, w, fps, count = lktools.PreProcess.video_capture_size(path, self.height)
     size = (w, h)
     self.logger.info(f'''
@@ -217,9 +236,13 @@ class BSOFModel:
       from frame {self.frame_range[0]} to {self.frame_range[1]}.
       total {count} frames.
     ''')
+
     self.logger.debug('对每一帧')
+
     while capture.isOpened():
+
       self.logger.debug('判断是否循环')
+
       l = loop(self, size)
       if type(l) == bool:
         if l:
@@ -227,17 +250,29 @@ class BSOFModel:
         else:
           break
       frame = l
+
       self.logger.debug('找到异常的矩形（其中第一个矩形为检测范围的矩形）')
+
       rects, binary = self.catch_abnormal(frame, size)
+
       self.logger.debug('分类')
-      _ = self.judge(frame, rects, binary)
+
+      classes = self.judge(frame, rects, binary)
+
       self.logger.debug('绘制矩形')
+
       frame_rects = lktools.PreProcess.draw(frame, rects)
+
       self.logger.debug('存储相关信息')
-      save(self, name, frame, frame_rects, binary)
+
+      save(self, frame, frame_rects, binary, classes)
+
       self.logger.debug('输出图像')
-      output(self, name, frame_rects, size)
+
+      output(self, frame_rects, size)
+
       self.logger.debug('更新变量')
+
       update(self, frame)
     capture.release()
 
@@ -273,8 +308,9 @@ class BSOFModel:
     对每一个视频进行处理
     """
     for name, video in self.videos:
-      self.one_video(name, video)
+      self.now['name'] = name
+      self.one_video(video)
       self.clear()
 
 if __name__ == '__main__':
-  BSOFModel(lktools.Loader.get_settings(), True).run()
+  BSOFModel(True).run()

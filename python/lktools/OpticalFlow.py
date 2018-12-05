@@ -1,10 +1,10 @@
 import numpy as np
 import cv2
-from lktools import PreProcess
-from lktools import Timer
-from lktools import LoggerFactory
+import lktools.PreProcess
+import lktools.Timer
+import lktools.LoggerFactory
 
-logger = LoggerFactory.LoggerFactory('OpticalFlow').logger
+logger = lktools.LoggerFactory.LoggerFactory('OpticalFlow').logger
 
 def draw_hsv(flow):
   (h, w) = flow.shape[:2]
@@ -17,7 +17,7 @@ def draw_hsv(flow):
   hsv[..., 2] = np.minimum(v * 4, 0xFF)
   return cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
-@Timer.timer_decorator
+@lktools.Timer.timer_decorator
 def optical_flow_rects(prev, now, rect, color=(0, 0xFF, 0), thickness=4, limit_size=10, compression_ratio=1):
   """
   Params:
@@ -64,7 +64,7 @@ def optical_flow_rects(prev, now, rect, color=(0, 0xFF, 0), thickness=4, limit_s
     (x, y, w, h) = cv2.boundingRect(c)
     r = np.array([[x, y], [(x + w), (y + h)]])
     r = (r / compression_ratio).astype(int)
-    if not PreProcess.rect_in_rect(r, rect):
+    if not lktools.PreProcess.rect_in_rect(r, rect):
       continue
     if w > limit_size and h > limit_size:
       rects.append((*map(tuple, r), color, thickness))
