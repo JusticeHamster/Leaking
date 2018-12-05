@@ -22,6 +22,7 @@ class BSOFModel:
       videoWriter：   为视频输出提供video writer，每个单独的视频有一个writer，会在clear中release
       logger：        创建logger
       every_frame：   回调函数，每一帧执行完后会调用，方便其它程序处理
+      thread_stop：   判断该线程是否该终止，由持有该模型的宿主修改
 
     做一次clear
     """
@@ -33,6 +34,7 @@ class BSOFModel:
     self.judge_cache = None
     self.videoWriter = None
     self.every_frame = None
+    self.thread_stop = False
     self.clear()
 
   def __getattribute__(self, name):
@@ -281,6 +283,12 @@ class BSOFModel:
       self.logger.debug('更新变量')
 
       update(self, frame)
+
+      self.logger.debug('判断该线程是否结束')
+
+      if self.thread_stop:
+        break
+
     capture.release()
 
   def clear(self):
@@ -317,6 +325,8 @@ class BSOFModel:
     for name, video in self.videos:
       self.now['name'] = name
       self.one_video(video)
+      if self.thread_stop:
+        break
       self.clear()
 
 if __name__ == '__main__':

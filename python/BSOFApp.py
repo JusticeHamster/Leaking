@@ -1,4 +1,5 @@
 from BSOFModel import BSOFModel
+import threading
 import lktools.Loader
 import lktools.LoggerFactory
 import kivy.lang
@@ -22,7 +23,6 @@ class BSOFApp(kivy.app.App):
       settings：        用户配置文件，settings.json
       logger：          日志，debug记录流程（默认不会打印），info及以上显示必要信息
       model：           BSOFModel模型
-
     """
     self.settings = lktools.Loader.get_settings()
     self.logger = lktools.LoggerFactory.LoggerFactory('App').logger
@@ -34,7 +34,8 @@ class BSOFApp(kivy.app.App):
 
     self.logger.debug('运行model')
 
-    self.model.run()
+    self.model_runner = threading.Thread(target=self.model.run)
+    self.model_runner.start()
 
   def every_frame(self):
     """
@@ -49,6 +50,10 @@ class BSOFApp(kivy.app.App):
     当然也可以直接读取self.model的变量，但请不要从这里修改
     """
     pass
+
+  def on_stop(self):
+    self.model.thread_stop = True
+    self.model_runner.join()
 
   def build(self):
     return kv
