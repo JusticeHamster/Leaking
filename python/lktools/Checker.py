@@ -4,11 +4,12 @@ class Checker:
   """
   用于类型、值合法性检查
   """
-  def __init__(self, name):
-    self.logger = LoggerFactory.LoggerFactory(name)()
+  def __init__(self, logger):
+    self.logger = LoggerFactory.LoggerFactory.getChild(logger, 'Checker')
+    self.dirty = False
     self.containers = {}
     self.asserts = {}
-  
+
   def add_container(self, name, container):
     self.containers[name] = container
 
@@ -19,14 +20,16 @@ class Checker:
     def __check(name, assert_type):
       if type(assert_type) == str:
         func = self.asserts.get(assert_type)
-        if func is None:
-          return
-        func(name, self.containers)
+        args = (name, self.containers)
       else:
         func = self.asserts.get('type')
-        if func is None:
-          return
-        func(name, assert_type, self.containers)
+        args = (name, assert_type, self.containers)
+      if func is None:
+        return
+      item, s = func(*args)
+      if not s:
+        self.logger.error(item)
+        self.dirty = True
     if isinstance(name, (tuple, list)):
       for n in name:
         __check(n, assert_type)

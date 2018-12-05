@@ -5,11 +5,11 @@ class LoggerFactory:
   """
   创建默认设置好的logger
   """
-  def __init__(self, name, stream=sys.stdout):
+  def __init__(self, name, level=logging.WARN, stream=sys.stdout):
     logger = logging.getLogger(name)
-    logger.setLevel(logging.WARN)
+    logger.setLevel(level)
     handler = logging.StreamHandler(stream)
-    handler.setLevel(logging.WARN)
+    handler.setLevel(level)
     formatter = logging.Formatter(
       '%(asctime)-15s %(levelname)s %(filename)s %(lineno)d %(process)d %(name)s %(message)s',
       '%a %d %b %Y %H:%M:%S'
@@ -18,5 +18,6 @@ class LoggerFactory:
     logger.addHandler(handler)
     self.logger = logger
 
-  def __call__(self):
-    return self.logger
+  @staticmethod
+  def getChild(logger, name):
+    return logger.getChild(name)

@@ -18,7 +18,7 @@ class BSOFModel:
 
     做一次clear
     """
-    self.logger = lktools.LoggerFactory.LoggerFactory('BS_OF')()
+    self.logger = lktools.LoggerFactory.LoggerFactory('BS_OF').logger
     self.settings = lktools.Loader.get_settings()
     self.judge_cache = None
     self.videoWriter = None

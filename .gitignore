@@ -19,6 +19,9 @@ cpp/static
 # linux nohup
 nohup.*
 
+# logger
+*.log
+
 # 设置文件
 *.settings
 settings.json

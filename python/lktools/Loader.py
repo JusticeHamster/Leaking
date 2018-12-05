@@ -30,56 +30,59 @@ def get_settings():
   if user_settings is not None:
     return user_settings
 
-  logger = LoggerFactory.LoggerFactory('Loader')()
-  checker = Checker.Checker('Loader')
+  logger = LoggerFactory.LoggerFactory('Loader').logger
+  checker = Checker.Checker(logger)
 
   def _exist(name, containers):
     item = containers['setting'].get(name)
     if item is None:
-      logger.error(f'"{name}" must exists')
-    return item
+      return f'"{name}" must exists', False
+    return item, True
 
   def _len_not_zero(name, containers):
-    item = _exist(name, containers)
-    if item is None:
-      return
+    item, s = _exist(name, containers)
+    if not s:
+      return item, False
     if len(item) == 0:
-      logger.error(f'size of "{name}" must > 0')
+      return f'size of "{name}" must > 0', False
+    return item, True
 
   def _int_plus(name, containers):
-    item = _exist(name, containers)
-    if item is None:
-      return
+    item, s = _exist(name, containers)
+    if not s:
+      return item, False
     if not (item > 0):
-      logger.error(f'"{name}" must > 0')
+      return f'"{name}" must > 0', False
+    return item, True
 
   def _range(name, containers):
-    item = _exist(name, containers)
-    if item is None:
-      return
+    item, s = _exist(name, containers)
+    if not s:
+      return item, False
     if len(item) != 2:
-      logger.error(f'range "{name}" must have and only have 2 elements')
+      return f'range "{name}" must have and only have 2 elements', False
     if item[0] < 0:
-      logger.error(f'range {name}[0] must > 0')
+      return f'range {name}[0] must > 0', False
     if item[0] > item[1]:
-      logger.error(f'range {name}[0] must <= {name}[1]')
+      return f'range {name}[0] must <= {name}[1]', False
+    return item, True
 
   def _debug_level(name, containers):
-    item = _exist(name, containers)
-    if item is None:
-      return
+    item, s = _exist(name, containers)
+    if not s:
+      return item, False
     debug_list = ('debug', 'info', 'warn', 'error', 'critical')
     if item not in debug_list:
-      logger.error(f'"{name}" was "{item}", not in {debug_list}')
+      return f'"{name}" was "{item}", not in {debug_list}', False
+    return item, True
 
   def _type(name, assert_type, containers):
-    item = _exist(name, containers)
-    if item is None:
-      return
+    item, s = _exist(name, containers)
+    if not s:
+      return item, False
     if type(item) != assert_type:
-      logger.error(
-        f'{name} must be type {assert_type} but find {type(item)}'
-      )
+      return f'{name} must be type {assert_type} but find {type(item)}', False
+    return item, True
 
   checker.add_assert('exist',       _exist        )
   checker.add_assert('not_zero',    _len_not_zero )
@@ -142,6 +145,11 @@ def get_settings():
       'limit_size', 'compression_ratio',
     ), 'plus'
   )
+
+  if checker.dirty:
+    logger.error("参数检查失败。。。请调整后再运行")
+    from sys import exit
+    exit(1)
 
   logger.info("去掉路径最后的'/'")
 
