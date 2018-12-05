@@ -21,6 +21,7 @@ class BSOFModel:
       judge_cache：   为judge使用的cache，每个单独的视频有一个单独的cache
       videoWriter：   为视频输出提供video writer，每个单独的视频有一个writer，会在clear中release
       logger：        创建logger
+      every_frame：   回调函数，每一帧执行完后会调用，方便其它程序处理
 
     做一次clear
     """
@@ -31,6 +32,7 @@ class BSOFModel:
     ).logger
     self.judge_cache = None
     self.videoWriter = None
+    self.every_frame = None
     self.clear()
 
   def __getattribute__(self, name):
@@ -270,6 +272,11 @@ class BSOFModel:
       self.logger.debug('输出图像')
 
       output(self, frame_rects, size)
+
+      self.logger.debug('回调函数')
+
+      if self.every_frame:
+        self.every_frame()
 
       self.logger.debug('更新变量')
 
