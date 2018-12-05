@@ -6,30 +6,35 @@ class BSOFModel:
   """
   整个模型
   """
-  def __init__(self, settings):
+  def __init__(self, settings, opencv_output):
     """
     初始化必要变量
 
     初始化
-      settings：    用户输入，一个字典
-      judge_cache： 为judge使用的cache，每个单独的视频有一个单独的cache
-      videoWriter： 为视频输出提供video writer，每个单独的视频有一个writer，会在clear中release
-      logger：      创建logger
+      settings：      用户输入，一个字典
+      opencv_output： 是否利用cv2.imgshow()显示每一帧图片
+      judge_cache：   为judge使用的cache，每个单独的视频有一个单独的cache
+      videoWriter：   为视频输出提供video writer，每个单独的视频有一个writer，会在clear中release
+      logger：        创建logger
 
     做一次clear
     """
-    self.logger = lktools.LoggerFactory.LoggerFactory('BS_OF').logger
     self.settings = settings
+    self.opencv_output = opencv_output
+    self.logger = lktools.LoggerFactory.LoggerFactory(
+      'BS_OF', level=settings['debug_level']
+    ).logger
     self.judge_cache = None
     self.videoWriter = None
     self.clear()
 
   def __getattribute__(self, name):
     """
-    如果self.NAME访问时，self不含属性NAME，则会在settings（配置文件json）中查找。
-    所以只要self和settings中含有同名属性就会报错。（详见Loader.py template的说明）
+    为了方便访问setting的内容，做了以下修改：
+      如果self.NAME访问时，self不含属性NAME，则会在settings中查找。
+      所以只要self和settings中含有同名属性就会报错。
 
-    请修复。
+    请避免传入的settings与self中由同名property。
     """
     try:
       obj = super().__getattribute__(name)
@@ -153,6 +158,8 @@ class BSOFModel:
         self.lastn = frame
         return True
       return frame
+    def save(self, name, frame, frame_rects, binary):
+      pass
     def output(self, name, frame, size):
       """
       输出一帧
@@ -163,7 +170,7 @@ class BSOFModel:
         将图片写入文件，地址为@img_path，图片名为@name_@nframes.jpg
         将图片写入视频，videoWriter会初始化，地址为@video_path，视频名为@name.avi，格式为'MJPG'
       """
-      if self.time_test:
+      if self.time_test and self.opencv_output:
         cv2.imshow(f'{name}', frame)
         cv2.waitKey(self.delay)
       else:
@@ -226,6 +233,8 @@ class BSOFModel:
       _ = self.judge(frame, rects, binary)
       self.logger.debug('绘制矩形')
       frame_rects = lktools.PreProcess.draw(frame, rects)
+      self.logger.debug('存储相关信息')
+      save(self, name, frame, frame_rects, binary)
       self.logger.debug('输出图像')
       output(self, name, frame_rects, size)
       self.logger.debug('更新变量')
@@ -243,19 +252,21 @@ class BSOFModel:
     last：        上一帧
     lastn：       前N帧
     fgbg：        BS_MOG2模型
+    now：         存储处理过程的当前帧等信息，是dict
     """
     self.logger.debug('导出视频')
     if (not self.time_test) and (self.videoWriter is not None):
       self.videoWriter.release()
       self.videoWriter = None
     self.logger.debug('销毁窗口')
-    if not self.linux:
+    if self.opencv_output and not self.linux:
       cv2.destroyAllWindows()
     self.judge_cache = []
     self.nframes = 0
     self.last = None
     self.lastn = None
     self.fgbg = cv2.createBackgroundSubtractorMOG2()
+    self.now = {}
 
   def run(self):
     """
@@ -266,4 +277,4 @@ class BSOFModel:
       self.clear()
 
 if __name__ == '__main__':
-  BSOFModel(lktools.Loader.get_settings()).run()
+  BSOFModel(lktools.Loader.get_settings(), True).run()

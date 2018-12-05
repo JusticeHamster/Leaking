@@ -7,7 +7,7 @@ from lktools import Checker
 
 template = """{
   "path": "../video",                     // 视频路径
-  "videos": [],                           // 视频列表
+  "videos": [],                           // 视频列表，可以写成["all"]，表示读取所有文件
   "delay": 10,                            // 视频播放延迟，用于cv2.waitKey第一个参数
   "height": 480,                          // 视频高度限定，宽度会自动计算
   "frame_range": [0, 100],                // 取[a, b]帧
@@ -170,12 +170,21 @@ def get_settings():
     path = path[:-1]
     user_settings['path'] = path
 
-  logger.debug('将设置中的文件转换为绝对地址')
+  logger.debug('将设置中的文件转换为绝对地址，检查videos是否为“all”，是的话读入所有文件')
 
-  user_settings['videos'] = tuple(map(
-    lambda n: (n.split('.')[0], f'{path}/{n}'),
-    user_settings['videos']
-  ))
+  videos = user_settings['videos']
+
+  if len(videos) == 1 and videos[0] == 'all':
+    videos = []
+    for r, _, fs in os.walk(path):
+      for f in fs:
+        videos.append((f.split('.')[0], os.path.join(r, f)))
+    user_settings['videos'] = videos
+  else:
+    user_settings['videos'] = tuple(map(
+      lambda n: (n.split('.')[0], f'{path}/{n}'),
+      videos
+    ))
 
   logger.debug('测试的情况下该返回了')
 
