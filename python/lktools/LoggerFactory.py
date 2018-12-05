@@ -13,9 +13,9 @@ class LoggerFactory:
 
       但如果是从Loader中调用的Logger.init，则会循环调用，所以在这种情况下请提供level
     """
-    self.settings = Loader.get_settings()
     if level is None:
-      level = self.settings['debug_level']
+      settings = Loader.get_settings()
+      level = settings['debug_level']
     logger = logging.getLogger(name)
     logger.setLevel(level)
     handler = logging.StreamHandler(stream)
