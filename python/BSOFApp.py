@@ -5,11 +5,6 @@ import lktools.LoggerFactory
 import kivy.lang
 import kivy.app
 
-kv = kivy.lang.Builder.load_string('''
-Button:
-  text: "I was created by kv codes"
-''')
-
 class BSOFApp(kivy.app.App):
   """
   App GUI for BSOFModel
@@ -56,7 +51,7 @@ class BSOFApp(kivy.app.App):
     self.model_runner.join()
 
   def build(self):
-    return kv
+    return kivy.lang.Builder.load_file('views/BSOFApp.kv')
 
 if __name__ == '__main__':
   BSOFApp().run()
