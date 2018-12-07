@@ -178,6 +178,8 @@ def get_settings():
     videos = []
     for r, _, fs in os.walk(path):
       for f in fs:
+        if f == '.DS_Store':
+          continue
         videos.append((f.split('.')[0], os.path.join(r, f)))
     user_settings['videos'] = videos
   else:
