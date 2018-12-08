@@ -1,4 +1,42 @@
 #:kivy 1.0
 
-Button:
-  text: "I was created by kv codes"
+MyForm:        # 顶级GUI部件类
+<MyForm>:      # 定义MyForm类
+  now_image: now_image
+  test_label: label1
+  BoxLayout:
+    orientation: "vertical"
+
+    GridLayout:
+      size_hint: (1,.7)
+      cols: 2
+      Label:
+        size_hint_y: None
+        height: 100
+        text: "now image"
+      Label:
+        id: label1
+        size_hint_y: None
+        height: 100
+        text: "abnormal image"
+      Image:
+        id: now_image
+        source: "/Users/wzy/Pictures/top.png"
+      
+      Image:
+        id: tech_image
+        source: "/Users/wzy/Pictures/bottom.png" 
+    BoxLayout:
+      size_hint: (1,.3)
+      # row_force_default: True
+      # row_default_height: 250
+      Label:
+        size_hint: (.7,1)
+        id: model_params
+        text: "show all params in this Label"
+      Button:
+        size_hint: (.3,1) 
+        id: button1
+        on_press:app.test_bind(now_image)
+        text: "please press me!"
+      
