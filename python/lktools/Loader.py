@@ -32,6 +32,12 @@ def get_settings():
     return user_settings
 
   logger = lktools.LoggerFactory.LoggerFactory('Loader', level=logging.INFO).logger
+
+  if not os.path.exists('settings.json'):
+    logger.error('settings.json not found')
+    from sys import exit
+    exit(1)
+
   checker = lktools.Checker.Checker(logger)
 
   def _exist(name, containers):
