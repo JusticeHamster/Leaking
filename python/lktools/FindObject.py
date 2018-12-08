@@ -6,13 +6,10 @@ import lktools.LoggerFactory
 logger = lktools.LoggerFactory.LoggerFactory('FindObject').logger
 
 @lktools.Timer.timer_decorator
-def findObject(img, rect):
+def findObject(binary, rect):
 
   logger.debug('计算图像中目标的轮廓并且返回彩色图像')
-
-  _, binary = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
   _, contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-  img = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
   rects = []
   for c in contours:
 

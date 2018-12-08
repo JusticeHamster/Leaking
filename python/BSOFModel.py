@@ -93,15 +93,20 @@ class BSOFModel:
       frame, *_ = lktools.SIFT.siftImageAlignment(self.lastn, frame)
     self.logger.debug('MOG2 BS')
     frame = self.fgbg.apply(frame)
+    self.logger.debug('Binary')
+    _, binary = cv2.threshold(frame, 127, 255, cv2.THRESH_BINARY)
+    # 自适应阈值辣鸡
+    # binary = cv2.adaptiveThreshold(frame,255,cv2.ADAPTIVE_THRESH_MEAN_C,\
+    #                 cv2.THRESH_BINARY,3,5)
     self.logger.debug('Denoise')
-    frame = lktools.Denoise.denoise(frame, 'bilater')
-    frame = lktools.Denoise.denoise(frame, 'morph_open')
-    frame = lktools.Denoise.denoise(frame, 'dilation')
-    frame = lktools.Denoise.denoise(frame, 'dilation')
-    frame = lktools.Denoise.denoise(frame, 'erode')
-    BS_binary = frame
+    binary = lktools.Denoise.denoise(binary, 'bilater')
+    binary = lktools.Denoise.denoise(binary, 'morph_open')
+    binary = lktools.Denoise.denoise(binary, 'dilation')
+    binary = lktools.Denoise.denoise(binary, 'dilation')
+    binary = lktools.Denoise.denoise(binary, 'erode')
+    BS_binary = binary
     self.logger.debug('findObject')
-    bs_rects = lktools.FindObject.findObject(frame, rect)
+    bs_rects = lktools.FindObject.findObject(binary, rect)
     self.logger.debug('rects')
     rects = [rect]
     self.logger.debug('rects')
@@ -195,6 +200,7 @@ class BSOFModel:
       name = self.now['name']
       if self.time_test and self.opencv_output:
         cv2.imshow(f'{name}', frame)
+        cv2.imshow(f'{name} gray', self.now['binary']['BS'])
         cv2.waitKey(self.delay)
       else:
         self.logger.debug('每一帧写入图片中')

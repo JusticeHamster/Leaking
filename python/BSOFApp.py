@@ -56,10 +56,9 @@ class BSOFApp(kivy.app.App):
     当然也可以直接读取self.model的变量，但请不要从这里修改
     """
     # MyForm.update(self.model.now['now_img_path'])
-      return
-    path = self.model.now['now_img_path']
+    # path = self.model.now['now_img_path']
     # print(path)
-    self.Form.update(path)
+    # self.Form.update(path)
     pass
 
   def on_stop(self):
