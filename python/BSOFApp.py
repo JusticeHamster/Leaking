@@ -9,18 +9,18 @@ import kivy.app
 # from kivy.app import App
 
 class MyForm(BoxLayout):  # 此处类定义虽然为空，但会将my.kv的GUI定义的相关“程序”引入，即相当于在此定义
-  def test_bind(self):
-    print("?????????????")
-    self.ids.now_image.source="/Users/wzy/Pictures/bottom.png"
-    # now_image.
-  
+  def update(self,img_path):
+    print(img_path)
+    #BUG: why segmentation fault?
+    self.ids.now_image.source = img_path
+    self.ids.now_image.reload()
+  pass
 
 class BSOFApp(kivy.app.App):
   """
   App GUI for BSOFModel
   """
-  now_image = ObjectProperty()
-  test_label = ObjectProperty()
+
   def on_start(self):
     """
     准备，并开始
@@ -43,12 +43,6 @@ class BSOFApp(kivy.app.App):
     self.model_runner = threading.Thread(target=self.model.run)
     self.model_runner.start()
 
-
-
-  def test_bind(self,img):
-    # print(self.now_image.source)
-    img.source = "/Users/wzy/Pictures/bottom.png" 
-
   def every_frame(self):
     """
     每一帧都会调用该函数
@@ -61,7 +55,11 @@ class BSOFApp(kivy.app.App):
 
     当然也可以直接读取self.model的变量，但请不要从这里修改
     """
-    
+    # MyForm.update(self.model.now['now_img_path'])
+      return
+    path = self.model.now['now_img_path']
+    # print(path)
+    self.Form.update(path)
     pass
 
   def on_stop(self):
@@ -69,7 +67,8 @@ class BSOFApp(kivy.app.App):
     self.model_runner.join()
 
   def build(self):
-    return kivy.lang.Builder.load_file('views/BSOFApp.kv')
+    self.Form = kivy.lang.Builder.load_file('views/BSOFApp.kv')
+    return self.Form
 
 if __name__ == '__main__':
   BSOFApp().run()

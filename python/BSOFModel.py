@@ -202,6 +202,7 @@ class BSOFModel:
           f'{self.img_path}/{name}_{self.nframes}.jpg',
           frame
         )
+        self.now['now_img_path'] = f'{self.img_path}/{name}_{self.nframes}.jpg'
         self.logger.debug('将图像保存为视频')
         self.logger.debug('WARNING：尺寸必须与图片的尺寸一致，否则保存后无法播放。')
         if self.videoWriter is None:
