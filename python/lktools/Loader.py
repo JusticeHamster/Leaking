@@ -25,8 +25,8 @@ template = """{
   "frame_range": [0, 100],                // 取[a, b]帧
   "img_path": "images.tmp",               // 图片存取路径
   "video_path": "videos.tmp",             // 视频存取路径
-  "time_test": false,                     // 是否测试时间，会关闭所有输出
-  "interval": 10,                         // 用前N帧图片作为修正的标准（由于命名冲突，lastn修改为interval）
+  "file_output": false,                   // 是否输出到文件夹
+  "interval": 10,                         // 用前N帧图片作为修正的标准
   "fps": 10,                              // 保存视频帧数
   "time_debug": false,                    // 是否打印每个函数耗时
   "limit_size": 10,                       // 光流法的参数
@@ -141,7 +141,7 @@ def get_settings():
   )
   checker.check(
     (
-      'time_test', 'time_debug',
+      'file_output', 'time_debug',
       'linux', 'sift', 'OF',
     ), bool
   )
@@ -215,7 +215,7 @@ def get_settings():
 
   logger.debug('清空输出文件夹')
 
-  if not user_settings['time_test']:
+  if user_settings['file_output']:
     img_path = user_settings['img_path']
     if os.path.exists(img_path):
       shutil.rmtree(img_path)

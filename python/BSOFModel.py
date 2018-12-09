@@ -200,18 +200,14 @@ class BSOFModel:
       """
       输出一帧
 
-      如果是要实时观察@time_test：
-        显示一个新窗口，名为视频名称，将图片显示，其中延迟为@delay
-      否则：
+      如果是要写入文件@file_output：
         将图片写入文件，地址为@img_path，图片名为@name_@nframes.jpg
         将图片写入视频，videoWriter会初始化，地址为@video_path，视频名为@name.avi，格式为'MJPG'
+      否则，如果要打印在opencv窗口@opencv_output：
+        显示一个新窗口，名为视频名称，将图片显示，其中延迟为@delay
       """
       name = self.now['name']
-      if self.time_test and self.opencv_output:
-        cv2.imshow(f'{name}', frame)
-        cv2.imshow(f'{name}_gray_BS', self.now['binary']['BS'])
-        cv2.waitKey(self.delay)
-      else:
+      if self.file_output:
         self.logger.debug('每一帧写入图片中')
 
         now_img_path = f'{self.img_path}/{name}_{self.nframes}.jpg'
@@ -234,6 +230,10 @@ class BSOFModel:
         self.logger.debug('WARNING：像素类型必须为uint8')
 
         self.videoWriter.write(np.uint8(frame))
+      elif self.opencv_output:
+        cv2.imshow(f'{name}', frame)
+        cv2.imshow(f'{name}_gray_BS', self.now['binary']['BS'])
+        cv2.waitKey(self.delay)
     def update(self, original):
       """
       如果@nframes计数为@interval的整数倍：
@@ -330,7 +330,7 @@ class BSOFModel:
     now：         存储处理过程的当前帧等信息，是dict
     """
     self.logger.debug('导出视频')
-    if (not self.time_test) and (self.videoWriter is not None):
+    if self.file_output and (self.videoWriter is not None):
       self.videoWriter.release()
       self.videoWriter = None
     self.logger.debug('销毁窗口')
