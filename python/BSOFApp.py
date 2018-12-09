@@ -84,7 +84,7 @@ class BSOFApp(kivy.app.App):
       self.logger.debug(f'处理{id}:')
       self.logger.debug('更新数据')
       data = data[::-1]
-      texture.blit_buffer(data.tostring(), colorfmt='rgb', bufferfmt='ubyte')
+      texture.blit_buffer(data.tostring(), colorfmt='bgr', bufferfmt='ubyte')
       self.logger.debug('刷新')
       self.form.ids[id].canvas.ask_update()
     self.logger.debug(f'------------- {delta_time}')
@@ -116,7 +116,7 @@ class BSOFApp(kivy.app.App):
         return
       self.logger.debug('创建新的texture，并存入缓存')
       size = self.model.now['frame'].shape[1::-1]
-      texture = kivy.graphics.texture.Texture.create(size=size, colorfmt='rgb')
+      texture = kivy.graphics.texture.Texture.create(size=size, colorfmt='bgr')
       self.textures[id] = texture
       self.logger.debug('找到id对应的widget，绑定texture，不存在就返回')
       widget = self.form.ids.get(id)
