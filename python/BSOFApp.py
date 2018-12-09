@@ -123,8 +123,6 @@ class BSOFApp(kivy.app.App):
       if widget is None:
         return
       with widget.canvas:
-        self.logger.info('当前size为：')
-        self.logger.info(widget.size)
         kivy.graphics.Rectangle(texture=texture, size=widget.size, pos=widget.pos)
     self.logger.debug('------------- 初始化texture')
     try_create_texture(self, 'now_image')
@@ -171,6 +169,11 @@ if __name__ == '__main__':
     用户键盘打断
     """
     app.on_stop()
+  except UnicodeDecodeError as ude:
+    """
+    .kv文件的Unicode的问题，kivy的load_file不支持Unicode。
+    """
+    lktools.LoggerFactory.LoggerFactory.default().error(ude)
   except:
     """
     其它error

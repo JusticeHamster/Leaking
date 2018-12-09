@@ -10,6 +10,10 @@ import sys
 lktools
 """
 import lktools.Loader
+"""
+lock
+"""
+import threading
 
 class LoggerFactory:
   """
@@ -40,3 +44,17 @@ class LoggerFactory:
   @staticmethod
   def getChild(logger, name):
     return logger.getChild(name)
+
+  """
+  default Logger的线程锁
+  """
+  lock = threading.Lock()
+  __default_logger = None
+
+  @staticmethod
+  def default():
+    LoggerFactory.lock.acquire()
+    if LoggerFactory.__default_logger is None:
+      LoggerFactory.__default_logger = LoggerFactory('Default').logger
+    LoggerFactory.lock.release()
+    return LoggerFactory.__default_logger
