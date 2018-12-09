@@ -6,7 +6,6 @@ import lktools.Loader
 import lktools.LoggerFactory
 import kivy.lang
 import kivy.app
-# from kivy.app import App
 
 class MyForm(BoxLayout):  # 此处类定义虽然为空，但会将my.kv的GUI定义的相关“程序”引入，即相当于在此定义
   def update(self,img_path):
@@ -14,7 +13,6 @@ class MyForm(BoxLayout):  # 此处类定义虽然为空，但会将my.kv的GUI�
     #BUG: why segmentation fault?
     self.ids.now_image.source = img_path
     self.ids.now_image.reload()
-  pass
 
 class BSOFApp(kivy.app.App):
   """
@@ -55,18 +53,15 @@ class BSOFApp(kivy.app.App):
 
     当然也可以直接读取self.model的变量，但请不要从这里修改
     """
-    # MyForm.update(self.model.now['now_img_path'])
-    # path = self.model.now['now_img_path']
-    # print(path)
-    # self.Form.update(path)
-    pass
+    path = self.model.now['now_img_path']
+    self.Form.update(path)
 
   def on_stop(self):
     self.model.thread_stop = True
     self.model_runner.join()
 
   def build(self):
-    self.Form = kivy.lang.Builder.load_file('views/BSOFApp.kv')
+    self.Form = kivy.lang.Builder.load_file('resources/views/BSOFApp.kv')
     return self.Form
 
 if __name__ == '__main__':

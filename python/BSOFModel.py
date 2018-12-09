@@ -204,13 +204,14 @@ class BSOFModel:
         cv2.waitKey(self.delay)
       else:
         self.logger.debug('每一帧写入图片中')
-        cv2.imwrite(
-          f'{self.img_path}/{name}_{self.nframes}.jpg',
-          frame
-        )
-        self.now['now_img_path'] = f'{self.img_path}/{name}_{self.nframes}.jpg'
+
+        now_img_path = f'{self.img_path}/{name}_{self.nframes}.jpg'
+        cv2.imwrite(now_img_path, frame)
+        self.now['now_img_path'] = now_img_path
+
         self.logger.debug('将图像保存为视频')
         self.logger.debug('WARNING：尺寸必须与图片的尺寸一致，否则保存后无法播放。')
+
         if self.videoWriter is None:
           fourcc = cv2.VideoWriter_fourcc(*'MJPG')
           self.videoWriter = cv2.VideoWriter(
@@ -219,8 +220,10 @@ class BSOFModel:
             fps,
             size
           )
+
         self.logger.debug('每一帧导入保存的视频中。')
         self.logger.debug('WARNING：像素类型必须为uint8')
+
         self.videoWriter.write(np.uint8(frame))
     def update(self, original):
       """
