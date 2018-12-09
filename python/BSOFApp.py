@@ -89,4 +89,11 @@ class BSOFApp(kivy.app.App):
     return self.Form
 
 if __name__ == '__main__':
-  BSOFApp().run()
+  app = BSOFApp()
+  try:
+    app.run()
+  except KeyboardInterrupt as it:
+    """
+    用户键盘打断
+    """
+    app.on_stop()
