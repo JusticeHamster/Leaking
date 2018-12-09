@@ -185,13 +185,13 @@ class BSOFModel:
       保存相关信息至self.now，便于其它类使用（如App）
 
       Args:
-        frame：             当前帧
+        frame：             当前帧的uint8拷贝
         frame_rects：       当前帧（包含圈出异常的框）
         binary：            当前帧的二值图像，是一个dict，有两个值{'OF', 'BS'}
                             分别代表光流法、高斯混合模型产生的二值图像
         classes：           当前帧的类别
       """
-      self.now['frame']       = frame
+      self.now['frame']       = np.uint8(frame)
       self.now['frame_rects'] = frame_rects
       self.now['binary']      = binary
       self.now['classes']     = classes

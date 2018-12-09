@@ -7,6 +7,10 @@ Multi-Thread
 """
 import threading
 """
+numpy
+"""
+import numpy
+"""
 lktools
 """
 import lktools.Loader
@@ -16,14 +20,16 @@ kivy related
 """
 import kivy.lang
 import kivy.app
+import kivy.graphics
+import kivy.graphics.texture
 import kivy.uix.boxlayout
 from kivy.properties import ObjectProperty, StringProperty
 
+texture = None
+
 class MyForm(kivy.uix.boxlayout.BoxLayout):  # 此处类定义虽然为空，但会将my.kv的GUI定义的相关“程序”引入，即相当于在此定义
   def update(self, img_path):
-    #BUG: why segmentation fault?
-    self.ids.now_image.source = img_path
-    self.ids.now_image.reload()
+    pass
 
 class BSOFApp(kivy.app.App):
   """
@@ -58,14 +64,21 @@ class BSOFApp(kivy.app.App):
 
     从self.model.now中获取model信息：
       name：          当前文件名称
-      frame：         当前帧
+      frame：         当前帧的uint8拷贝
       frame_rects：   当前帧（框出异常）
       binary：        二值图像（是一个dict，包含{'OF', 'BS'}两种，详情见BSOFModel）
 
     当然也可以直接读取self.model的变量，但请不要从这里修改
     """
-    path = self.model.now['now_img_path']
-    self.Form.update(path)
+    frame = self.model.now['frame']
+    size = frame.shape[1::-1]
+    global texture
+    if texture is None:
+      texture = kivy.graphics.texture.Texture.create(size=size, colorfmt='rgb')
+      with self.Form.ids.now_image.canvas:
+        kivy.graphics.Rectangle(texture=texture, size=size)
+    texture.blit_buffer(frame.tostring(), colorfmt='rgb', bufferfmt='ubyte')
+    self.Form.ids.now_image.canvas.ask_update()
 
   def on_stop(self):
     self.model.thread_stop = True

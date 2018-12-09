@@ -16,17 +16,13 @@ MyForm:        # top GUI component class
         size_hint_y: None
         height: 100
         text: "abnormal image"
-      Image:
+      Widget:
         id: now_image
-        source: "/Users/wzy/Pictures/top.png"
-
-      Image:
+      Widget:
         id: abnormal_image
-        source: "/Users/wzy/Pictures/dust_high_2.jpg" 
+
     BoxLayout:
       size_hint: (1,.3)
-      # row_force_default: True
-      # row_default_height: 250
       Label:
         size_hint: (.7,1)
         id: model_params
@@ -34,5 +30,4 @@ MyForm:        # top GUI component class
       Button:
         size_hint: (.3,1) 
         id: button1
-        # on_press:app.test_bind(now_image)
         text: "please press me!"
