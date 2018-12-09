@@ -92,7 +92,7 @@ if __name__ == '__main__':
   app = BSOFApp()
   try:
     app.run()
-  except KeyboardInterrupt as it:
+  except KeyboardInterrupt:
     """
     用户键盘打断
     """
