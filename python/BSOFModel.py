@@ -24,13 +24,14 @@ class BSOFModel:
     初始化必要变量
 
     初始化
-      opencv_output： 是否利用cv2.imgshow()显示每一帧图片
-      settings：      一个字典，由Loader从用户自定义json文件中读取
-      judge_cache：   为judge使用的cache，每个单独的视频有一个单独的cache
-      videoWriter：   为视频输出提供video writer，每个单独的视频有一个writer，会在clear中release
-      logger：        创建logger
-      every_frame：   回调函数，每一帧执行完后会调用，方便其它程序处理
-      thread_stop：   判断该线程是否该终止，由持有该模型的宿主修改
+      opencv_output：       是否利用cv2.imgshow()显示每一帧图片
+      settings：            一个字典，由Loader从用户自定义json文件中读取
+      judge_cache：         为judge使用的cache，每个单独的视频有一个单独的cache
+      videoWriter：         为视频输出提供video writer，每个单独的视频有一个writer，会在clear中release
+      logger：              创建logger
+      every_frame：         回调函数，每一帧执行完后会调用，方便其它程序处理
+      before_every_video：  回调函数，每个视频开始前调用，方便其它程序处理
+      thread_stop：         判断该线程是否该终止，由持有该模型的宿主修改
 
     做一次clear
     """
@@ -42,8 +43,9 @@ class BSOFModel:
     self.judge_cache = None
     self.videoWriter = None
     self.every_frame = None
+    self.before_every_video = None
     self.thread_stop = False
-    self.clear()
+    self.setup()
 
   def __getattribute__(self, name):
     """
@@ -117,7 +119,6 @@ class BSOFModel:
     bs_rects = lktools.FindObject.findObject(binary, rect)
     self.logger.debug('rects')
     rects = [rect]
-    self.logger.debug('rects')
     rects.extend(bs_rects)
     if self.OF:
       rects.extend(flow_rects)
@@ -247,7 +248,11 @@ class BSOFModel:
         self.fgbg.apply(self.lastn)
       self.last = original
 
-    self.logger.debug('正式开始')
+    self.logger.debug('----------------------')
+    self.logger.debug('首先是看是否有初始化动作')
+
+    if self.before_every_video:
+      self.before_every_video()
 
     self.logger.debug('首先读取视频信息，包括capture类，高度h，宽度w，fps，帧数count')
 
@@ -309,6 +314,8 @@ class BSOFModel:
 
     capture.release()
 
+    self.clear()
+
   def clear(self):
     """
     每个视频处理完之后对相关变量的清理
@@ -336,6 +343,12 @@ class BSOFModel:
     self.fgbg = cv2.createBackgroundSubtractorMOG2()
     self.now = {}
 
+  def setup(self):
+    """
+    等价于clear，为了接口分离
+    """
+    self.clear()
+
   def run(self):
     """
     对每一个视频进行处理
@@ -343,7 +356,6 @@ class BSOFModel:
     for name, video in self.videos:
       self.now['name'] = name
       self.one_video(video)
-      self.clear()
       if self.thread_stop:
         break
 

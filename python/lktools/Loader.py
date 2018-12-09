@@ -35,6 +35,7 @@ template = """{
   "sift": true,                           // 是否开启sift对齐
   "OF": true,                             // 是否开启光流法
   "debug_level": "info",                  // 等级debug -> info -> warn -> error -> critical，会打印该级别级以上的Logger信息
+  "app_fps": 60,                          // app刷新率
 }"""
 user_settings = None
 
@@ -141,13 +142,13 @@ def get_settings():
   checker.check(
     (
       'time_test', 'time_debug',
-      'linux', 'sift', 'OF'
+      'linux', 'sift', 'OF',
     ), bool
   )
   checker.check(
     (
       'delay', 'height', 'interval',
-      'fps', 'limit_size'
+      'fps', 'limit_size', 'app_fps',
     ), int
   )
   checker.check('compression_ratio', float)
@@ -162,6 +163,7 @@ def get_settings():
       'delay', 'height',
       'interval', 'fps',
       'limit_size', 'compression_ratio',
+      'app_fps',
     ), 'plus'
   )
 
