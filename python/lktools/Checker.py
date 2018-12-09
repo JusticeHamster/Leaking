@@ -1,3 +1,6 @@
+"""
+lktools
+"""
 import lktools.LoggerFactory
 
 class Checker:

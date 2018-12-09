@@ -1,4 +1,10 @@
+"""
+time
+"""
 import time
+"""
+lktools
+"""
 import lktools.Loader
 import lktools.LoggerFactory
 

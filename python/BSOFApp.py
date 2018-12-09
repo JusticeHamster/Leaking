@@ -1,15 +1,26 @@
+"""
+Model Class
+"""
 from BSOFModel import BSOFModel
-from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import ObjectProperty, StringProperty
+"""
+Multi-Thread
+"""
 import threading
+"""
+lktools
+"""
 import lktools.Loader
 import lktools.LoggerFactory
+"""
+kivy related
+"""
 import kivy.lang
 import kivy.app
+import kivy.uix.boxlayout
+from kivy.properties import ObjectProperty, StringProperty
 
-class MyForm(BoxLayout):  # 此处类定义虽然为空，但会将my.kv的GUI定义的相关“程序”引入，即相当于在此定义
-  def update(self,img_path):
-    print(img_path)
+class MyForm(kivy.uix.boxlayout.BoxLayout):  # 此处类定义虽然为空，但会将my.kv的GUI定义的相关“程序”引入，即相当于在此定义
+  def update(self, img_path):
     #BUG: why segmentation fault?
     self.ids.now_image.source = img_path
     self.ids.now_image.reload()
