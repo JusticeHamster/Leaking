@@ -343,9 +343,9 @@ class BSOFModel:
     for name, video in self.videos:
       self.now['name'] = name
       self.one_video(video)
+      self.clear()
       if self.thread_stop:
         break
-      self.clear()
 
 if __name__ == '__main__':
   BSOFModel(True).run()
