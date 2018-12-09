@@ -46,12 +46,14 @@ class BSOFApp(kivy.app.App):
       model：           BSOFModel模型
       textures：        缓存
       clock：           定时调用
+      dirty：           判断是否处理完一帧，防止重复计算
     """
     self.settings = lktools.Loader.get_settings()
     self.logger = lktools.LoggerFactory.LoggerFactory('App').logger
     self.model = BSOFModel(False)
     self.textures = {}
     self.clock = kivy.clock.Clock.schedule_interval(self.on_clock, 1 / self.settings['app_fps'])
+    self.dirty = True
 
     self.logger.debug('设置回调函数')
 
@@ -73,6 +75,8 @@ class BSOFApp(kivy.app.App):
     由settings.json中的app_fps指定
     """
     self.logger.debug(f'on_clock: {delta_time}')
+    if not self.dirty:
+      return
     def update(self, data, id):
       data = self.model.now.get(data)
       if data is None:
@@ -88,6 +92,7 @@ class BSOFApp(kivy.app.App):
       self.form.ids[id].canvas.ask_update()
     self.logger.debug('-------------')
     update(self, 'frame', 'now_image')
+    self.dirty = False
 
   def every_frame(self):
     """
@@ -121,6 +126,7 @@ class BSOFApp(kivy.app.App):
     self.logger.debug('-------------')
     self.logger.debug('初始化texture')
     try_create_texture(self, 'now_image')
+    self.dirty = True
 
   def before_every_video(self):
     """
