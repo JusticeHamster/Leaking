@@ -46,7 +46,7 @@ class BSOFApp(kivy.app.App):
       model：           BSOFModel模型
       textures：        缓存
       clock：           定时调用
-      dirty：           判断是否处理完一帧，防止重复计算
+      dirty：           判断是否处理完一帧，防止定时调用重复计算
     """
     self.settings = lktools.Loader.get_settings()
     self.logger = lktools.LoggerFactory.LoggerFactory('App').logger
@@ -74,9 +74,6 @@ class BSOFApp(kivy.app.App):
 
     由settings.json中的app_fps指定
     """
-    self.logger.debug(f'on_clock: {delta_time}')
-    if not self.dirty:
-      return
     def update(self, data, id):
       data = self.model.now.get(data)
       if data is None:
@@ -90,8 +87,12 @@ class BSOFApp(kivy.app.App):
       texture.blit_buffer(data.tostring(), colorfmt='rgb', bufferfmt='ubyte')
       self.logger.debug('刷新')
       self.form.ids[id].canvas.ask_update()
-    self.logger.debug('-------------')
+    self.logger.debug(f'------------- {delta_time}')
+    self.logger.debug('如果这一帧已经刷新过了，就不要再次刷新了')
+    if not self.dirty:
+      return
     update(self, 'frame', 'now_image')
+    self.logger.debug('已刷新')
     self.dirty = False
 
   def every_frame(self):
@@ -123,9 +124,9 @@ class BSOFApp(kivy.app.App):
         return
       with widget.canvas:
         kivy.graphics.Rectangle(texture=texture, size=size)
-    self.logger.debug('-------------')
-    self.logger.debug('初始化texture')
+    self.logger.debug('------------- 初始化texture')
     try_create_texture(self, 'now_image')
+    self.logger.debug('需刷新')
     self.dirty = True
 
   def before_every_video(self):
