@@ -2,32 +2,36 @@
 
 MyForm:        # top GUI component class
 <MyForm>:      # define MyForm class
+  # BoxLayout:
+  orientation: "vertical"
+
   BoxLayout:
-    orientation: "vertical"
-
-    GridLayout:
-      size_hint: (1,.7)
-      cols: 2
-      Label:
-        size_hint_y: None
-        height: 100
-        text: "now image"
-      Label:
-        size_hint_y: None
-        height: 100
-        text: "abnormal image"
-      Widget:
-        id: now_image
-      Widget:
-        id: abnormal_image
-
+    size_hint: (1,.85)
+    #左侧正常帧
     BoxLayout:
-      size_hint: (1,.3)
+      orientation: "vertical"
       Label:
-        size_hint: (.7,1)
-        id: model_params
-        text: "show all params in this Label"
-      Button:
-        size_hint: (.3,1) 
-        id: button1
-        text: "please press me!"
+        size_hint: (1,.1)
+        text: "now image"
+      Widget:
+        size_hint: (1,.9)
+        id: now_image
+    #右侧异常帧
+    BoxLayout:
+      orientation: "vertical"
+      Label:
+        size_hint: (1,.1)
+        text: "now image"
+      Widget:
+        size_hint: (1,.9)
+        id: abnormal_image
+  BoxLayout:
+    size_hint: (1,.15)
+    Label:
+      size_hint: (.7,1)
+      id: model_params
+      text: "show all params in this Label"
+    Button:
+      size_hint: (.3,1) 
+      id: button1
+      text: "please press me!"

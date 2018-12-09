@@ -14,7 +14,7 @@ logger = lktools.LoggerFactory.LoggerFactory('FindObject').logger
 @lktools.Timer.timer_decorator
 def findObject(binary, rect):
 
-  logger.debug('计算图像中目标的轮廓并且返回彩色图像')
+  logger.debug('计算图像中目标的轮廓')
   _, contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
   rects = []
   for c in contours:

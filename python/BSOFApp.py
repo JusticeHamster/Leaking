@@ -123,7 +123,9 @@ class BSOFApp(kivy.app.App):
       if widget is None:
         return
       with widget.canvas:
-        kivy.graphics.Rectangle(texture=texture, size=size)
+        self.logger.info('当前size为：')
+        self.logger.info(widget.size)
+        kivy.graphics.Rectangle(texture=texture, size=widget.size, pos=widget.pos)
     self.logger.debug('------------- 初始化texture')
     try_create_texture(self, 'now_image')
     self.logger.debug('需刷新')
