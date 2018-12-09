@@ -208,7 +208,7 @@ class BSOFModel:
       name = self.now['name']
       if self.time_test and self.opencv_output:
         cv2.imshow(f'{name}', frame)
-        cv2.imshow(f'{name} gray', self.now['binary']['BS'])
+        cv2.imshow(f'{name}_gray_BS', self.now['binary']['BS'])
         cv2.waitKey(self.delay)
       else:
         self.logger.debug('每一帧写入图片中')
