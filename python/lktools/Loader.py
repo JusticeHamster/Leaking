@@ -19,7 +19,7 @@ import lktools.Checker
 
 template = """{
   "path": "../video",                     // 视频路径
-  "videos": [],                           // 视频列表，可以写成["all"]，表示读取所有文件
+  "videos": ["all"],                      // 视频列表，["all"]表示读取文件夹下所有文件
   "delay": 10,                            // 视频播放延迟，用于cv2.waitKey第一个参数
   "height": 480,                          // 视频高度限定，宽度会自动计算
   "frame_range": [0, 100],                // 取[a, b]帧
