@@ -251,7 +251,7 @@ class BSOFModel:
       """
       if self.nframes % self.interval == 0:
         self.lastn = original
-        self.fgbg = cv2.createBackgroundSubtractorMOG2()
+        self.fgbg = cv2.createBackgroundSubtractorMOG2(varThreshold=121, detectShadows=False)
         self.fgbg.apply(self.lastn)
       self.last = original
 
@@ -347,7 +347,7 @@ class BSOFModel:
     self.nframes = 0
     self.last = None
     self.lastn = None
-    self.fgbg = cv2.createBackgroundSubtractorMOG2()
+    self.fgbg = cv2.createBackgroundSubtractorMOG2(varThreshold=121, detectShadows=False)
     self.now = {}
 
   RUNNING = 'running'
