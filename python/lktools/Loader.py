@@ -7,6 +7,7 @@ about filesystem
 """
 import shutil
 import os
+import glob
 """
 log
 """
@@ -19,7 +20,7 @@ import lktools.Checker
 
 template = """{
   "path": "../video",                     // 视频路径
-  "videos": ["all"],                      // 视频列表，["all"]表示读取文件夹下所有文件
+  "videos": ["*"],                        // 视频列表，"*"为通配符
   "delay": 10,                            // 视频播放延迟，用于cv2.waitKey第一个参数
   "height": 480,                          // 视频高度限定，宽度会自动计算
   "frame_range": [0, 100],                // 取[a, b]帧
@@ -190,23 +191,25 @@ def get_settings():
     path = path[:-1]
     user_settings['path'] = path
 
-  logger.debug('将设置中的文件转换为绝对地址，检查videos是否为“all”，是的话读入所有文件')
+  logger.debug('将设置中的文件转换为绝对地址，匹配videos')
 
   videos = user_settings['videos']
 
-  if len(videos) == 1 and videos[0] == 'all':
-    videos = []
-    for r, _, fs in os.walk(path):
-      for f in fs:
-        if f == '.DS_Store':
-          continue
-        videos.append((f.split('.')[0], os.path.join(r, f)))
-    user_settings['videos'] = videos
-  else:
-    user_settings['videos'] = tuple(map(
-      lambda n: (n.split('.')[0], f'{path}/{n}'),
-      videos
-    ))
+  __videos = []
+  for video in videos:
+    for f in glob.glob(f'{path}/{video}'):
+      f = f.replace('\\', '/')
+      splits = f.split('.')
+      if len(splits) <= 1:
+        logger.debug('文件没有扩展名')
+        continue
+      name = splits[-2].split('/')[-1]
+      if len(name) == 0:
+        logger.debug('无名特殊文件')
+        continue
+      __videos.append((name, f))
+
+  user_settings['videos'] = __videos
 
   logger.debug('测试的情况下该返回了')
 
