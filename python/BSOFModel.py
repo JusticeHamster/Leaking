@@ -256,9 +256,9 @@ class BSOFModel:
       if self.nframes % self.interval == 0:
         self.lastn = original
         self.fgbg = cv2.createBackgroundSubtractorMOG2(
-          varThreshold=self.settings['varThreshold'], 
-          detectShadows=self.settings['detectShadows']
-          )
+          varThreshold=self.varThreshold,
+          detectShadows=self.detectShadows
+        )
         self.fgbg.apply(self.lastn)
       self.last = original
 
@@ -355,9 +355,9 @@ class BSOFModel:
     self.last = None
     self.lastn = None
     self.fgbg = cv2.createBackgroundSubtractorMOG2(
-      varThreshold=self.settings['varThreshold'], 
-      detectShadows=self.settings['detectShadows']
-      )
+      varThreshold=self.varThreshold,
+      detectShadows=self.detectShadows
+    )
     self.now = {}
 
   RUNNING = 'running'
