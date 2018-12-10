@@ -37,14 +37,28 @@ def trim_to_rect(rect1, rect2):
   """
   将rect1缩到rect2内部，裁剪掉外部多余部分
   """
-  pass
+  (x11, y11), (x12, y12), *_ = rect1
+  (x21, y21), (x22, y22), *_ = rect2
+  if x11 < x21:
+    x11 = x21
+  if x12 > x22:
+    x12 = x22
+  if y12 > y21:
+    y12 = y21
+  if y11 < y22:
+    y11 = y22
+  if x11 >= x12:
+    return
+  if y11 >= y12:
+    return
+  return (x11, y11), (x12, y12)
 
 def rect_in_rect(rect1, rect2):
   """
   判断矩形rect1是否在矩形rect2中。
   """
   logger.warning_times('this func is deprecated, please use trim_to_rect instead')
-  (x11, y11), (x12, y12) = rect1
+  (x11, y11), (x12, y12), *_ = rect1
   (x21, y21), (x22, y22), *_ = rect2
   return x11 >= x21 and x12 <= x22 and y12 <= y21 and y11 >= y22
 

@@ -73,7 +73,8 @@ def optical_flow_rects(prev, now, rect, color=(0, 0xFF, 0), thickness=4, limit_s
     (x, y, w, h) = cv2.boundingRect(c)
     r = np.array([[x, y], [(x + w), (y + h)]])
     r = (r / compression_ratio).astype(int)
-    if not lktools.PreProcess.rect_in_rect(r, rect):
+    r = lktools.PreProcess.trim_to_rect(r, rect)
+    if r is None:
       continue
     if w > limit_size and h > limit_size:
       rects.append((*map(tuple, r), color, thickness))
