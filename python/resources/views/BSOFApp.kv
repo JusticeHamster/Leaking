@@ -1,4 +1,6 @@
 #:kivy 1.10.1
+#:import label kivy.uix.label
+#:import sla kivy.adapters.simplelistadapter
 
 MyForm:        # top GUI component class
 <MyForm>:      # define MyForm class
@@ -30,10 +32,12 @@ MyForm:        # top GUI component class
         id: abnormal_image
   BoxLayout:
     size_hint: (1,.15)
-    Label:
+    ListView:
       size_hint: (.7,1)
-      id: model_params
-      text: "params"
+      adapter:
+        sla.SimpleListAdapter(
+        data=["params","add some datas"],
+        cls=label.Label)
     Button:
       size_hint: (.3,1) 
       id: pause
