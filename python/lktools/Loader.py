@@ -37,6 +37,8 @@ template = """{
   "OF": true,                             // 是否开启光流法
   "debug_level": "info",                  // 等级debug -> info -> warn -> error -> critical，会打印该级别级以上的Logger信息
   "app_fps": 60,                          // app刷新率
+  "varThreshold": 121.0,                  // 高斯混合模型的阈值，决定模型是否灵敏，越小越敏感
+  "detectShadows": false                  // 高斯混合模型的阴影识别，True开启后影响速度
 }"""
 user_settings = None
 
@@ -143,7 +145,7 @@ def get_settings():
   checker.check(
     (
       'file_output', 'time_debug',
-      'linux', 'sift', 'OF',
+      'linux', 'sift', 'OF', 'detectShadows',
     ), bool
   )
   checker.check(
@@ -152,7 +154,11 @@ def get_settings():
       'fps', 'limit_size', 'app_fps',
     ), int
   )
-  checker.check('compression_ratio', float)
+  checker.check(
+    (
+      'compression_ratio', 'varThreshold', 
+    ), float
+  )
 
   logger.debug('check legal')
 
