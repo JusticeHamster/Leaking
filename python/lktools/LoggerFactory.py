@@ -39,6 +39,25 @@ class LoggerFactory:
     )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+    """
+    提供额外方法
+
+    warning_times：
+      提示用户warning信息，但只重复n次，n可设置
+    counter：
+      记录是每条信息的出现次数
+    """
+    self.counter = {}
+
+    def warning_times(info, n=1):
+      count = self.counter.get(info, 0)
+      if count >= n:
+        return
+      self.logger.warning(info)
+      self.counter[info] = count + 1
+
+    logger.warning_times = warning_times
+
     self.logger = logger
 
   @staticmethod

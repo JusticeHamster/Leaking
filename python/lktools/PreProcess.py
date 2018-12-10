@@ -2,11 +2,19 @@
 opencv
 """
 import cv2
+"""
+lktools
+"""
+import lktools.LoggerFactory
+
+logger = lktools.LoggerFactory.LoggerFactory('PreProcess').logger
 
 def video_capture_size(path, height):
   capture = cv2.VideoCapture(path)
   if not capture.isOpened():
-    raise RuntimeError(f'{path} not found')
+    logger.error(f'{path} not found')
+    from sys import exit
+    exit(1)
   m = capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
   n = capture.get(cv2.CAP_PROP_FRAME_WIDTH)
   fps = capture.get(cv2.CAP_PROP_FPS)
@@ -25,10 +33,17 @@ def get_rect_property(size):
     1, 0
   )
 
+def trim_to_rect(rect1, rect2):
+  """
+  将rect1缩到rect2内部，裁剪掉外部多余部分
+  """
+  pass
+
 def rect_in_rect(rect1, rect2):
   """
   判断矩形rect1是否在矩形rect2中。
   """
+  logger.warning_times('this func is deprecated, please use trim_to_rect instead')
   (x11, y11), (x12, y12) = rect1
   (x21, y21), (x22, y22), *_ = rect2
   return x11 >= x21 and x12 <= x22 and y12 <= y21 and y11 >= y22
