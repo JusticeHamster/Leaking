@@ -159,12 +159,14 @@ class BSOFModel:
     """
     def loop(self, size):
       """
+      如果线程结束
+        就返回False，即break
       如果暂停
-        就返回True，即Continue，不读取任何帧，也不计数
+        就返回True，即continue，不读取任何帧，也不计数
 
       计数frame
       如果是第一帧
-        那么会返回True，即Continue
+        那么会返回True，即continue
       如果在[0, frame_range[0]]范围内
         那么会返回True，即continue
       如果在[frame_range[0], frame_range[1]]范围内
@@ -172,6 +174,8 @@ class BSOFModel:
       否则
         返回False，即break
       """
+      if self.thread_stop:
+        return False
       if self.state is BSOFModel.PAUSED:
         return True
       if self.nframes >= self.frame_range[1]:
