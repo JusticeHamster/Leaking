@@ -21,7 +21,7 @@ class LoggerFactory:
   """
   def __init__(self, name, level=None, stream=sys.stdout):
     """
-    注意：
+    注意:
       level如果为None，则会默认从settings中读取。
 
       但如果是从Loader中调用的Logger.init，则会循环调用，所以在这种情况下请提供level
@@ -42,9 +42,11 @@ class LoggerFactory:
     """
     提供额外方法
 
-    warning_times：
+    debug_times:
+      提示用户debug信息，但只重复n次，n可设置
+    warning_times:
       提示用户warning信息，但只重复n次，n可设置
-    counter：
+    counter:
       记录是每条信息的出现次数
     """
     self.counter = {}
