@@ -29,8 +29,7 @@ class MyForm(kivy.uix.boxlayout.BoxLayout):
   """
   此处类定义虽然为空，但会将my.kv的GUI定义的相关“程序”引入，即相当于在此定义
   """
-  def update(self, img_path):
-    pass
+  pass
 
 class BSOFApp(kivy.app.App):
   """
@@ -92,6 +91,7 @@ class BSOFApp(kivy.app.App):
     if not self.dirty:
       return
     update(self, 'frame', 'now_image')
+    update(self, 'frame_rects', 'abnormal_image')
     self.logger.debug('已刷新')
     self.dirty = False
 
