@@ -211,8 +211,13 @@ if __name__ == '__main__':
     用户键盘打断
     """
     app.on_stop()
-  except: 
+  except UnicodeDecodeError as ude:
+    """
+    .kv文件的Unicode的问题，kivy的load_file不支持Unicode。
+    """
+    lktools.LoggerFactory.LoggerFactory.default().error(ude)
+  except Exception as e: 
     """
     其它error
     """
-    app.on_stop()
+    lktools.LoggerFactory.LoggerFactory.default().error(e)
