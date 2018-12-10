@@ -15,7 +15,8 @@ MyForm:        # top GUI component class
       orientation: "vertical"
       Label:
         size_hint: (1,.1)
-        text: "now image"
+        text: "image"
+        id: image
       Widget:
         size_hint: (1,.9)
         id: now_image
@@ -24,7 +25,7 @@ MyForm:        # top GUI component class
       orientation: "vertical"
       Label:
         size_hint: (1,.1)
-        text: "now image"
+        text: "binary"
       Widget:
         size_hint: (1,.9)
         id: abnormal_image
@@ -33,8 +34,9 @@ MyForm:        # top GUI component class
     Label:
       size_hint: (.7,1)
       id: model_params
-      text: "show all params in this Label"
+      text: "params"
     Button:
       size_hint: (.3,1) 
-      id: button1
-      text: "please press me!"
+      id: pause
+      on_press: app.pause()
+      text: "Pause"

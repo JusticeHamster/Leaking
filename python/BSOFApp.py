@@ -15,6 +15,7 @@ lktools
 """
 import lktools.Loader
 import lktools.LoggerFactory
+import lktools.PreProcess
 """
 kivy related
 """
@@ -29,8 +30,7 @@ class MyForm(kivy.uix.boxlayout.BoxLayout):
   """
   此处类定义虽然为空，但会将my.kv的GUI定义的相关“程序”引入，即相当于在此定义
   """
-  def update(self, img_path):
-    pass
+  pass
 
 class BSOFApp(kivy.app.App):
   """
@@ -47,6 +47,7 @@ class BSOFApp(kivy.app.App):
       textures：        缓存
       clock：           定时调用
       dirty：           判断是否处理完一帧，防止定时调用重复计算
+      state：           当前状态，可以暂停：{RUNNING, PAUSED}
     """
     self.settings = lktools.Loader.get_settings()
     self.logger = lktools.LoggerFactory.LoggerFactory('App').logger
@@ -54,6 +55,7 @@ class BSOFApp(kivy.app.App):
     self.textures = {}
     self.clock = kivy.clock.Clock.schedule_interval(self.on_clock, 1 / self.settings['app_fps'])
     self.dirty = True
+    self.state = BSOFApp.RUNNING
 
     self.logger.debug('设置回调函数')
 
@@ -74,24 +76,33 @@ class BSOFApp(kivy.app.App):
 
     由settings.json中的app_fps指定
     """
-    def update(self, data, id):
-      data = self.model.now.get(data)
-      if data is None:
-        return
+    def update(self, name, id):
+      data = None
+      for n in name.split('.'):
+        data = self.model.now.get(n) if data is None else data.get(n)
+        if data is None:
+          return
+      if len(data.shape) == 2:
+        self.logger.debug('灰度图转换为bgr')
+        data = lktools.PreProcess.gray_to_bgr(data)
       texture = self.textures.get(id)
       if texture is None:
         return
       self.logger.debug(f'处理{id}:')
       self.logger.debug('更新数据')
       data = data[::-1]
-      texture.blit_buffer(data.tostring(), colorfmt='rgb', bufferfmt='ubyte')
-      self.logger.debug('刷新')
+      texture.blit_buffer(data.tostring(), colorfmt='bgr', bufferfmt='ubyte')
+      self.logger.debug('刷新canvas')
       self.form.ids[id].canvas.ask_update()
     self.logger.debug(f'------------- {delta_time}')
-    self.logger.debug('如果这一帧已经刷新过了，就不要再次刷新了')
-    if not self.dirty:
+    if self.state is BSOFApp.PAUSED:
+      self.logger.debug('暂停中')
       return
-    update(self, 'frame', 'now_image')
+    if not self.dirty:
+      self.logger.debug('不要重复刷新')
+      return
+    update(self, 'frame_rects', 'now_image')
+    update(self, 'binary.BS', 'abnormal_image')
     self.logger.debug('已刷新')
     self.dirty = False
 
@@ -126,6 +137,7 @@ class BSOFApp(kivy.app.App):
         kivy.graphics.Rectangle(texture=texture, size=widget.size, pos=widget.pos)
     self.logger.debug('------------- 初始化texture')
     try_create_texture(self, 'now_image')
+    try_create_texture(self, 'abnormal_image')
     self.logger.debug('需刷新')
     self.dirty = True
 
@@ -141,6 +153,32 @@ class BSOFApp(kivy.app.App):
     当然也可以直接读取self.model的变量，但请不要从这里修改
     """
     self.textures = {}
+    self.logger.debug('显示视频名称')
+    image = self.form.ids.get('image')
+    if image is None:
+      return
+    name = self.model.now.get('name')
+    if name is None:
+      return
+    image.text = name
+
+  RUNNING = 'running'
+  PAUSED = 'paused'
+  def pause(self):
+    """
+    用户点击暂停按钮
+    """
+    btn = self.form.ids.get('pause')
+    if btn is None:
+      self.logger.error('pause button not found')
+      return
+    if self.state is BSOFApp.RUNNING:
+      self.state = BSOFApp.PAUSED
+      btn.text = 'Continue'
+    elif self.state is BSOFApp.PAUSED:
+      self.state = BSOFApp.RUNNING
+      btn.text = 'Pause'
+    self.model.pause()
 
   def on_stop(self):
     """

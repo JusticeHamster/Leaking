@@ -32,6 +32,7 @@ class BSOFModel:
       every_frame：         回调函数，每一帧执行完后会调用，方便其它程序处理
       before_every_video：  回调函数，每个视频开始前调用，方便其它程序处理
       thread_stop：         判断该线程是否该终止，由持有该模型的宿主修改
+      state：               是否暂停
 
     做一次clear
     """
@@ -40,11 +41,12 @@ class BSOFModel:
     self.logger = lktools.LoggerFactory.LoggerFactory(
       'BS_OF', level=self.settings['debug_level']
     ).logger
-    self.judge_cache = None
-    self.videoWriter = None
-    self.every_frame = None
+    self.judge_cache        = None
+    self.videoWriter        = None
+    self.every_frame        = None
     self.before_every_video = None
-    self.thread_stop = False
+    self.thread_stop        = False
+    self.state              = BSOFModel.RUNNING
     self.setup()
 
   def __getattribute__(self, name):
@@ -157,6 +159,9 @@ class BSOFModel:
     """
     def loop(self, size):
       """
+      如果暂停
+        就返回True，即Continue，不读取任何帧，也不计数
+
       计数frame
       如果是第一帧
         那么会返回True，即Continue
@@ -167,6 +172,8 @@ class BSOFModel:
       否则
         返回False，即break
       """
+      if self.state is BSOFModel.PAUSED:
+        return True
       if self.nframes >= self.frame_range[1]:
         return False
       success, frame = capture.read()
@@ -342,6 +349,17 @@ class BSOFModel:
     self.lastn = None
     self.fgbg = cv2.createBackgroundSubtractorMOG2()
     self.now = {}
+
+  RUNNING = 'running'
+  PAUSED = 'paused'
+  def pause(self):
+    """
+    暂停
+    """
+    if self.state is BSOFModel.RUNNING:
+      self.state = BSOFModel.PAUSED
+    elif self.state is BSOFModel.PAUSED:
+      self.state = BSOFModel.RUNNING
 
   def setup(self):
     """

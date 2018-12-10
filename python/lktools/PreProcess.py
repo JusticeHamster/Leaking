@@ -33,11 +33,11 @@ def rect_in_rect(rect1, rect2):
   (x21, y21), (x22, y22), *_ = rect2
   return x11 >= x21 and x12 <= x22 and y12 <= y21 and y11 >= y22
 
-def gray_to_rgb(img):
+def gray_to_bgr(img):
   """
-  cv2.cvtColor(*, cv2.COLOR_GRAY2RGB) helper
+  cv2.cvtColor(*, cv2.COLOR_GRAY2BGR) helper
   """
-  return cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+  return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
 def bgr_to_gray(img):
   """
