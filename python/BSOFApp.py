@@ -25,6 +25,7 @@ import kivy.graphics
 import kivy.clock
 import kivy.graphics.texture
 import kivy.uix.boxlayout
+import kivy.config
 
 class MyForm(kivy.uix.boxlayout.BoxLayout):
   """
