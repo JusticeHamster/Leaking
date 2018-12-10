@@ -213,8 +213,8 @@ if __name__ == '__main__':
     .kv文件的Unicode的问题，kivy的load_file不支持Unicode。
     """
     lktools.LoggerFactory.LoggerFactory.default().error(ude)
-  except: 
+  except Exception as e: 
     """
     其它error
     """
-    app.on_stop()
+    lktools.LoggerFactory.LoggerFactory.default().error(e)
