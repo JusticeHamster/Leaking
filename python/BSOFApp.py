@@ -195,8 +195,10 @@ class BSOFApp(kivy.app.App):
     Self:
       form    窗口类
     """
+    kivy.config.Config.set('graphics', 'resizable', False)
+    kivy.config.Config.set('graphics', 'width', '670')
+    kivy.config.Config.set('graphics', 'height', '760')
     self.form = kivy.lang.Builder.load_file('resources/views/BSOFApp.kv')
-    self.form.bind(on_resize=self.refresh)
     return self.form
 
 if __name__ == '__main__':
