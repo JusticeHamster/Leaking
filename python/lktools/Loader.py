@@ -171,7 +171,7 @@ def get_settings():
       'delay', 'height',
       'interval', 'fps',
       'limit_size', 'compression_ratio',
-      'app_fps', 'varThreshould'
+      'app_fps', 'varThreshold'
     ), 'plus'
   )
 
