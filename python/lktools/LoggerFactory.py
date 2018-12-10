@@ -34,7 +34,7 @@ class LoggerFactory:
     handler = logging.StreamHandler(stream)
     handler.setLevel(level)
     formatter = logging.Formatter(
-      '[%(levelname)-7s] [%(asctime)-15s] [%(filename)s: %(lineno)d, @%(process)d] %(name)s: %(message)s',
+      '[%(levelname)-7s] [%(name)-12s] %(message)s [%(filename)s: %(lineno)d, @%(process)d] [%(asctime)s]',
       '%Y-%m-%d %H:%M:%S'
     )
     handler.setFormatter(formatter)
