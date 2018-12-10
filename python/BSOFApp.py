@@ -153,7 +153,7 @@ class BSOFApp(kivy.app.App):
     当然也可以直接读取self.model的变量，但请不要从这里修改
     """
     self.textures = {}
-    self.logger.info('显示视频名称')
+    self.logger.debug('显示视频名称')
     image = self.form.ids.get('image')
     if image is None:
       return
