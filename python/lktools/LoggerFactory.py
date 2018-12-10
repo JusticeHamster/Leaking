@@ -14,6 +14,10 @@ import lktools.Loader
 lock
 """
 import threading
+"""
+partial
+"""
+import functools
 
 class LoggerFactory:
   """
@@ -21,7 +25,7 @@ class LoggerFactory:
   """
   def __init__(self, name, level=None, stream=sys.stdout):
     """
-    注意：
+    注意:
       level如果为None，则会默认从settings中读取。
 
       但如果是从Loader中调用的Logger.init，则会循环调用，所以在这种情况下请提供level
@@ -39,6 +43,31 @@ class LoggerFactory:
     )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+    """
+    提供额外方法
+
+    注意: 由于是string hash存储，所以如果字符串相同
+    会被视作同一个打印请求，计数
+
+    debug_times:
+      提示用户debug信息，但只重复n次，n可设置
+    warning_times:
+      提示用户warning信息，但只重复n次，n可设置
+    counter:
+      记录是每条信息的出现次数
+    """
+    self.counter = {}
+
+    def XXX_times(func, info, n=1):
+      count = self.counter.get(info, 0)
+      if count >= n:
+        return
+      func(info)
+      self.counter[info] = count + 1
+
+    logger.warning_times = functools.partial(XXX_times, logger.warning)
+    logger.debug_times   = functools.partial(XXX_times, logger.debug)
+
     self.logger = logger
 
   @staticmethod

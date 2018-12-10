@@ -24,15 +24,15 @@ class BSOFModel:
     初始化必要变量
 
     初始化
-      opencv_output：       是否利用cv2.imgshow()显示每一帧图片
-      settings：            一个字典，由Loader从用户自定义json文件中读取
-      judge_cache：         为judge使用的cache，每个单独的视频有一个单独的cache
-      videoWriter：         为视频输出提供video writer，每个单独的视频有一个writer，会在clear中release
-      logger：              创建logger
-      every_frame：         回调函数，每一帧执行完后会调用，方便其它程序处理
-      before_every_video：  回调函数，每个视频开始前调用，方便其它程序处理
-      thread_stop：         判断该线程是否该终止，由持有该模型的宿主修改
-      state：               是否暂停
+      opencv_output:       是否利用cv2.imgshow()显示每一帧图片
+      settings:            一个字典，由Loader从用户自定义json文件中读取
+      judge_cache:         为judge使用的cache，每个单独的视频有一个单独的cache
+      videoWriter:         为视频输出提供video writer，每个单独的视频有一个writer，会在clear中release
+      logger:              创建logger
+      every_frame:         回调函数，每一帧执行完后会调用，方便其它程序处理
+      before_every_video:  回调函数，每个视频开始前调用，方便其它程序处理
+      thread_stop:         判断该线程是否该终止，由持有该模型的宿主修改
+      state:               是否暂停
 
     做一次clear
     """
@@ -51,7 +51,7 @@ class BSOFModel:
 
   def __getattribute__(self, name):
     """
-    为了方便访问setting的内容，做了以下修改：
+    为了方便访问setting的内容，做了以下修改:
       如果self.NAME访问时，self不含属性NAME，则会在settings中查找。
       所以只要self和settings中含有同名属性就会报错。
 
@@ -67,7 +67,7 @@ class BSOFModel:
         return obj
       else:
         self.logger.error(BSOFModel.__getattribute__.__doc__)
-        self.logger.error(f"冲突为：self.{name}及self.settings['{name}']")
+        self.logger.error(f"冲突为:self.{name}及self.settings['{name}']")
         from sys import exit
         exit(1)
 
@@ -159,12 +159,14 @@ class BSOFModel:
     """
     def loop(self, size):
       """
+      如果线程结束
+        就返回False，即break
       如果暂停
-        就返回True，即Continue，不读取任何帧，也不计数
+        就返回True，即continue，不读取任何帧，也不计数
 
       计数frame
       如果是第一帧
-        那么会返回True，即Continue
+        那么会返回True，即continue
       如果在[0, frame_range[0]]范围内
         那么会返回True，即continue
       如果在[frame_range[0], frame_range[1]]范围内
@@ -172,6 +174,8 @@ class BSOFModel:
       否则
         返回False，即break
       """
+      if self.thread_stop:
+        return False
       if self.state is BSOFModel.PAUSED:
         return True
       if self.nframes >= self.frame_range[1]:
@@ -193,11 +197,11 @@ class BSOFModel:
       保存相关信息至self.now，便于其它类使用（如App）
 
       Args:
-        frame：             当前帧的uint8拷贝
-        frame_rects：       当前帧（包含圈出异常的框）
-        binary：            当前帧的二值图像，是一个dict，有两个值{'OF', 'BS'}
+        frame:             当前帧的uint8拷贝
+        frame_rects:       当前帧（包含圈出异常的框）
+        binary:            当前帧的二值图像，是一个dict，有两个值{'OF', 'BS'}
                             分别代表光流法、高斯混合模型产生的二值图像
-        classes：           当前帧的类别
+        classes:           当前帧的类别
       """
       self.now['frame']       = np.uint8(frame)
       self.now['frame_rects'] = frame_rects
@@ -207,10 +211,10 @@ class BSOFModel:
       """
       输出一帧
 
-      如果是要写入文件@file_output：
+      如果是要写入文件@file_output:
         将图片写入文件，地址为@img_path，图片名为@name_@nframes.jpg
         将图片写入视频，videoWriter会初始化，地址为@video_path，视频名为@name.avi，格式为'MJPG'
-      否则，如果要打印在opencv窗口@opencv_output：
+      否则，如果要打印在opencv窗口@opencv_output:
         显示一个新窗口，名为视频名称，将图片显示，其中延迟为@delay
       """
       name = self.now['name']
@@ -222,7 +226,7 @@ class BSOFModel:
         self.now['now_img_path'] = now_img_path
 
         self.logger.debug('将图像保存为视频')
-        self.logger.debug('WARNING：尺寸必须与图片的尺寸一致，否则保存后无法播放。')
+        self.logger.debug('WARNING:尺寸必须与图片的尺寸一致，否则保存后无法播放。')
 
         if self.videoWriter is None:
           fourcc = cv2.VideoWriter_fourcc(*'MJPG')
@@ -234,7 +238,7 @@ class BSOFModel:
           )
 
         self.logger.debug('每一帧导入保存的视频中。')
-        self.logger.debug('WARNING：像素类型必须为uint8')
+        self.logger.debug('WARNING:像素类型必须为uint8')
 
         self.videoWriter.write(np.uint8(frame))
       elif self.opencv_output:
@@ -243,10 +247,10 @@ class BSOFModel:
         cv2.waitKey(self.delay)
     def update(self, original):
       """
-      如果@nframes计数为@interval的整数倍：
+      如果@nframes计数为@interval的整数倍:
         更新@lastn
         重新建立BS_MOG2模型，并将当前帧作为第一帧应用在该模型上
-      所有情况下：
+      所有情况下:
         更新@last
       """
       if self.nframes % self.interval == 0:
@@ -327,14 +331,14 @@ class BSOFModel:
     """
     每个视频处理完之后对相关变量的清理
 
-    videowriter： 会在这里release，并且设置为None
-    cv：          会清理所有窗口
-    judge_cache： judge使用的缓存，初始化为空list
-    nframes：     计数器，为loop使用，初始化为0
-    last：        上一帧
-    lastn：       前N帧
-    fgbg：        BS_MOG2模型
-    now：         存储处理过程的当前帧等信息，是dict
+    videowriter: 会在这里release，并且设置为None
+    cv:          会清理所有窗口
+    judge_cache: judge使用的缓存，初始化为空list
+    nframes:     计数器，为loop使用，初始化为0
+    last:        上一帧
+    lastn:       前N帧
+    fgbg:        BS_MOG2模型
+    now:         存储处理过程的当前帧等信息，是dict
     """
     self.logger.debug('导出视频')
     if self.file_output and (self.videoWriter is not None):

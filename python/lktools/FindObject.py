@@ -28,7 +28,8 @@ def findObject(binary, rect):
     logger.debug('该函数计算矩形的边界框')
 
     r = ((x, y), (x + w, y + h))
-    if not lktools.PreProcess.rect_in_rect(r, rect):
+    r = lktools.PreProcess.trim_to_rect(r, rect)
+    if r is None:
       continue
     rects.append((*r, (0, 0, 255), 2))
   return rects
