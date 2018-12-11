@@ -19,8 +19,10 @@ from lktools.PreProcess import gray_to_bgr
 from lktools.Translator import translate
 """
 GUI
+  warning: 必须导入，用于kivy创建类
 """
 import GUI.BSOFForm
+import GUI.BSOFGraph
 """
 kivy related
 """
