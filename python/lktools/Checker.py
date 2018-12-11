@@ -7,10 +7,10 @@ class Checker:
   """
   用于类型、值合法性检查
   """
-  def __init__(self, logger):
+  def __init__(self, logger, container):
     self.logger = lktools.LoggerFactory.LoggerFactory.getChild(logger, 'Checker')
+    self.container = container
     self.dirty = False
-    self.container = None
 
   def check(self, name, assert_type):
     def __check(name, assert_type):

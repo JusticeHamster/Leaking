@@ -54,18 +54,16 @@ def get_settings():
     from sys import exit
     exit(1)
 
-  checker = lktools.Checker.Checker(logger)
-
   logger.debug('设置')
 
   with open('settings.json', encoding='utf-8') as f:
     user_settings = json5.load(f)
 
-  logger.debug('load user setting')
+  logger.debug('Checker')
 
-  checker.container = user_settings
+  checker = lktools.Checker.Checker(logger, user_settings)
 
-  logger.debug('load default')
+  logger.debug('Default Settings')
 
   # tuple(map(lambda item: user_settings.setdefault(*item), json5.loads(template).items()))
   default_settings = json5.loads(template)
