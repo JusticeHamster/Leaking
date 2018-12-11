@@ -209,6 +209,10 @@ class BSOFApp(kivy.app.App):
   def on_stop(self):
     """
     关闭时被调用
+
+    Self:
+      model.thread_stop     告知线程停止，线程将在这个循环完成过后退出（关闭掉输出）
+      model_runner          等待线程
     """
     self.logger.debug('准备退出，呼叫线程关闭')
     self.model.thread_stop = True
@@ -217,6 +221,9 @@ class BSOFApp(kivy.app.App):
   def on_resize(self, window, width, height):
     """
     当窗口改变size的时候调用
+
+    Self:
+      wsize   当前视频对应的窗口应有的大小
     """
     if self.wsize is None or (width, height) == self.wsize:
       self.logger.debug('不需要改变')
