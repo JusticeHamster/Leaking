@@ -9,9 +9,9 @@ import cv2
 """
 lktools
 """
-import lktools.PreProcess
 import lktools.Timer
 import lktools.LoggerFactory
+from lktools.PreProcess import trim_to_rect
 
 logger = lktools.LoggerFactory.LoggerFactory('OpticalFlow').logger
 
@@ -73,7 +73,7 @@ def optical_flow_rects(prev, now, rect, color=(0, 0xFF, 0), thickness=4, limit_s
     (x, y, w, h) = cv2.boundingRect(c)
     r = np.array([[x, y], [(x + w), (y + h)]])
     r = (r / compression_ratio).astype(int)
-    r = lktools.PreProcess.trim_to_rect(r, rect)
+    r = trim_to_rect(r, rect)
     if r is None:
       continue
     if w > limit_size and h > limit_size:

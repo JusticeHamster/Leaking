@@ -5,9 +5,9 @@ import cv2
 """
 lktools
 """
-import lktools.PreProcess
 import lktools.Timer
 import lktools.LoggerFactory
+from lktools.PreProcess import trim_to_rect
 
 logger = lktools.LoggerFactory.LoggerFactory('FindObject').logger
 
@@ -28,7 +28,7 @@ def findObject(binary, rect):
     logger.debug('该函数计算矩形的边界框')
 
     r = ((x, y), (x + w, y + h))
-    r = lktools.PreProcess.trim_to_rect(r, rect)
+    r = trim_to_rect(r, rect)
     if r is None:
       continue
     rects.append((*r, (0, 0, 255), 2))

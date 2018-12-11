@@ -10,11 +10,11 @@ import cv2
 lktools
 """
 import lktools.Timer
-import lktools.PreProcess
-import lktools.Denoise
-import lktools.FindObject
-import lktools.OpticalFlow
-import lktools.SIFT
+from lktools.PreProcess   import get_rect_property, video_capture_size
+from lktools.OpticalFlow  import optical_flow_rects
+from lktools.SIFT         import siftImageAlignment
+from lktools.Denoise      import denoise
+from lktools.FindObject   import findObject
 class BSOFModel:
   """
   整个模型
@@ -91,10 +91,10 @@ class BSOFModel:
     """
     frame = src
     self.logger.debug('rect')
-    rect = lktools.PreProcess.get_rect_property(size) 
+    rect = get_rect_property(size) 
     self.logger.debug('optical flow')
     if self.OF:
-      flow_rects, OF_binary = lktools.OpticalFlow.optical_flow_rects(
+      flow_rects, OF_binary = optical_flow_rects(
         self.last, frame, rect,
         limit_size=self.limit_size, compression_ratio=self.compression_ratio
       )
@@ -102,7 +102,7 @@ class BSOFModel:
       OF_binary = None
     self.logger.debug('sift alignment')
     if self.sift:
-      frame, *_ = lktools.SIFT.siftImageAlignment(self.lastn, frame)
+      frame, *_ = siftImageAlignment(self.lastn, frame)
     self.logger.debug('MOG2 BS')
     frame = self.fgbg.apply(frame)
     self.logger.debug('Binary')
@@ -111,14 +111,14 @@ class BSOFModel:
     # binary = cv2.adaptiveThreshold(frame,255,cv2.ADAPTIVE_THRESH_MEAN_C,\
     #                 cv2.THRESH_BINARY,3,5)
     self.logger.debug('Denoise')
-    binary = lktools.Denoise.denoise(binary, 'bilater')
-    binary = lktools.Denoise.denoise(binary, 'morph_open')
-    binary = lktools.Denoise.denoise(binary, 'dilation')
-    binary = lktools.Denoise.denoise(binary, 'dilation')
-    binary = lktools.Denoise.denoise(binary, 'erode')
+    binary = denoise(binary, 'bilater')
+    binary = denoise(binary, 'morph_open')
+    binary = denoise(binary, 'dilation')
+    binary = denoise(binary, 'dilation')
+    binary = denoise(binary, 'erode')
     BS_binary = binary
     self.logger.debug('findObject')
-    bs_rects = lktools.FindObject.findObject(binary, rect)
+    bs_rects = findObject(binary, rect)
     self.logger.debug('rects')
     rects = [rect]
     rects.extend(bs_rects)
@@ -266,7 +266,7 @@ class BSOFModel:
 
     self.logger.debug('首先读取视频信息，包括capture类，高度h，宽度w，fps，帧数count')
 
-    capture, h, w, fps, count = lktools.PreProcess.video_capture_size(path, self.height)
+    capture, h, w, fps, count = video_capture_size(path, self.height)
     size = (w, h)
     self.now['size'] = size
     self.logger.info(f'''
