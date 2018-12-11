@@ -157,7 +157,7 @@ class BSOFModel:
     """
     处理一个单独的视频
     """
-    def loop(self, size):
+    def loop(size):
       """
       如果线程结束
         就返回False，即break
@@ -192,7 +192,7 @@ class BSOFModel:
         self.lastn = frame
         return True
       return frame
-    def save(self, frame, frame_rects, binary, classes):
+    def save(frame, frame_rects, binary, classes):
       """
       保存相关信息至self.now，便于其它类使用（如App）
 
@@ -207,7 +207,7 @@ class BSOFModel:
       self.now['frame_rects'] = frame_rects
       self.now['binary']      = binary
       self.now['classes']     = classes
-    def output(self, frame, size):
+    def output(frame, size):
       """
       输出一帧
 
@@ -245,7 +245,7 @@ class BSOFModel:
         cv2.imshow(f'{name}', frame)
         cv2.imshow(f'{name}_gray_BS', self.now['binary']['BS'])
         cv2.waitKey(self.delay)
-    def update(self, original):
+    def update(original):
       """
       如果@nframes计数为@interval的整数倍:
         更新@lastn
@@ -256,9 +256,9 @@ class BSOFModel:
       if self.nframes % self.interval == 0:
         self.lastn = original
         self.fgbg = cv2.createBackgroundSubtractorMOG2(
-          varThreshold=self.varThreshold, 
+          varThreshold=self.varThreshold,
           detectShadows=self.detectShadows
-          )
+        )
         self.fgbg.apply(self.lastn)
       self.last = original
 
@@ -284,7 +284,7 @@ class BSOFModel:
 
       self.logger.debug('判断是否循环')
 
-      l = loop(self, size)
+      l = loop(size)
       if type(l) == bool:
         if l:
           continue
@@ -306,11 +306,11 @@ class BSOFModel:
 
       self.logger.debug('存储相关信息')
 
-      save(self, frame, frame_rects, binary, classes)
+      save(frame, frame_rects, binary, classes)
 
       self.logger.debug('输出图像')
 
-      output(self, frame_rects, size)
+      output(frame_rects, size)
 
       self.logger.debug('回调函数')
 
@@ -319,7 +319,7 @@ class BSOFModel:
 
       self.logger.debug('更新变量')
 
-      update(self, frame)
+      update(frame)
 
       self.logger.debug('判断该线程是否结束')
 
@@ -355,13 +355,14 @@ class BSOFModel:
     self.last = None
     self.lastn = None
     self.fgbg = cv2.createBackgroundSubtractorMOG2(
-      varThreshold=self.varThreshold, 
+      varThreshold=self.varThreshold,
       detectShadows=self.detectShadows
-      )
+    )
     self.now = {}
 
   RUNNING = 'running'
-  PAUSED = 'paused'
+  PAUSED  = 'paused'
+  STOPPED = 'stopped'
   def pause(self):
     """
     暂停
@@ -386,6 +387,7 @@ class BSOFModel:
       self.one_video(video)
       if self.thread_stop:
         break
+    self.state = BSOFModel.STOPPED
 
 if __name__ == '__main__':
   BSOFModel(True).run()

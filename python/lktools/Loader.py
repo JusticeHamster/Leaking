@@ -125,6 +125,7 @@ def get_settings():
 
   logger.debug('load default')
 
+  # tuple(map(lambda item: user_settings.setdefault(*item), json5.loads(template).items()))
   default_settings = json5.loads(template)
   for item in default_settings.items():
     user_settings.setdefault(*item)
@@ -170,7 +171,7 @@ def get_settings():
       'delay', 'height',
       'interval', 'fps',
       'limit_size', 'compression_ratio',
-      'app_fps',
+      'app_fps', 'varThreshold'
     ), 'plus'
   )
 

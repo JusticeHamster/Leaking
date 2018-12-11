@@ -77,7 +77,7 @@ class BSOFApp(kivy.app.App):
 
     由settings.json中的app_fps指定
     """
-    def update(self, name, id):
+    def update(name, id):
       data = None
       for n in name.split('.'):
         data = self.model.now.get(n) if data is None else data.get(n)
@@ -99,11 +99,17 @@ class BSOFApp(kivy.app.App):
     if self.state is BSOFApp.PAUSED:
       self.logger.debug('暂停中')
       return
+    if self.model.state is BSOFModel.STOPPED:
+      self.logger.debug('model运行结束')
+      image = self.form.ids.get('image')
+      if image is not None:
+        image.text = 'END'
+      return
     if not self.dirty:
       self.logger.debug('不要重复刷新')
       return
-    update(self, 'frame_rects', 'now_image')
-    update(self, 'binary.BS', 'abnormal_image')
+    update('frame_rects', 'now_image')
+    update('binary.BS', 'abnormal_image')
     self.logger.debug('已刷新')
     self.dirty = False
 
@@ -121,7 +127,7 @@ class BSOFApp(kivy.app.App):
 
     当然也可以直接读取self.model的变量，但请不要从这里修改
     """
-    def try_create_texture(self, id):
+    def try_create_texture(id):
       self.logger.debug('如果已经存在了就返回')
       texture = self.textures.get(id)
       if texture is not None:
@@ -137,8 +143,8 @@ class BSOFApp(kivy.app.App):
       with widget.canvas:
         kivy.graphics.Rectangle(texture=texture, size=widget.size, pos=widget.pos)
     self.logger.debug('------------- 初始化texture')
-    try_create_texture(self, 'now_image')
-    try_create_texture(self, 'abnormal_image')
+    try_create_texture('now_image')
+    try_create_texture('abnormal_image')
     self.logger.debug('需刷新')
     self.dirty = True
 
