@@ -105,7 +105,7 @@ class BSOFApp(kivy.app.App):
       self.logger.debug('model运行结束')
       image = self.form.ids.get('image')
       if image is not None:
-        image.text = 'END'
+        image.text = lktools.Translator.translate('END', 'Chinese')
       return
     if not self.dirty:
       self.logger.debug('不要重复刷新')
