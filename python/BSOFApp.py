@@ -15,8 +15,12 @@ lktools
 """
 import lktools.Loader
 import lktools.LoggerFactory
-import lktools.PreProcess
-import lktools.Translator
+from lktools.PreProcess import gray_to_bgr
+from lktools.Translator import translate
+"""
+GUI
+"""
+import GUI.BSOFForm
 """
 kivy related
 """
@@ -24,15 +28,9 @@ import kivy.lang
 import kivy.app
 import kivy.graphics
 import kivy.clock
-import kivy.graphics.texture
-import kivy.uix.boxlayout
 import kivy.core.window
-
-class MyForm(kivy.uix.boxlayout.BoxLayout):
-  """
-  此处类定义虽然为空，但会将my.kv的GUI定义的相关“程序”引入，即相当于在此定义
-  """
-  pass
+import kivy.garden
+from kivy.graphics.texture import Texture
 
 class BSOFApp(kivy.app.App):
   """
@@ -90,7 +88,7 @@ class BSOFApp(kivy.app.App):
           return
       if len(data.shape) == 2:
         self.logger.debug('灰度图转换为bgr，与frame做与运算')
-        data = lktools.PreProcess.gray_to_bgr(data)
+        data = gray_to_bgr(data)
         data &= self.model.now['frame']
       texture = self.textures.get(id)
       if texture is None:
@@ -109,7 +107,7 @@ class BSOFApp(kivy.app.App):
       self.logger.debug('model运行结束')
       image = self.form.ids.get('image')
       if image is not None:
-        image.text = lktools.Translator.translate('END', 'Chinese')
+        image.text = translate('END', 'Chinese')
       return
     if not self.dirty:
       self.logger.debug('不要重复刷新')
@@ -141,7 +139,7 @@ class BSOFApp(kivy.app.App):
         return
       self.logger.debug('创建新的texture，并存入缓存')
       size = self.model.now['frame'].shape[1::-1]
-      texture = kivy.graphics.texture.Texture.create(size=size, colorfmt='rgb')
+      texture = Texture.create(size=size, colorfmt='rgb')
       self.textures[id] = texture
       self.logger.debug('找到id对应的widget，绑定texture，不存在就返回')
       widget = self.form.ids.get(id)
@@ -200,10 +198,10 @@ class BSOFApp(kivy.app.App):
       return
     if self.state is BSOFApp.RUNNING:
       self.state = BSOFApp.PAUSED
-      btn.text = lktools.Translator.translate('Continue', 'Chinese')
+      btn.text = translate('Continue', 'Chinese')
     elif self.state is BSOFApp.PAUSED:
       self.state = BSOFApp.RUNNING
-      btn.text = lktools.Translator.translate('Pause', 'Chinese')
+      btn.text = translate('Pause', 'Chinese')
     self.model.pause()
 
   def on_stop(self):
@@ -240,8 +238,8 @@ class BSOFApp(kivy.app.App):
     """
     kivy.core.window.Window.bind(on_resize=self.on_resize)
     self.form = kivy.lang.Builder.load_file('resources/views/BSOFApp.kv')
-    self.form.ids['abnormal'].text = lktools.Translator.translate('abnormal', 'Chinese')
-    self.form.ids['pause'].text    = lktools.Translator.translate('pause'   , 'Chinese')
+    self.form.ids['abnormal'].text = translate('abnormal', 'Chinese')
+    self.form.ids['pause'].text    = translate('pause'   , 'Chinese')
     return self.form
 
 if __name__ == '__main__':
