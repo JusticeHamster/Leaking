@@ -263,20 +263,22 @@ class BSOFModel:
       self.last = original
 
     self.logger.debug('----------------------')
-    self.logger.debug('首先是看是否有初始化动作')
-
-    if self.before_every_video:
-      self.before_every_video()
 
     self.logger.debug('首先读取视频信息，包括capture类，高度h，宽度w，fps，帧数count')
 
     capture, h, w, fps, count = lktools.PreProcess.video_capture_size(path, self.height)
     size = (w, h)
+    self.now['size'] = size
     self.logger.info(f'''
       read {path}.
       from frame {self.frame_range[0]} to {self.frame_range[1]}.
       total {count} frames.
     ''')
+
+    self.logger.debug('首先是看是否有初始化动作')
+
+    if self.before_every_video:
+      self.before_every_video()
 
     self.logger.debug('对每一帧')
 

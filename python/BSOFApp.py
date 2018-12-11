@@ -26,7 +26,7 @@ import kivy.graphics
 import kivy.clock
 import kivy.graphics.texture
 import kivy.uix.boxlayout
-import kivy.config
+import kivy.core.window
 
 class MyForm(kivy.uix.boxlayout.BoxLayout):
   """
@@ -50,14 +50,18 @@ class BSOFApp(kivy.app.App):
       clock:           定时调用
       dirty:           判断是否处理完一帧，防止定时调用重复计算
       state:           当前状态，可以暂停:{RUNNING, PAUSED}
+      scale:           视频缩放
+      wsize:           当前window size
     """
     self.settings = lktools.Loader.get_settings()
-    self.logger = lktools.LoggerFactory.LoggerFactory('App').logger
-    self.model = BSOFModel(False)
+    self.logger   = lktools.LoggerFactory.LoggerFactory('App').logger
+    self.model    = BSOFModel(False)
     self.textures = {}
-    self.clock = kivy.clock.Clock.schedule_interval(self.on_clock, 1 / self.settings['app_fps'])
-    self.dirty = True
-    self.state = BSOFApp.RUNNING
+    self.clock    = kivy.clock.Clock.schedule_interval(self.on_clock, 1 / self.settings['app_fps'])
+    self.dirty    = True
+    self.state    = BSOFApp.RUNNING
+    self.scale    = self.settings['scale']
+    self.wsize    = None
 
     self.logger.debug('设置回调函数')
 
@@ -126,6 +130,7 @@ class BSOFApp(kivy.app.App):
       frame:         当前帧的uint8拷贝
       frame_rects:   当前帧（框出异常）
       binary:        二值图像（是一个dict，包含{'OF', 'BS'}两种，详情见BSOFModel）
+      size:          图像大小
 
     当然也可以直接读取self.model的变量，但请不要从这里修改
     """
@@ -143,7 +148,9 @@ class BSOFApp(kivy.app.App):
       if widget is None:
         return
       with widget.canvas:
-        kivy.graphics.Rectangle(texture=texture, size=widget.size, pos=widget.pos)
+        w, h = self.model.now['size']
+        size = (w * self.scale, h * self.scale)
+        kivy.graphics.Rectangle(texture=texture, size=size, pos=widget.pos)
     self.logger.debug('------------- 初始化texture')
     try_create_texture('now_image')
     try_create_texture('abnormal_image')
@@ -154,10 +161,11 @@ class BSOFApp(kivy.app.App):
     """
     处理每一个视频前都会调用该函数
 
-    清空textures
+    清空textures，resize
 
     可以从self.model.now中获取model信息:
       name:          当前文件名称
+      size:          视频长宽，由配置文件定义
 
     当然也可以直接读取self.model的变量，但请不要从这里修改
     """
@@ -170,6 +178,15 @@ class BSOFApp(kivy.app.App):
     if name is None:
       return
     image.text = name
+    self.logger.debug('resize')
+    """
+    解释:     留空       Label Layout 留空
+    (w * (2 + 0.2), h / (0.9 * 0.85 * .9)) 由kivy文件中的比例所定
+    scale 为缩放比例
+    """
+    w, h = self.model.now['size']
+    self.wsize = (w * 2.2 * self.scale, h / .6885 * self.scale)
+    kivy.core.window.Window.size = self.wsize
 
   RUNNING = 'running'
   PAUSED = 'paused'
@@ -197,6 +214,16 @@ class BSOFApp(kivy.app.App):
     self.model.thread_stop = True
     self.model_runner.join()
 
+  def on_resize(self, window, width, height):
+    """
+    当窗口改变size的时候调用
+    """
+    if self.wsize is None or (width, height) == self.wsize:
+      self.logger.debug('不需要改变')
+      return
+    self.logger.debug('又改回去')
+    window.size = self.wsize
+
   def build(self):
     """
     创建窗口时调用
@@ -204,9 +231,7 @@ class BSOFApp(kivy.app.App):
     Self:
       form    窗口类
     """
-    kivy.config.Config.set('graphics', 'resizable', False)
-    kivy.config.Config.set('graphics', 'width', '670')
-    kivy.config.Config.set('graphics', 'height', '760')
+    kivy.core.window.Window.bind(on_resize=self.on_resize)
     self.form = kivy.lang.Builder.load_file('resources/views/BSOFApp.kv')
     self.form.ids['abnormal'].text = lktools.Translator.translate('abnormal', 'Chinese')
     self.form.ids['pause'].text    = lktools.Translator.translate('pause'   , 'Chinese')

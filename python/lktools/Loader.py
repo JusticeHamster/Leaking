@@ -19,26 +19,27 @@ import lktools.LoggerFactory
 import lktools.Checker
 
 template = """{
-  "path": "../video",                     // 视频路径
-  "videos": ["*"],                        // 视频列表，"*"为通配符
-  "delay": 10,                            // 视频播放延迟，用于cv2.waitKey第一个参数
-  "height": 480,                          // 视频高度限定，宽度会自动计算
-  "frame_range": [0, 100],                // 取[a, b]帧
-  "img_path": "images.tmp",               // 图片存取路径
-  "video_path": "videos.tmp",             // 视频存取路径
-  "file_output": false,                   // 是否输出到文件夹
-  "interval": 10,                         // 用前N帧图片作为修正的标准
-  "fps": 10,                              // 保存视频帧数
-  "time_debug": false,                    // 是否打印每个函数耗时
-  "limit_size": 10,                       // 光流法的参数
-  "compression_ratio": 1.0,               // 光流法的压缩率
-  "linux": false,                         // 是不是linux，linux不会执行显示相关的函数
-  "sift": true,                           // 是否开启sift对齐
-  "OF": true,                             // 是否开启光流法
-  "debug_level": "info",                  // 等级debug -> info -> warn -> error -> critical，会打印该级别级以上的Logger信息
-  "app_fps": 60,                          // app刷新率
-  "varThreshold": 121.0,                  // 高斯混合模型的阈值，决定模型是否灵敏，越小越敏感
-  "detectShadows": false                  // 高斯混合模型的阴影识别，True开启后影响速度
+  "path"              : "../video",       // 视频路径
+  "videos"            : ["*"],            // 视频列表，"*"为通配符
+  "delay"             : 10,               // 视频播放延迟，用于cv2.waitKey第一个参数
+  "height"            : 480,              // 视频高度限定，宽度会自动计算
+  "frame_range"       : [0, 100],         // 取[a, b]帧
+  "img_path"          : "images.tmp",     // 图片存取路径
+  "video_path"        : "videos.tmp",     // 视频存取路径
+  "file_output"       : false,            // 是否输出到文件夹
+  "interval"          : 10,               // 用前N帧图片作为修正的标准
+  "fps"               : 10,               // 保存视频帧数
+  "time_debug"        : false,            // 是否打印每个函数耗时
+  "limit_size"        : 10,               // 光流法的参数
+  "compression_ratio" : 1.0,              // 光流法的压缩率
+  "linux"             : false,            // 是不是linux，linux不会执行显示相关的函数
+  "sift"              : true,             // 是否开启sift对齐
+  "OF"                : true,             // 是否开启光流法
+  "debug_level"       : "info",           // 等级debug -> info -> warn -> error -> critical，会打印该级别级以上的Logger信息
+  "app_fps"           : 60,               // app刷新率
+  "varThreshold"      : 121.0,            // 高斯混合模型的阈值，决定模型是否灵敏，越小越敏感
+  "detectShadows"     : false,            // 高斯混合模型的阴影识别，True开启后影响速度
+  "scale"             : 0.6,              // 视频在APP里显示的缩放
 }"""
 user_settings = None
 
@@ -98,6 +99,7 @@ def get_settings():
   checker.check(
     (
       'compression_ratio', 'varThreshold', 
+      'scale',
     ), float
   )
 
@@ -111,7 +113,7 @@ def get_settings():
       'delay', 'height',
       'interval', 'fps',
       'limit_size', 'compression_ratio',
-      'app_fps', 'varThreshold'
+      'app_fps', 'varThreshold', 'scale',
     ), checker.plus
   )
 
