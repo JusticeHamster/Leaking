@@ -14,6 +14,9 @@ logger = lktools.LoggerFactory.LoggerFactory('Translator').logger
 def translate(raw, language=None):
   if language is None:
     language = settings['language'].lower()
+  elif type(language) != str:
+    logger.error(f'language {language} must be str')
+    return
   if language == 'english':
     return raw
   raw = raw.lower()
