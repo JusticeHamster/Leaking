@@ -86,6 +86,7 @@ class BSOFApp(kivy.app.App):
       if len(data.shape) == 2:
         self.logger.debug('灰度图转换为bgr')
         data = lktools.PreProcess.gray_to_bgr(data)
+        data = self.model.now['frame'] & data
       texture = self.textures.get(id)
       if texture is None:
         return
