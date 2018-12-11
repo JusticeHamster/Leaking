@@ -237,7 +237,7 @@ class BSOFApp(kivy.app.App):
       form    窗口类
     """
     kivy.core.window.Window.bind(on_resize=self.on_resize)
-    self.form = kivy.lang.Builder.load_file('resources/views/BSOFApp.kv')
+    self.form = kivy.lang.Builder.load_file('resources/views/BSOFForm.kv')
     self.form.ids['abnormal'].text = translate('abnormal', 'Chinese')
     self.form.ids['pause'].text    = translate('pause'   , 'Chinese')
     return self.form
