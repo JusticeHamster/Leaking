@@ -28,7 +28,6 @@ kivy related
 """
 import kivy
 kivy.require('1.10.1')
-import kivy.lang
 import kivy.app
 import kivy.graphics
 import kivy.clock
@@ -241,7 +240,7 @@ class BSOFApp(kivy.app.App):
       form    窗口类
     """
     kivy.core.window.Window.bind(on_resize=self.on_resize)
-    self.form = GUI.BSOFForm.BSOFForm()
+    self.form = GUI.BSOFForm.BSOFForm.load()
     self.form.ids['abnormal'].text = translate('abnormal')
     self.form.ids['pause'].text    = translate('pause')
     return self.form
