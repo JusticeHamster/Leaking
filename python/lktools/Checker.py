@@ -10,26 +10,12 @@ class Checker:
   def __init__(self, logger):
     self.logger = lktools.LoggerFactory.LoggerFactory.getChild(logger, 'Checker')
     self.dirty = False
-    self.containers = {}
-    self.asserts = {}
-
-  def add_container(self, name, container):
-    self.containers[name] = container
-
-  def add_assert(self, assert_name, assert_func):
-    self.asserts[assert_name] = assert_func
+    self.container = None
 
   def check(self, name, assert_type):
     def __check(name, assert_type):
-      if type(assert_type) == str:
-        func = self.asserts.get(assert_type)
-        args = (name, self.containers)
-      else:
-        func = self.asserts.get('type')
-        args = (name, assert_type, self.containers)
-      if func is None:
-        return
-      item, s = func(*args)
+      check_t = type(assert_type) == type
+      item, s = self.type_test(name, assert_type) if check_t else assert_type(name)
       if not s:
         self.logger.error(item)
         self.dirty = True
@@ -40,3 +26,54 @@ class Checker:
       __check(name, assert_type)
     else:
       self.logger.error(f'error attribute name: {name}')
+
+  def exist(self, name):
+    item = self.container.get(name)
+    if item is None:
+      return f'"{name}" must exists', False
+    return item, True
+
+  def len_not_zero(self, name):
+    item, s = self.exist(name)
+    if not s:
+      return item, False
+    if len(item) == 0:
+      return f'size of "{name}" must > 0', False
+    return item, True
+
+  def plus(self, name):
+    item, s = self.exist(name)
+    if not s:
+      return item, False
+    if not (item > 0):
+      return f'"{name}" must > 0', False
+    return item, True
+
+  def range(self, name):
+    item, s = self.exist(name)
+    if not s:
+      return item, False
+    if len(item) != 2:
+      return f'range "{name}" must have and only have 2 elements', False
+    if item[0] < 0:
+      return f'range {name}[0] must > 0', False
+    if item[0] > item[1]:
+      return f'range {name}[0] must <= {name}[1]', False
+    return item, True
+
+  def debug_level(self, name):
+    item, s = self.exist(name)
+    if not s:
+      return item, False
+    debug_list = ('debug', 'info', 'warn', 'error', 'critical')
+    if item not in debug_list:
+      return f'"{name}" was "{item}", not in {debug_list}', False
+    return item, True
+
+  def type_test(self, name, assert_type):
+    item, s = self.exist(name)
+    if not s:
+      return item, False
+    if type(item) != assert_type:
+      return f'{name} must be type {assert_type} but find {type(item)}', False
+    return item, True

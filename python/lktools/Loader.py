@@ -56,64 +56,6 @@ def get_settings():
 
   checker = lktools.Checker.Checker(logger)
 
-  def _exist(name, containers):
-    item = containers['setting'].get(name)
-    if item is None:
-      return f'"{name}" must exists', False
-    return item, True
-
-  def _len_not_zero(name, containers):
-    item, s = _exist(name, containers)
-    if not s:
-      return item, False
-    if len(item) == 0:
-      return f'size of "{name}" must > 0', False
-    return item, True
-
-  def _int_plus(name, containers):
-    item, s = _exist(name, containers)
-    if not s:
-      return item, False
-    if not (item > 0):
-      return f'"{name}" must > 0', False
-    return item, True
-
-  def _range(name, containers):
-    item, s = _exist(name, containers)
-    if not s:
-      return item, False
-    if len(item) != 2:
-      return f'range "{name}" must have and only have 2 elements', False
-    if item[0] < 0:
-      return f'range {name}[0] must > 0', False
-    if item[0] > item[1]:
-      return f'range {name}[0] must <= {name}[1]', False
-    return item, True
-
-  def _debug_level(name, containers):
-    item, s = _exist(name, containers)
-    if not s:
-      return item, False
-    debug_list = ('debug', 'info', 'warn', 'error', 'critical')
-    if item not in debug_list:
-      return f'"{name}" was "{item}", not in {debug_list}', False
-    return item, True
-
-  def _type(name, assert_type, containers):
-    item, s = _exist(name, containers)
-    if not s:
-      return item, False
-    if type(item) != assert_type:
-      return f'{name} must be type {assert_type} but find {type(item)}', False
-    return item, True
-
-  checker.add_assert('exist',       _exist        )
-  checker.add_assert('not_zero',    _len_not_zero )
-  checker.add_assert('plus',        _int_plus     )
-  checker.add_assert('range',       _range        )
-  checker.add_assert('debug_level', _debug_level  )
-  checker.add_assert('type',        _type         )
-
   logger.debug('设置')
 
   with open('settings.json', encoding='utf-8') as f:
@@ -121,7 +63,7 @@ def get_settings():
 
   logger.debug('load user setting')
 
-  checker.add_container('setting', user_settings)
+  checker.container = user_settings
 
   logger.debug('load default')
 
@@ -163,16 +105,16 @@ def get_settings():
 
   logger.debug('check legal')
 
-  checker.check('videos', 'not_zero')
-  checker.check('frame_range', 'range')
-  checker.check('debug_level', 'debug_level')
+  checker.check('videos', checker.len_not_zero)
+  checker.check('frame_range', checker.range)
+  checker.check('debug_level', checker.debug_level)
   checker.check(
     (
       'delay', 'height',
       'interval', 'fps',
       'limit_size', 'compression_ratio',
       'app_fps', 'varThreshold'
-    ), 'plus'
+    ), checker.plus
   )
 
   if checker.dirty:
