@@ -16,6 +16,7 @@ lktools
 import lktools.Loader
 import lktools.LoggerFactory
 import lktools.PreProcess
+import lktools.Translator
 """
 kivy related
 """
@@ -86,7 +87,7 @@ class BSOFApp(kivy.app.App):
       if len(data.shape) == 2:
         self.logger.debug('灰度图转换为bgr，与frame做与运算')
         data = lktools.PreProcess.gray_to_bgr(data)
-        data = self.model.now['frame'] & data
+        data &= self.model.now['frame']
       texture = self.textures.get(id)
       if texture is None:
         return
@@ -182,10 +183,10 @@ class BSOFApp(kivy.app.App):
       return
     if self.state is BSOFApp.RUNNING:
       self.state = BSOFApp.PAUSED
-      btn.text = 'Continue'
+      btn.text = lktools.Translator.translate('Continue', 'Chinese')
     elif self.state is BSOFApp.PAUSED:
       self.state = BSOFApp.RUNNING
-      btn.text = 'Pause'
+      btn.text = lktools.Translator.translate('Pause', 'Chinese')
     self.model.pause()
 
   def on_stop(self):
@@ -207,6 +208,8 @@ class BSOFApp(kivy.app.App):
     kivy.config.Config.set('graphics', 'width', '670')
     kivy.config.Config.set('graphics', 'height', '760')
     self.form = kivy.lang.Builder.load_file('resources/views/BSOFApp.kv')
+    self.form.ids['abnormal'].text = lktools.Translator.translate('abnormal', 'Chinese')
+    self.form.ids['pause'].text    = lktools.Translator.translate('pause'   , 'Chinese')
     return self.form
 
 if __name__ == '__main__':
