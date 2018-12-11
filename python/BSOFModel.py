@@ -203,7 +203,7 @@ class BSOFModel:
                             分别代表光流法、高斯混合模型产生的二值图像
         classes:           当前帧的类别
       """
-      self.now['frame']       = np.uint8(frame)
+      self.now['frame']       = np.uint8(frame.copy())
       self.now['frame_rects'] = frame_rects
       self.now['binary']      = binary
       self.now['classes']     = classes
