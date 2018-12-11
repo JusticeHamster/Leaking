@@ -26,6 +26,8 @@ import GUI.BSOFGraph
 """
 kivy related
 """
+import kivy
+kivy.require('1.10.1')
 import kivy.lang
 import kivy.app
 import kivy.graphics
