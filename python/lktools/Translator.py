@@ -8,13 +8,12 @@ logger
 import lktools.LoggerFactory
 
 dictionaries = {}
+settings = lktools.Loader.get_settings()
 logger = lktools.LoggerFactory.LoggerFactory('Translator').logger
 
-def translate(raw, language):
-  if type(language) != str:
-    logger.error(f'"{language}" must be str')
-    return
-  language = language.lower()
+def translate(raw, language=None):
+  if language is None:
+    language = settings['language'].lower()
   if language == 'english':
     return raw
   raw = raw.lower()

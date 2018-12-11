@@ -40,6 +40,7 @@ template = """{
   "varThreshold"      : 121.0,            // 高斯混合模型的阈值，决定模型是否灵敏，越小越敏感
   "detectShadows"     : false,            // 高斯混合模型的阴影识别，True开启后影响速度
   "scale"             : 0.6,              // 视频在APP里显示的缩放
+  "language"          : "Chinese",        // 所使用的语言
 }"""
 user_settings = None
 
@@ -77,6 +78,7 @@ def get_settings():
     (
       'path', 'debug_level',
       'img_path', 'video_path',
+      'language',
     ), str
   )
   checker.check(

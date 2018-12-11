@@ -109,7 +109,7 @@ class BSOFApp(kivy.app.App):
       self.logger.debug('model运行结束')
       image = self.form.ids.get('image')
       if image is not None:
-        image.text = translate('END', 'Chinese')
+        image.text = translate('END')
       return
     if not self.dirty:
       self.logger.debug('不要重复刷新')
@@ -200,10 +200,10 @@ class BSOFApp(kivy.app.App):
       return
     if self.state is BSOFApp.RUNNING:
       self.state = BSOFApp.PAUSED
-      btn.text = translate('Continue', 'Chinese')
+      btn.text = translate('Continue')
     elif self.state is BSOFApp.PAUSED:
       self.state = BSOFApp.RUNNING
-      btn.text = translate('Pause', 'Chinese')
+      btn.text = translate('Pause')
     self.model.pause()
 
   def on_stop(self):
@@ -239,9 +239,9 @@ class BSOFApp(kivy.app.App):
       form    窗口类
     """
     kivy.core.window.Window.bind(on_resize=self.on_resize)
-    self.form = kivy.lang.Builder.load_file('resources/views/BSOFForm.kv')
-    self.form.ids['abnormal'].text = translate('abnormal', 'Chinese')
-    self.form.ids['pause'].text    = translate('pause'   , 'Chinese')
+    self.form = GUI.BSOFForm.BSOFForm()
+    self.form.ids['abnormal'].text = translate('abnormal')
+    self.form.ids['pause'].text    = translate('pause')
     return self.form
 
 if __name__ == '__main__':
