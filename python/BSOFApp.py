@@ -248,6 +248,11 @@ class BSOFApp(kivy.app.App):
     self.form.ids['abnormal'].text = translate('abnormal')
     self.form.ids['pause'].text    = translate('pause')
     return self.form
+    """
+    self.graph = GUI.BSOFGraph.BSOFGraph.load()
+    self.graph.update_graph()
+    return self.graph
+    """
 
 if __name__ == '__main__':
   app = BSOFApp()
