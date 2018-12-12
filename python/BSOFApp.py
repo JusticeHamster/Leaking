@@ -49,7 +49,7 @@ class BSOFApp(kivy.app.App):
       model:           BSOFModel模型
       textures:        缓存
       clock:           定时调用
-      dirty:           判断是否处理完一帧，防止定时调用重复计算
+      dirty:           判断是否处理完一帧(视频)，防止定时调用重复计算
       state:           当前状态，可以暂停:{RUNNING, PAUSED}
       scale:           视频缩放
       wsize:           当前window size
@@ -59,7 +59,7 @@ class BSOFApp(kivy.app.App):
     self.model    = BSOFModel(False)
     self.textures = {}
     self.clock    = kivy.clock.Clock.schedule_interval(self.on_clock, 1 / self.settings['app_fps'])
-    self.dirty    = True
+    self.dirty    = {'frame': False, 'video': False}
     self.state    = BSOFApp.RUNNING
     self.scale    = self.settings['scale']
     self.wsize    = None
@@ -112,13 +112,15 @@ class BSOFApp(kivy.app.App):
       if image is not None:
         image.text = translate('END')
       return
-    if not self.dirty:
-      self.logger.debug('不要重复刷新')
-      return
-    update('frame_rects', 'now_image')
-    update('binary.BS', 'abnormal_image')
-    self.logger.debug('已刷新')
-    self.dirty = False
+    if self.dirty['frame']:
+      self.logger.debug('需要刷新frame')
+      update('frame_rects', 'now_image')
+      update('binary.BS', 'abnormal_image')
+      self.dirty['frame'] = False
+    if self.dirty['video']:
+      self.logger.debug('需要resize')
+      kivy.core.window.Window.size = self.wsize
+      self.dirty['video'] = False
 
   def every_frame(self):
     """
@@ -150,13 +152,13 @@ class BSOFApp(kivy.app.App):
         return
       with widget.canvas:
         w, h = self.model.now['size']
-        size = (w * self.scale, h * self.scale)
+        macos = 2 if self.settings['Retina'] else 1
+        size = (w * self.scale * macos, h * self.scale * macos)
         kivy.graphics.Rectangle(texture=texture, size=size, pos=widget.pos)
     self.logger.debug('------------- 初始化texture')
     try_create_texture('now_image')
     try_create_texture('abnormal_image')
-    self.logger.debug('需刷新')
-    self.dirty = True
+    self.dirty['frame'] = True
 
   def before_every_video(self):
     """
@@ -179,15 +181,17 @@ class BSOFApp(kivy.app.App):
     if name is None:
       return
     image.text = name
-    self.logger.debug('resize')
     """
+    resize
+
     解释:     留空       Label Layout 留空
     (w * (2 + 0.2), h / (0.9 * 0.85 * .9)) 由kivy文件中的比例所定
     scale 为缩放比例
     """
     w, h = self.model.now['size']
     self.wsize = (w * 2.2 * self.scale, h / .6885 * self.scale)
-    kivy.core.window.Window.size = self.wsize
+    self.dirty['video'] = True
+    self.logger.debug(self.wsize)
 
   RUNNING = 'running'
   PAUSED = 'paused'

@@ -41,6 +41,7 @@ template = """{
   "detectShadows"     : false,            // 高斯混合模型的阴影识别，True开启后影响速度
   "scale"             : 0.6,              // 视频在APP里显示的缩放
   "language"          : "Chinese",        // 所使用的语言
+  "Retina"            : false,            // 是否是Retina高清屏幕，它的像素数量不一样，会影响显示的计算
 }"""
 user_settings = None
 
@@ -90,6 +91,7 @@ def get_settings():
     (
       'file_output', 'time_debug',
       'linux', 'sift', 'OF', 'detectShadows',
+      'Retina',
     ), bool
   )
   checker.check(
