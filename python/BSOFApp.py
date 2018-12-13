@@ -63,7 +63,8 @@ class BSOFApp(kivy.app.App):
     self.state    = BSOFApp.RUNNING
     self.scale    = self.settings['scale']
     self.wsize    = None
-
+    # init data in recycle_view
+    self.form.ids['recycle_view'].data = [{'text': str(x)} for x in range(100)]
     self.logger.debug('设置回调函数')
 
     self.model.every_frame = self.every_frame
