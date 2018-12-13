@@ -93,7 +93,10 @@ class BSOFApp(kivy.app.App):
       if len(data.shape) == 2:
         self.logger.debug('灰度图转换为bgr，与frame做与运算')
         data = gray_to_bgr(data)
-        data = self.model.now['frame'] & data
+        frame = self.model.now.get('frame')
+        if frame is None:
+          return
+        data = frame & data
       texture = self.textures.get(id)
       if texture is None:
         return
@@ -173,7 +176,7 @@ class BSOFApp(kivy.app.App):
 
     当然也可以直接读取self.model的变量，但请不要从这里修改
     """
-    self.textures = {}
+    self.textures.clear()
     self.logger.debug('显示视频名称')
     image = self.form.ids.get('image')
     if image is None:
