@@ -28,10 +28,10 @@ def get_rect_property(size):
   width, height = size
   return (
     # 低处落下相关视频
-    # (width // 16, int(height *2.9) // 4),
+    # (width // 16, int(height * 2.9) // 4),
     # (width * 15 // 16, height // 2),
     # 高处落下相关视频
-    (width // 16, int(height *2.9) // 4),
+    (width // 16, int(height * 2.9) // 4),
     (width * 15 // 16, height // 4),
     (255, 0, 0),
     1, 0

@@ -27,6 +27,7 @@ class BSOFModel:
       opencv_output:       是否利用cv2.imgshow()显示每一帧图片
       settings:            一个字典，由Loader从用户自定义json文件中读取
       judge_cache:         为judge使用的cache，每个单独的视频有一个单独的cache
+      rect_mask:           做整个视频裁剪的mask
       videoWriter:         为视频输出提供video writer，每个单独的视频有一个writer，会在clear中release
       logger:              创建logger
       every_frame:         回调函数，每一帧执行完后会调用，方便其它程序处理
@@ -42,6 +43,7 @@ class BSOFModel:
       'BS_OF', level=self.settings['debug_level']
     ).logger
     self.judge_cache        = None
+    self.rect_mask          = None
     self.videoWriter        = None
     self.every_frame        = None
     self.before_every_video = None
@@ -197,13 +199,13 @@ class BSOFModel:
       保存相关信息至self.now，便于其它类使用（如App）
 
       Args:
-        frame:             当前帧的uint8拷贝
-        frame_rects:       当前帧（包含圈出异常的框）
+        frame:             当前帧原始图片
+        frame_rects:       当前帧原始图片（包含圈出异常的框）
         binary:            当前帧的二值图像，是一个dict，有两个值{'OF', 'BS'}
                             分别代表光流法、高斯混合模型产生的二值图像
         classes:           当前帧的类别
       """
-      self.now['frame']       = np.uint8(frame.copy())
+      self.now['frame']       = frame
       self.now['frame_rects'] = frame_rects
       self.now['binary']      = binary
       self.now['classes']     = classes
@@ -261,6 +263,15 @@ class BSOFModel:
         )
         self.fgbg.apply(self.lastn)
       self.last = original
+    def trim(frame, size):
+      """
+      对图片进行裁剪
+      """
+      if self.rect_mask is None:
+        (x1, y1), (x2, y2), *_ = get_rect_property(size)
+        self.rect_mask = np.zeros(frame.shape, dtype=np.uint8)
+        self.rect_mask[y2:y1, x1:x2] = 255
+      return self.rect_mask & frame.copy()
 
     self.logger.debug('----------------------')
 
@@ -294,6 +305,10 @@ class BSOFModel:
           break
       frame = l
 
+      self.logger.debug('裁剪原始图片')
+
+      frame = trim(frame, size)
+
       self.logger.debug('找到异常的矩形（其中第一个矩形为检测范围的矩形）')
 
       rects, binary = self.catch_abnormal(frame, size)
@@ -304,11 +319,11 @@ class BSOFModel:
 
       self.logger.debug('绘制矩形')
 
-      frame_rects = lktools.PreProcess.draw(frame, rects)
+      frame_rects = lktools.PreProcess.draw(l, rects)
 
       self.logger.debug('存储相关信息')
 
-      save(frame, frame_rects, binary, classes)
+      save(l, frame_rects, binary, classes)
 
       self.logger.debug('输出图像')
 
