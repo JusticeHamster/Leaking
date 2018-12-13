@@ -147,7 +147,10 @@ class BSOFApp(kivy.app.App):
       if texture is not None:
         return
       self.logger.debug('创建新的texture，并存入缓存')
-      size = self.model.now['frame'].shape[1::-1]
+      frame = self.model.now.get('frame')
+      if frame is None:
+        return
+      size = frame.shape[1::-1]
       texture = Texture.create(size=size, colorfmt='rgb')
       self.textures[id] = texture
       self.logger.debug('找到id对应的widget，绑定texture，不存在就返回')
