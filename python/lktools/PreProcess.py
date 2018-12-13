@@ -27,8 +27,10 @@ def video_capture_size(path, height):
 def get_rect_property(size):
   width, height = size
   return (
-    (width // 16, height * 5 // 6),
-    (width * 15 // 16, height // 6),
+    # (width // 16, height * 5 // 6),
+    (width // 16, int(height *2.9) // 4),
+    # (width * 15 // 16, height // 6),
+    (width * 15 // 16, height // 2),
     (255, 0, 0),
     1, 0
   )
