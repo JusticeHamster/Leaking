@@ -191,12 +191,12 @@ class BSOFApp(kivy.app.App):
     """
     resize
 
-    解释:     留空       Label Layout 留空
-    (w * (2 + 0.2), h / (0.9 * 0.85 * .9)) 由kivy文件中的比例所定
+    解释:          留空       Label Layout 留空
+    (w * (2 + 2 + 0.4), h / (0.9 * 0.85 * .9)) 由kivy文件中的比例所定
     scale 为缩放比例
     """
     w, h = self.model.now['size']
-    self.wsize = (w * 2.2 * self.scale, h / .6885 * self.scale)
+    self.wsize = (w * 4.4 * self.scale, h / .6885 * self.scale)
     self.dirty['video'] = True
     self.logger.debug(self.wsize)
 
@@ -255,11 +255,6 @@ class BSOFApp(kivy.app.App):
     self.form.ids['abnormal'].text = translate('abnormal')
     self.form.ids['pause'].text    = translate('pause')
     return self.form
-    """
-    self.graph = GUI.BSOFGraph.BSOFGraph.load()
-    self.graph.update_graph()
-    return self.graph
-    """
 
 if __name__ == '__main__':
   app = BSOFApp()
