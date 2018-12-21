@@ -78,6 +78,12 @@ def bgr_to_gray(img):
   """
   return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
+def bgr_to_hsv(img):
+  """
+  cv2.cvtColor(*, cv2.COLOR_BGR2HSV) helper
+  """
+  return cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+
 def draw(frame, rects):
   """
   将rects中的矩形绘制在frame上

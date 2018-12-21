@@ -15,23 +15,23 @@ import lktools.LoggerFactory
 logger = lktools.LoggerFactory.LoggerFactory('Denoise').logger
 
 @lktools.Timer.timer_decorator
-def denoise(img, which=None):
+def denoise(img, which=None, args=None):
   """
   四个不同的滤波器
   """
-  def mean(img):
+  def mean(img, args=(5, 5)):
     logger.debug('均值滤波')
-    return cv2.blur(img, (5,5))
-  def guassian(img):
+    return cv2.blur(img, args)
+  def guassian(img, args=((5, 5), 0)):
     logger.debug('高斯滤波')
-    return cv2.GaussianBlur(img,(5,5),0)
-  def median(img):
+    return cv2.GaussianBlur(img,*args)
+  def median(img, args=5):
     logger.debug('中值滤波')
-    return cv2.medianBlur(img, 5)
-  def bilater(img):
+    return cv2.medianBlur(img, args)
+  def bilater(img, args=(9, 75, 75)):
     logger.debug('双边滤波')
-    return cv2.bilateralFilter(img,9,75,75)
-  def morph_open(img):
+    return cv2.bilateralFilter(img,*args)
+  def morph_open(img, args=None):
     logger.debug('形态学处理——开运算')
     logger.debug('定义结构元素')
 
@@ -45,15 +45,14 @@ def denoise(img, which=None):
 
     binary = cv2.morphologyEx(binary, cv2.MORPH_OPEN, kernel)
     return binary
-  def dilation(img):
-    kernel = np.ones((5,5),np.uint8)
-    return cv2.dilate(img,kernel,iterations = 1)
-  def erode(img):
-    kernel = np.ones((5,5),np.uint8)
-    return cv2.erode(img,kernel,iterations = 2)
+  def dilation(img, args=((5, 5), 1)):
+    kernel = np.ones(args[0],np.uint8)
+    return cv2.dilate(img, kernel, iterations=args[1])
+  def erode(img, args=((5, 5), 2)):
+    kernel = np.ones(args[0],np.uint8)
+    return cv2.erode(img, kernel, iterations=args[1])
 
   denoise_funcs = {
-    'original':       lambda img: img,
     'mean':           mean,
     'guassian':       guassian,
     'median':         median,
@@ -65,4 +64,10 @@ def denoise(img, which=None):
   if which is None:
     return map(lambda f: f(img), denoise_funcs.values())
   else:
-    return denoise_funcs[which](img)
+    func = denoise_funcs.get(which)
+    if func is None:
+      return img
+    if args is None:
+      return func(img)
+    else:
+      return func(img, args)

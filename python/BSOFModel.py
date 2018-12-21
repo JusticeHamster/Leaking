@@ -10,7 +10,7 @@ import cv2
 lktools
 """
 import lktools.Timer
-from lktools.PreProcess   import get_rect_property, video_capture_size
+from lktools.PreProcess   import get_rect_property, video_capture_size, bgr_to_hsv
 from lktools.OpticalFlow  import optical_flow_rects
 from lktools.SIFT         import siftImageAlignment
 from lktools.Denoise      import denoise
@@ -149,10 +149,9 @@ class BSOFModel:
     if len(rects) <= 1:
       return
     rects = rects[1:]
-    self.logger.debug('对异常框进行处理')
-    if len(rects) <= 1:
-      pass
-    return None
+    self.logger.debug('首先准备一个该帧的HSV图像')
+    # _ = bgr_to_hsv(src)
+    return
 
   @lktools.Timer.timer_decorator
   def one_video(self, path):
@@ -193,6 +192,9 @@ class BSOFModel:
         self.last = frame
         self.lastn = frame
         return True
+      # TODO: 先假定第一帧为正常帧，并且后面不会变化
+      if self.normal_frame is None:
+        self.normal_frame = frame
       return frame
     def save(frame, frame_rects, binary, classes):
       """
@@ -211,13 +213,14 @@ class BSOFModel:
       self.now['classes']     = classes
     def output(frame, size):
       """
-      输出一帧
+      输出一帧处理过的图像（有异常框）
 
       如果是要写入文件@file_output:
         将图片写入文件，地址为@img_path，图片名为@name_@nframes.jpg
         将图片写入视频，videoWriter会初始化，地址为@video_path，视频名为@name.avi，格式为'MJPG'
       否则，如果要打印在opencv窗口@opencv_output:
         显示一个新窗口，名为视频名称，将图片显示，其中延迟为@delay
+        ESC键退出
       """
       name = self.now['name']
       if self.file_output:
@@ -246,7 +249,10 @@ class BSOFModel:
       elif self.opencv_output:
         cv2.imshow(f'{name}', frame)
         cv2.imshow(f'{name}_gray_BS', self.now['binary']['BS'])
-        cv2.waitKey(self.delay)
+        # cv2.imshow(f'{name}_subtraction', frame - self.normal_frame)
+        if cv2.waitKey(self.delay) == 27:
+          self.logger.debug('ESC 停止')
+          self.thread_stop = True
     def update(original):
       """
       如果@nframes计数为@interval的整数倍:
@@ -359,6 +365,7 @@ class BSOFModel:
     lastn:       前N帧
     fgbg:        BS_MOG2模型
     now:         存储处理过程的当前帧等信息，是dict
+    normal_frame:正常帧
     """
     self.logger.debug('导出视频')
     if self.file_output and (self.videoWriter is not None):
@@ -376,6 +383,7 @@ class BSOFModel:
       detectShadows=self.detectShadows
     )
     self.now = {}
+    self.normal_frame = None
 
   RUNNING = 'running'
   PAUSED  = 'paused'
