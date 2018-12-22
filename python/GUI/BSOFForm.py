@@ -12,9 +12,29 @@ class BSOFForm(kivy.uix.boxlayout.BoxLayout):
   """
   此处类定义虽然为空，但会将BSOFForm.kv的GUI定义的相关“程序”引入，即相当于在此定义
   """
+  def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+    self.graph  = None
+
   @staticmethod
   def load():
-    form = kivy.lang.Builder.load_file('resources/views/BSOFForm.kv')
-    graph = GUI.BSOFGraph.BSOFGraph.load()
-    form.ids['graph_area'].add_widget(graph)
-    return form
+    """
+    载入对应的kv文件
+    """
+    return kivy.lang.Builder.load_file('resources/views/BSOFForm.kv')
+
+  def pizza(self, *args, **kwargs):
+    """
+    添加pizza图
+
+    第一个参数为serie
+    """
+    serie = args[0]
+
+    if self.graph is not None:
+      self.graph.serie = serie
+      return
+
+    graph_area = self.ids['graph_area']
+    self.graph = GUI.BSOFGraph.BSOFGraph.load(serie=serie, **kwargs)
+    graph_area.add_widget(self.graph)

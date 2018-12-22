@@ -9,15 +9,15 @@ class BSOFGraph(kivy.uix.widget.Widget):
   显示类
   """
   @staticmethod
-  def load():
-    return kivy.garden.pizza.Pizza(serie=[
-                ["Français", 5, 'a9a9a9'],
-                ["Belge", 25, '808080'],
-                ["Anglais", 20, '696969'],
-                ["Allemand", 30, '778899'],
-                ["Italien", 20, '708090']],
-                chart_size=256,
-                legend_color='ffffcc',
-                legend_value_rayon=100,
-                legend_title_rayon=160,
-                chart_border=2)
+  def load(*args, **kwargs):
+    """
+    serie: [ ['class', percentage, 'color'], ... ]
+    """
+    return kivy.garden.pizza.Pizza(
+      serie=kwargs.get('serie'),
+      legend_color=kwargs.get('legend_color', 'ffffcc'),
+      legend_value_rayon=kwargs.get('legend_value_rayon', 160),
+      legend_title_rayon=kwargs.get('legend_title_rayon', 320),
+      chart_size=kwargs.get('chart_size', 512),
+      chart_border=kwargs.get('chart_border', 10)
+    )

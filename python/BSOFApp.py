@@ -52,6 +52,7 @@ class BSOFApp(kivy.app.App):
       state:           当前状态，可以暂停:{RUNNING, PAUSED}
       scale:           视频缩放
       wsize:           当前window size
+      classes:         分类信息，格式为pizza格式[ ['title', percentage, 'color'], ... ]
     """
     self.settings = lktools.Loader.get_settings()
     self.logger   = lktools.LoggerFactory.LoggerFactory('App').logger
@@ -62,15 +63,17 @@ class BSOFApp(kivy.app.App):
     self.state    = BSOFApp.RUNNING
     self.scale    = self.settings['scale']
     self.wsize    = None
+    self.classes  = []
     # init data in recycle_view
     # self.form.ids['recycle_view'].data = [{'text': '参数显示'}]
     self.logger.debug('设置回调函数')
-
     self.model.every_frame = self.every_frame
     self.model.before_every_video = self.before_every_video
 
-    self.logger.debug('运行model')
+    self.logger.debug('创建pizza')
+    self.form.pizza(self.classes)
 
+    self.logger.debug('运行model')
     self.model_runner = threading.Thread(target=self.model.run)
     self.model_runner.start()
 
@@ -192,6 +195,10 @@ class BSOFApp(kivy.app.App):
     self.dirty['video'] = True
     self.logger.debug(self.wsize)
 
+    self.logger.debug('pizza更新测试')
+    self.classes.append(['a', 10, 'ccccff'])
+    self.form.pizza(self.classes)
+
   RUNNING = 'running'
   PAUSED = 'paused'
   def pause(self):
@@ -243,6 +250,10 @@ class BSOFApp(kivy.app.App):
       form    窗口类
     """
     kivy.core.window.Window.bind(on_resize=self.on_resize)
+    kivy.core.window.Window.clearcolor = (1, 1, 1, 1)
+    """
+    创建canvas
+    """
     self.form = GUI.BSOFForm.BSOFForm.load()
     self.form.ids['abnormal'].text = translate('abnormal')
     self.form.ids['pause'].text    = translate('pause')
