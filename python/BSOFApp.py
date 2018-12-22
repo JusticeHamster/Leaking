@@ -15,7 +15,6 @@ lktools
 """
 import lktools.Loader
 import lktools.LoggerFactory
-from lktools.PreProcess import gray_to_bgr
 from lktools.Translator import translate
 """
 GUI
@@ -90,13 +89,6 @@ class BSOFApp(kivy.app.App):
         data = self.model.now.get(n) if data is None else data.get(n)
         if data is None:
           return
-      if len(data.shape) == 2:
-        self.logger.debug('灰度图转换为bgr，与frame做与运算')
-        data = gray_to_bgr(data)
-        frame = self.model.now.get('frame')
-        if frame is None:
-          return
-        data = frame & data
       texture = self.textures.get(id)
       if texture is None:
         return
@@ -119,7 +111,7 @@ class BSOFApp(kivy.app.App):
     if self.dirty['frame']:
       self.logger.debug('需要刷新frame')
       update('frame_rects', 'now_image')
-      update('binary.BS', 'abnormal_image')
+      update('abnormal.BS', 'abnormal_image')
       self.dirty['frame'] = False
     if self.dirty['video']:
       self.logger.debug('需要resize')

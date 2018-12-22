@@ -10,7 +10,7 @@ import cv2
 lktools
 """
 import lktools.Timer
-from lktools.PreProcess   import get_rect_property, video_capture_size, bgr_to_hsv
+from lktools.PreProcess   import get_rect_property, video_capture_size, bgr_to_hsv, gray_to_bgr, subtraction
 from lktools.OpticalFlow  import optical_flow_rects
 from lktools.SIFT         import siftImageAlignment
 from lktools.Denoise      import denoise
@@ -127,10 +127,15 @@ class BSOFModel:
     if self.OF:
       rects.extend(flow_rects)
     self.logger.debug('return')
-    return rects, {
-      'OF': OF_binary,
-      'BS': BS_binary,
-    }
+    # TODO: 先假定第一帧为正常帧，并且后面不会变化
+    if self.normal_frame is None:
+      self.normal_frame = src
+    abnormal = {}
+    if OF_binary is not None:
+      abnormal['OF'] = gray_to_bgr(OF_binary) & src
+    if BS_binary is not None:
+      abnormal['BS'] = gray_to_bgr(BS_binary) & src
+    return rects, abnormal
 
   @lktools.Timer.timer_decorator
   def judge(self, src, rects, binary):
@@ -192,24 +197,23 @@ class BSOFModel:
         self.last = frame
         self.lastn = frame
         return True
-      # TODO: 先假定第一帧为正常帧，并且后面不会变化
-      if self.normal_frame is None:
-        self.normal_frame = frame
       return frame
-    def save(frame, frame_rects, binary, classes):
+    def save(frame, frame_trim, frame_rects, abnormal, classes):
       """
       保存相关信息至self.now，便于其它类使用（如App）
 
       Args:
         frame:             当前帧原始图片
+        frame_trim:        裁剪过后的图片
         frame_rects:       当前帧原始图片（包含圈出异常的框）
-        binary:            当前帧的二值图像，是一个dict，有两个值{'OF', 'BS'}
-                            分别代表光流法、高斯混合模型产生的二值图像
+        abnormal:          当前帧的异常图像，是一个dict，有两个值{'OF', 'BS'}
+                            分别代表光流法、高斯混合模型产生的异常图像
         classes:           当前帧的类别
       """
       self.now['frame']       = frame
+      self.now['frame_trim']  = frame_trim
       self.now['frame_rects'] = frame_rects
-      self.now['binary']      = binary
+      self.now['abnormal']    = abnormal
       self.now['classes']     = classes
     def output(frame, size):
       """
@@ -248,8 +252,7 @@ class BSOFModel:
         self.videoWriter.write(np.uint8(frame))
       elif self.opencv_output:
         cv2.imshow(f'{name}', frame)
-        cv2.imshow(f'{name}_gray_BS', self.now['binary']['BS'])
-        cv2.imshow(f'{name}_subtraction', np.abs(self.now['frame'].astype(np.int8) - self.normal_frame.astype(np.int8)))
+        cv2.imshow(f'{name}_abnormal_BS', self.now['abnormal']['BS'])
         if cv2.waitKey(self.delay) == 27:
           self.logger.debug('ESC 停止')
           self.thread_stop = True
@@ -317,11 +320,11 @@ class BSOFModel:
 
       self.logger.debug('找到异常的矩形（其中第一个矩形为检测范围的矩形）')
 
-      rects, binary = self.catch_abnormal(frame, size)
+      rects, abnormal = self.catch_abnormal(frame, size)
 
       self.logger.debug('分类')
 
-      classes = self.judge(frame, rects, binary)
+      classes = self.judge(frame, rects, abnormal)
 
       self.logger.debug('绘制矩形')
 
@@ -329,7 +332,7 @@ class BSOFModel:
 
       self.logger.debug('存储相关信息')
 
-      save(l, frame_rects, binary, classes)
+      save(l, frame, frame_rects, abnormal, classes)
 
       self.logger.debug('输出图像')
 

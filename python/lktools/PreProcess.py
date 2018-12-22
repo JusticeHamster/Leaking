@@ -3,6 +3,10 @@ opencv
 """
 import cv2
 """
+numpy
+"""
+import numpy
+"""
 lktools
 """
 import lktools.LoggerFactory
@@ -23,6 +27,15 @@ def video_capture_size(path, height):
   m = height
   n = int(n * scale)
   return capture, m, n, fps, count
+
+def subtraction(mat1, mat2, distance=0):
+  """
+  两帧做差（保证不溢出），把距离小于distance的置零，返回。
+  """
+  mat = numpy.abs(mat1.astype(numpy.int8) - mat2.astype(numpy.int8))
+  if distance > 0:
+    mat[mat < distance] = 0
+  return mat.astype(numpy.uint8)
 
 def get_rect_property(size):
   width, height = size
@@ -70,18 +83,24 @@ def gray_to_bgr(img):
   """
   cv2.cvtColor(*, cv2.COLOR_GRAY2BGR) helper
   """
+  if img is None:
+    return
   return cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
 def bgr_to_gray(img):
   """
   cv2.cvtColor(*, cv2.COLOR_BGR2GRAY) helper
   """
+  if img is None:
+    return
   return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 def bgr_to_hsv(img):
   """
   cv2.cvtColor(*, cv2.COLOR_BGR2HSV) helper
   """
+  if img is None:
+    return
   return cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
 def draw(frame, rects):
