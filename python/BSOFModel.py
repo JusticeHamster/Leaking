@@ -249,7 +249,7 @@ class BSOFModel:
       elif self.opencv_output:
         cv2.imshow(f'{name}', frame)
         cv2.imshow(f'{name}_gray_BS', self.now['binary']['BS'])
-        # cv2.imshow(f'{name}_subtraction', frame - self.normal_frame)
+        cv2.imshow(f'{name}_subtraction', np.abs(self.now['frame'].astype(np.int8) - self.normal_frame.astype(np.int8)))
         if cv2.waitKey(self.delay) == 27:
           self.logger.debug('ESC 停止')
           self.thread_stop = True

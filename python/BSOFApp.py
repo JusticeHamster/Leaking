@@ -151,7 +151,7 @@ class BSOFApp(kivy.app.App):
       if frame is None:
         return
       size = frame.shape[1::-1]
-      texture = Texture.create(size=size, colorfmt='rgb')
+      texture = Texture.create(size=size, colorfmt='bgr')
       self.textures[id] = texture
       self.logger.debug('找到id对应的widget，绑定texture，不存在就返回')
       widget = self.form.ids.get(id)
@@ -162,7 +162,7 @@ class BSOFApp(kivy.app.App):
         macos = 2 if self.settings['Retina'] else 1
         size = (w * self.scale * macos, h * self.scale * macos)
         kivy.graphics.Rectangle(texture=texture, size=size, pos=widget.pos)
-    self.logger.debug('------------- 初始化texture')
+    self.logger.debug('初始化texture')
     try_create_texture('now_image')
     try_create_texture('abnormal_image')
     self.dirty['frame'] = True
