@@ -1,16 +1,14 @@
-"""
-kivy
-"""
-import kivy.uix.widget
-import kivy.garden.pizza
+garden.pizza
+============
 
-class BSOFGraph(kivy.uix.widget.Widget):
-  """
-  显示类
-  """
-  @staticmethod
-  def load():
-    return kivy.garden.pizza.Pizza(serie=[
+The class Pizza draws a pizza chart.
+
+serie, chart_size, legend_color, legend_title_rayon, legend_value_rayon and
+chart_border are properties, they could be changed dynamically.
+
+Example ::
+
+    pie = Pizza(serie=[
                 ["Français", 5, 'a9a9a9'],
                 ["Belge", 25, '808080'],
                 ["Anglais", 20, '696969'],
