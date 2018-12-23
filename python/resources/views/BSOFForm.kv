@@ -4,80 +4,80 @@
 
 BSOFForm:        # top GUI component class
 <BSOFForm>:      # define MyForm class
+  size_hint_y: None
+  height: self.minimum_height
   BoxLayout:
+    size_hint: None, None
+    size: dp(300*2+10),dp(50+300/1080*1920+100+20)
+    orientation: 'vertical'
+    padding: [dp(10), dp(10), dp(10), dp(10)]
+    spacing: dp(10)
     BoxLayout:
-      size_hint: .6,None
-      height: now_image.height*1.1+60
-      orientation: 'vertical'
-      padding: [25, 25, 25, 25]
-      spacing: 10
-      BoxLayout:
-        size_hint: 1, None
-        height: self.minimum_height
-        spacing: 10
-        # left normal frame
-        BoxLayout:
-          orientation: 'vertical'
-          Label:
-            size_hint_y: None
-            height: now_image.height/15
-            pos: self.pos
-            font_name: 'resources/fonts/msyh'
-            font_size: 45
-            color: 0, 0, 0, 1
-            text: 'image'
-            id: image
-          Widget:
-            size_hint_y: None
-            height:self.width/1080*1920
-            id: now_image
-        # right abnormal frame
-        BoxLayout:
-          orientation: 'vertical'
-          Label:
-            size_hint_y: None
-            height: image.height
-            pos: self.pos
-            font_name: 'resources/fonts/msyh'
-            font_size: 45
-            color: 0, 0, 0, 1
-            text: 'abnormal'
-            id: abnormal
-          Widget:
-            size_hint_y: None
-            height:now_image.width
-            id: abnormal_image
-      BoxLayout:
-        size_hint: 1, None
-        height: self.minimum_height
-        RecycleView:
-          id: recycle_view
-          size_hint: .7, 1
-          viewclass: 'Label'
-          RecycleBoxLayout:
-            default_size: None, dp(20)
-            default_size_hint: 1, None
-            size_hint_y: None
-            height: self.minimum_height
-            orientation: 'vertical'
-        Button:
-          size_hint: .3, 1
-          id: pause
-          on_press: app.pause()
-          font_name: 'resources/fonts/msyh'
-          font_size: 45
-          text: 'pause'
-    # Hard Code
-    BoxLayout:
-      size_hint: .4,None
-      height: now_image.height*1.1+60
-      BoxLayout:
-        size_hint_x: .15
+      size_hint: None, None
+      size: dp(300*2+10),dp(50+300/1080*1920)
+      spacing: dp(10)
+      # left normal frame
       BoxLayout:
         orientation: 'vertical'
-        size_hint_x: .85
-        AnchorLayout:
-          size_hint_y: .7
-          id: graph_area
-        BoxLayout:
-          size_hint_y: .3
+        Label:
+          size_hint: None, None
+          size: dp(300),dp(50)
+          font_name: 'resources/fonts/msyh'
+          font_size: 45
+          color: 0, 0, 0, 1
+          text: 'image'
+          id: image
+        Widget:
+          size_hint: None, None
+          size: dp(300),dp(300/1080*1920)
+          id: now_image
+      # right abnormal frame
+      BoxLayout:
+        orientation: 'vertical'
+        Label:
+          size_hint: None, None
+          size: dp(300),dp(50)
+          pos: self.pos
+          font_name: 'resources/fonts/msyh'
+          font_size: 45
+          color: 0, 0, 0, 1
+          text: 'abnormal'
+          id: abnormal
+        Widget:
+          size_hint: None, None
+          size: dp(300),dp(300/1080*1920)
+          id: abnormal_image
+    BoxLayout:
+      size_hint: None, None
+      size: dp(300*2+10),dp(100)
+      RecycleView:
+        id: recycle_view
+        size_hint: .7, 1
+        viewclass: 'Label'
+        RecycleBoxLayout:
+          default_size: None, dp(20)
+          default_size_hint: 1, None
+          size_hint_y: None
+          height: self.minimum_height
+          orientation: 'vertical'
+      Button:
+        size_hint: .3, 1
+        id: pause
+        on_press: app.pause()
+        font_name: 'resources/fonts/msyh'
+        font_size: 45
+        text: 'pause'
+  # Hard Code
+  BoxLayout:
+    size_hint: .4,None
+    height: now_image.height*1.1+dp(5)
+    BoxLayout:
+      size_hint_x: .15
+    BoxLayout:
+      orientation: 'vertical'
+      size_hint_x: .85
+      AnchorLayout:
+        size_hint_y: .7
+        id: graph_area
+      BoxLayout:
+        size_hint_y: .3
