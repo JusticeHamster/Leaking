@@ -5,18 +5,14 @@
 BSOFForm:        # top GUI component class
 <BSOFForm>:      # define MyForm class
   BoxLayout:
-    orientation: 'horizontal'
-    padding: [25, 25, 25, 25]
-    spacing: 10
     BoxLayout:
-      size_hint_x: None
-      width:1500
+      size_hint: .6,1
       orientation: 'vertical'
+      padding: [25, 25, 25, 25]
       spacing: 10
       BoxLayout:
-        size_hint: None,None
-        size: 1350, 1200
-        spacing: 20
+        size_hint: 1, .85
+        spacing: 10
         # left normal frame
         BoxLayout:
           orientation: 'vertical'
@@ -44,8 +40,7 @@ BSOFForm:        # top GUI component class
             size_hint: 1, .9
             id: abnormal_image
       BoxLayout:
-        size_hint: None,None
-        size: 1300, 200
+        size_hint: 1, .15
         RecycleView:
           id: recycle_view
           size_hint: .7, 1
@@ -64,17 +59,15 @@ BSOFForm:        # top GUI component class
           font_size: 45
           text: 'pause'
     # Hard Code
-    # BoxLayout:
-    #   size_hint_x:None
-    #   size_hint_y:1
-    #   width:100
-    #   BoxLayout:
-    #     orientation: 'vertical'
-    AnchorLayout:
-      size_hint_x:None
-      width:800
-      id: graph_area
-        # BoxLayout:
-        #   size_hint_y: .3
-
-# 2200 1400
+    BoxLayout:
+      size_hint: .4,1
+      BoxLayout:
+        size_hint_x: .15
+      BoxLayout:
+        orientation: 'vertical'
+        size_hint_x: .85
+        AnchorLayout:
+          size_hint_y: .85
+          id: graph_area
+        BoxLayout:
+          size_hint_y: .15
