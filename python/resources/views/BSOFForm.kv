@@ -7,7 +7,7 @@ BSOFForm:        # top GUI component class
   BoxLayout:
     BoxLayout:
       size_hint: .6,None
-      height: self.minimum_height
+      height: now_image.height*1.1+60
       orientation: 'vertical'
       padding: [25, 25, 25, 25]
       spacing: 10
@@ -20,7 +20,8 @@ BSOFForm:        # top GUI component class
           orientation: 'vertical'
           Label:
             size_hint_y: None
-            height: now_image.height/10
+            height: now_image.height/15
+            pos: self.pos
             font_name: 'resources/fonts/msyh'
             font_size: 45
             color: 0, 0, 0, 1
@@ -35,7 +36,8 @@ BSOFForm:        # top GUI component class
           orientation: 'vertical'
           Label:
             size_hint_y: None
-            height: now_image.height
+            height: image.height
+            pos: self.pos
             font_name: 'resources/fonts/msyh'
             font_size: 45
             color: 0, 0, 0, 1
@@ -67,7 +69,8 @@ BSOFForm:        # top GUI component class
           text: 'pause'
     # Hard Code
     BoxLayout:
-      size_hint: .4,1
+      size_hint: .4,None
+      height: now_image.height*1.1+60
       BoxLayout:
         size_hint_x: .15
       BoxLayout:
