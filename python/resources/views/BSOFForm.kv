@@ -6,18 +6,21 @@ BSOFForm:        # top GUI component class
 <BSOFForm>:      # define MyForm class
   BoxLayout:
     BoxLayout:
-      size_hint: .6,1
+      size_hint: .6,None
+      height: self.minimum_height
       orientation: 'vertical'
       padding: [25, 25, 25, 25]
       spacing: 10
       BoxLayout:
-        size_hint: 1, .85
+        size_hint: 1, None
+        height: self.minimum_height
         spacing: 10
         # left normal frame
         BoxLayout:
           orientation: 'vertical'
           Label:
-            size_hint: 1, .1
+            size_hint_y: None
+            height: now_image.height/10
             font_name: 'resources/fonts/msyh'
             font_size: 45
             color: 0, 0, 0, 1
@@ -31,7 +34,8 @@ BSOFForm:        # top GUI component class
         BoxLayout:
           orientation: 'vertical'
           Label:
-            size_hint: 1, .1
+            size_hint_y: None
+            height: now_image.height
             font_name: 'resources/fonts/msyh'
             font_size: 45
             color: 0, 0, 0, 1
@@ -39,10 +43,11 @@ BSOFForm:        # top GUI component class
             id: abnormal
           Widget:
             size_hint_y: None
-            height:self.width/1080*1920
+            height:now_image.width
             id: abnormal_image
       BoxLayout:
-        size_hint: 1, .15
+        size_hint: 1, None
+        height: self.minimum_height
         RecycleView:
           id: recycle_view
           size_hint: .7, 1
