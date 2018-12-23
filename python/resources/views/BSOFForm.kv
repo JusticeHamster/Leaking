@@ -24,7 +24,8 @@ BSOFForm:        # top GUI component class
             text: 'image'
             id: image
           Widget:
-            size_hint: 1, .9
+            size_hint_y: None
+            height:self.width/1080*1920
             id: now_image
         # right abnormal frame
         BoxLayout:
@@ -37,7 +38,8 @@ BSOFForm:        # top GUI component class
             text: 'abnormal'
             id: abnormal
           Widget:
-            size_hint: 1, .9
+            size_hint_y: None
+            height:self.width/1080*1920
             id: abnormal_image
       BoxLayout:
         size_hint: 1, .15
