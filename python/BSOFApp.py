@@ -224,7 +224,9 @@ class BSOFApp(kivy.app.App):
     scale 为缩放比例
     """
     w, h = self.model.now['size']
-    self.wsize = (w * 4.4 * self.scale, h / .6885 * self.scale)
+    # self.wsize = (w * 4.4 * self.scale, h / .6885 * self.scale)
+    # TODO: wsize
+    self.wsize = (1100,1000)
     self.dirty['video'] = True
     self.logger.debug(self.wsize)
 
