@@ -5,66 +5,68 @@
 BSOFForm:        # top GUI component class
 <BSOFForm>:      # define MyForm class
   BoxLayout:
-    orientation: 'vertical'
     padding: [25, 25, 25, 25]
     spacing: 10
-    BoxLayout:
-      size_hint: 1, .85
-      spacing: 10
-      # left normal frame
-      BoxLayout:
-        orientation: 'vertical'
-        Label:
-          size_hint: 1, .1
-          font_name: 'resources/fonts/msyh'
-          font_size: 45
-          color: 0, 0, 0, 1
-          text: 'image'
-          id: image
-        Widget:
-          size_hint: 1, .9
-          id: now_image
-      # right abnormal frame
-      BoxLayout:
-        orientation: 'vertical'
-        Label:
-          size_hint: 1, .1
-          font_name: 'resources/fonts/msyh'
-          font_size: 45
-          color: 0, 0, 0, 1
-          text: 'abnormal'
-          id: abnormal
-        Widget:
-          size_hint: 1, .9
-          id: abnormal_image
-    BoxLayout:
-      size_hint: 1, .15
-      RecycleView:
-        id: recycle_view
-        size_hint: .7, 1
-        viewclass: 'Label'
-        RecycleBoxLayout:
-          default_size: None, dp(20)
-          default_size_hint: 1, None
-          size_hint_y: None
-          height: self.minimum_height
-          orientation: 'vertical'
-      Button:
-        size_hint: .3, 1
-        id: pause
-        on_press: app.pause()
-        font_name: 'resources/fonts/msyh'
-        font_size: 45
-        text: 'pause'
-  # Hard Code
-  BoxLayout:
-    BoxLayout:
-      size_hint_x: .15
+    size_hint: .6, 1
     BoxLayout:
       orientation: 'vertical'
-      size_hint_x: .85
-      AnchorLayout:
-        size_hint_y: .85
-        id: graph_area
+      padding: [25, 25, 25, 25]
+      spacing: 10
       BoxLayout:
-        size_hint_y: .15
+        size_hint: 1, .85
+        spacing: 10
+        # left normal frame
+        BoxLayout:
+          orientation: 'vertical'
+          Label:
+            size_hint: 1, .1
+            font_name: 'resources/fonts/msyh'
+            font_size: 45
+            color: 0, 0, 0, 1
+            text: 'image'
+            id: image
+          Widget:
+            size_hint: 1, .9
+            id: now_image
+        # right abnormal frame
+        BoxLayout:
+          orientation: 'vertical'
+          Label:
+            size_hint: 1, .1
+            font_name: 'resources/fonts/msyh'
+            font_size: 45
+            color: 0, 0, 0, 1
+            text: 'abnormal'
+            id: abnormal
+          Widget:
+            size_hint: 1, .9
+            id: abnormal_image
+      BoxLayout:
+        size_hint: 1, .15
+        RecycleView:
+          id: recycle_view
+          size_hint: .7, 1
+          viewclass: 'Label'
+          RecycleBoxLayout:
+            default_size: None, dp(20)
+            default_size_hint: 1, None
+            size_hint_y: None
+            height: self.minimum_height
+            orientation: 'vertical'
+        Button:
+          size_hint: .3, 1
+          id: pause
+          on_press: app.pause()
+          font_name: 'resources/fonts/msyh'
+          font_size: 45
+          text: 'pause'
+    # Hard Code
+    BoxLayout:
+      size_hint: .4, 1
+      BoxLayout:
+        orientation: 'vertical'
+        AnchorLayout:
+          size_hint_y: .7
+          id: graph_area
+        BoxLayout:
+          size_hint_y: .3
