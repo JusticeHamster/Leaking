@@ -137,6 +137,27 @@ class BSOFModel:
       abnormal['BS'] = gray_to_bgr(BS_binary) & src
     return rects, abnormal
 
+  """
+  类别常量
+  """
+  '''液体异常'''
+  ACID_SOLUTION     = '酸碱溶液'
+  WATER             = '水'
+  EDIBLE_OIL        = '食用油'
+  MOTOR_OIL         = '机油'
+  COAL_WATER_SLURRY = '水煤浆'
+  '''气体异常'''
+  WATER_VAPOR       = '水蒸气'
+  SMOKE             = '烟'
+  '''明火异常'''
+  OPEN_FIRE         = '明火'
+  ELECTRIC_SPARK    = '电火花'
+  '''粉尘异常'''
+  LEAKAGE_DUST      = '漏料粉尘'
+  FUNNEL_COAL_ASH   = '漏斗煤灰'
+  '''未知'''
+  UNKNOWN           = 'unknown'
+
   @lktools.Timer.timer_decorator
   def judge(self, src, rects, binary):
     """
@@ -149,6 +170,9 @@ class BSOFModel:
 
     Self:
       judge_cache:   可长期持有的缓存，如果需要处理多帧的话
+
+    Return:
+      ( (class, probablity), ... )
     """
     self.logger.debug('第一个框是检测范围，不是异常')
     if len(rects) <= 1:
@@ -156,7 +180,20 @@ class BSOFModel:
     rects = rects[1:]
     self.logger.debug('首先准备一个该帧的HSV图像')
     # _ = bgr_to_hsv(src)
-    return
+    # 测试所有类别的颜色等信息
+    return (
+      (BSOFModel.ACID_SOLUTION    , 9),
+      (BSOFModel.WATER            , 9),
+      (BSOFModel.EDIBLE_OIL       , 9),
+      (BSOFModel.MOTOR_OIL        , 9),
+      (BSOFModel.COAL_WATER_SLURRY, 9),
+      (BSOFModel.WATER_VAPOR      , 9),
+      (BSOFModel.SMOKE            , 9),
+      (BSOFModel.OPEN_FIRE        , 9),
+      (BSOFModel.ELECTRIC_SPARK   , 9),
+      (BSOFModel.LEAKAGE_DUST     , 9),
+      (BSOFModel.FUNNEL_COAL_ASH  , 10),
+    )
 
   @lktools.Timer.timer_decorator
   def one_video(self, path):

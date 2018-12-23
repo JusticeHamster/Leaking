@@ -52,14 +52,14 @@ class BSOFApp(kivy.app.App):
       state:           当前状态，可以暂停:{RUNNING, PAUSED}
       scale:           视频缩放
       wsize:           当前window size
-      classes:         分类信息，格式为pizza格式[ ['title', percentage, 'color'], ... ]
+      classes:         分类信息，格式为pizza格式( ('title', percentage, 'color'), ... )
     """
     self.settings = lktools.Loader.get_settings()
     self.logger   = lktools.LoggerFactory.LoggerFactory('App').logger
     self.model    = BSOFModel(False)
     self.textures = {}
     self.clock    = kivy.clock.Clock.schedule_interval(self.on_clock, 1 / self.settings['app_fps'])
-    self.dirty    = {'frame': False, 'video': False}
+    self.dirty    = {'frame': False, 'video': False, 'classes': False}
     self.state    = BSOFApp.RUNNING
     self.scale    = self.settings['scale']
     self.wsize    = None
@@ -120,6 +120,32 @@ class BSOFApp(kivy.app.App):
       self.logger.debug('需要resize')
       kivy.core.window.Window.size = self.wsize
       self.dirty['video'] = False
+    if self.dirty['classes']:
+      self.logger.debug('重画pizza')
+      self.form.pizza(self.classes)
+      self.dirty['classes'] = False
+
+  """
+  不同分类对应的颜色
+  """
+  color = {
+    # 液体异常
+    BSOFModel.ACID_SOLUTION     : 'EE00EE',
+    BSOFModel.WATER             : 'BBFFFF',
+    BSOFModel.EDIBLE_OIL        : 'EEC900',
+    BSOFModel.MOTOR_OIL         : '000000',
+    BSOFModel.COAL_WATER_SLURRY : '696969',
+    # 气体异常
+    BSOFModel.WATER_VAPOR       : 'FCFCFC',
+    BSOFModel.SMOKE             : 'D9D9D9',
+    # 明火异常
+    BSOFModel.OPEN_FIRE         : 'EE0000',
+    BSOFModel.ELECTRIC_SPARK    : 'EEEE00',
+    # 粉尘异常
+    BSOFModel.LEAKAGE_DUST      : '00FFFF',
+    BSOFModel.FUNNEL_COAL_ASH   : '000080',
+  }
+  UNKNOWN_COLOR = '00FF00',
 
   def every_frame(self):
     """
@@ -132,6 +158,7 @@ class BSOFApp(kivy.app.App):
       frame:         当前帧的uint8拷贝
       frame_rects:   当前帧（框出异常）
       binary:        二值图像（是一个dict，包含{'OF', 'BS'}两种，详情见BSOFModel）
+      classes:       分类信息，格式为( ('class', probablity), ... )
       size:          图像大小
 
     当然也可以直接读取self.model的变量，但请不要从这里修改
@@ -161,6 +188,12 @@ class BSOFApp(kivy.app.App):
     try_create_texture('now_image')
     try_create_texture('abnormal_image')
     self.dirty['frame'] = True
+
+    self.logger.debug('更新分类信息')
+    classes = self.model.now['classes']
+    if classes is not None:
+      self.classes = tuple(map(lambda i: (*i, BSOFApp.color.get(i[0], BSOFApp.UNKNOWN_COLOR)), classes))
+      self.dirty['classes'] = True
 
   def before_every_video(self):
     """
@@ -194,10 +227,6 @@ class BSOFApp(kivy.app.App):
     self.wsize = (w * 4.4 * self.scale, h / .6885 * self.scale)
     self.dirty['video'] = True
     self.logger.debug(self.wsize)
-
-    self.logger.debug('pizza更新测试')
-    self.classes.append(['a', 10, 'ccccff'])
-    self.form.pizza(self.classes)
 
   RUNNING = 'running'
   PAUSED = 'paused'

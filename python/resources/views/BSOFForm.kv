@@ -6,7 +6,6 @@ BSOFForm:        # top GUI component class
 <BSOFForm>:      # define MyForm class
   BoxLayout:
     orientation: 'vertical'
-    size_hint: .5, 1
     padding: [25, 25, 25, 25]
     spacing: 10
     BoxLayout:
@@ -57,6 +56,15 @@ BSOFForm:        # top GUI component class
         font_name: 'resources/fonts/msyh'
         font_size: 45
         text: 'pause'
-  AnchorLayout:
-    size_hint: .5, 1
-    id: graph_area
+  # 比较强硬的挤上去的
+  BoxLayout:
+    BoxLayout:
+      size_hint_x: .15
+    BoxLayout:
+      orientation: 'vertical'
+      size_hint_x: .85
+      AnchorLayout:
+        size_hint_y: .85
+        id: graph_area
+      BoxLayout:
+        size_hint_y: .15

@@ -59,6 +59,7 @@ class Pizza(RelativeLayout):
     legend_value_rayon = NumericProperty(100)
     legend_title_rayon = NumericProperty(160)
     chart_border = NumericProperty(2)
+    font_name = StringProperty()
 
     def __init__(self, **kwargs):
         super(Pizza, self).__init__(**kwargs)
@@ -71,7 +72,8 @@ class Pizza(RelativeLayout):
             legend_color=self.update_pizza,
             legend_value_rayon=self.update_pizza,
             legend_title_rayon=self.update_pizza,
-            chart_border=self.update_pizza)
+            chart_border=self.update_pizza,
+            font_name=self.update_pizza)
         self.bind(
             pos=self.update_label,
             size=self.update_label,
@@ -80,7 +82,8 @@ class Pizza(RelativeLayout):
             legend_color=self.update_label,
             legend_value_rayon=self.update_label,
             legend_title_rayon=self.update_label,
-            chart_border=self.update_label)
+            chart_border=self.update_label,
+            font_name=self.update_label)
 
     def update_pizza(self, *args):
         '''
@@ -142,23 +145,29 @@ class Pizza(RelativeLayout):
             title_x_pt = (math.sin(angle)) * self.legend_title_rayon
             title_y_pt = (math.cos(angle)) * self.legend_title_rayon
 
-            # Title
-            self.add_widget(Label(
-                size_hint=(None, None),
-                text="[color=" + self.legend_color + "]" +
-                title + "[/color]",
-                center_x=self.chart_center + title_x_pt,
-                center_y=self.chart_center + title_y_pt,
-                markup=True))
+            title_args = {
+                'size_hint'     : (None, None),
+                'text'          : f'[color={self.legend_color}]{title}[/color]',
+                'center_x'      : self.chart_center + title_x_pt,
+                'center_y'      : self.chart_center + title_y_pt,
+                'markup'        : True,
+            }
+            # 反色
+            value_color = ''.join(map(lambda c: f'{0xf - int(c, 16):x}', color))
+            value_args = {
+                'size_hint'     : (None, None),
+                'text'          : f'[color={value_color}]{str(value)}[/color]',
+                'center_x'      : self.chart_center + value_x_pt,
+                'center_y'      : self.chart_center + value_y_pt,
+                'markup'        : True,
+            }
 
-            # Value
-            self.add_widget(Label(
-                size_hint=(None, None),
-                text="[color=" + self.legend_color + "]" +
-                str(value) + "[/color]",
-                center_x=self.chart_center + value_x_pt,
-                center_y=self.chart_center + value_y_pt,
-                markup=True))
+            if len(self.font_name) != 0:
+                title_args['font_name'] = self.font_name
+                value_args['font_name'] = self.font_name
+
+            self.add_widget(Label(**title_args))
+            self.add_widget(Label(**value_args))
 
             offset_rotation += value * 3.6
 
