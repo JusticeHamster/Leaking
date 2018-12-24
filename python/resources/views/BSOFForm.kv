@@ -24,7 +24,7 @@ BSOFForm:        # top GUI component class
           size_hint: None, None
           size: dp(300),dp(50)
           font_name: 'resources/fonts/msyh'
-          font_size: 45
+          font_size: dp(30)
           color: 0, 0, 0, 1
           text: 'image'
           id: image
@@ -40,7 +40,7 @@ BSOFForm:        # top GUI component class
           size: dp(300),dp(50)
           pos: self.pos
           font_name: 'resources/fonts/msyh'
-          font_size: 45
+          font_size: dp(30)
           color: 0, 0, 0, 1
           text: 'abnormal'
           id: abnormal
@@ -70,8 +70,9 @@ BSOFForm:        # top GUI component class
         text: 'pause'
   # Hard Code
   BoxLayout:
-    size_hint: .4,None
+    size_hint: None,None
     height: now_image.height*1.1+dp(5)
+    width: dp(400)
     BoxLayout:
       size_hint_x: .15
     BoxLayout:

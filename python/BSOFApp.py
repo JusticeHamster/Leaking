@@ -225,10 +225,10 @@ class BSOFApp(kivy.app.App):
     (w * (2 + 2 + 0.4), h / (0.9 * 0.85 * .9)) 由kivy文件中的比例所定
     scale 为缩放比例
     """
-    w, h = self.model.now['size']
-    # self.wsize = (w * 4.4 * self.scale, h / .6885 * self.scale)
-    # TODO: wsize
-    self.wsize = (dp(300*2+10-100),dp(50+300/1080*1920+50+20-300))
+    if self.settings['Retina']:
+      self.wsize = (dp(300*2+10-100),dp(50+300/1080*1920+50+20-300))
+    else:
+      self.wsize = (dp(300*2+10+400+20),dp(50+300/1080*1920+100+20))
     self.dirty['video'] = True
     self.logger.debug(self.wsize)
 
