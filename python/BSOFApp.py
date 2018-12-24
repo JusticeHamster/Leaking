@@ -33,6 +33,7 @@ import kivy.clock
 import kivy.core.window
 import kivy.garden
 from kivy.graphics.texture import Texture
+from kivy.metrics import dp
 
 class BSOFApp(kivy.app.App):
   """
@@ -227,7 +228,7 @@ class BSOFApp(kivy.app.App):
     w, h = self.model.now['size']
     # self.wsize = (w * 4.4 * self.scale, h / .6885 * self.scale)
     # TODO: wsize
-    self.wsize = (1100,1000)
+    self.wsize = (dp(300*2+10-100),dp(50+300/1080*1920+50+20-300))
     self.dirty['video'] = True
     self.logger.debug(self.wsize)
 
