@@ -283,6 +283,7 @@ class BSOFApp(kivy.app.App):
       form    窗口类
     """
     kivy.core.window.Window.bind(on_resize=self.on_resize)
+    # 设置背景色
     kivy.core.window.Window.clearcolor = (1, 1, 1, 1)
     """
     创建canvas
