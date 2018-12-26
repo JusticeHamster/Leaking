@@ -66,7 +66,8 @@ class BSOFApp(kivy.app.App):
     self.wsize    = None
     self.classes  = []
     # init data in recycle_view
-    # self.form.ids['recycle_view'].data = [{'text': '参数显示'}]
+    # self.form.ids['recycle_view'].data = [{'text': 'all paras'}]
+    kivy.core.window.Window.bind(mouse_pos = self.show_mouse_pos)
     self.logger.debug('设置回调函数')
     self.model.every_frame = self.every_frame
     self.model.before_every_video = self.before_every_video
@@ -251,6 +252,13 @@ class BSOFApp(kivy.app.App):
       self.state = BSOFApp.RUNNING
       btn.text = translate('Pause')
     self.model.pause()
+
+  def show_mouse_pos(self, _ , pos):
+    x=pos[0]
+    y=pos[1]
+    pos=f'x:{x}\ny:{y}'
+    self.form.ids['recycle_view'].text = pos
+
 
   def on_stop(self):
     """

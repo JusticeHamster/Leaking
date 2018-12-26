@@ -38,7 +38,6 @@ BSOFForm:        # top GUI component class
         Label:
           size_hint: None, None
           size: dp(300),dp(50)
-          pos: self.pos
           font_name: 'resources/fonts/msyh'
           font_size: sp(30)
           color: 0, 0, 0, 1
@@ -51,23 +50,39 @@ BSOFForm:        # top GUI component class
     BoxLayout:
       size_hint: None, None
       size: dp(300*2+10),dp(100)
-      RecycleView:
+      spacing:dp(10)
+      # RecycleView:
+      #   id: recycle_view
+      #   size_hint: .6, 1
+      #   viewclass: 'Label'
+      #   color: 0, 0, 0, 1
+      #   RecycleBoxLayout:
+      #     default_size: None, dp(50)
+      #     default_size_hint: 1, None
+      #     size_hint_y: None
+      #     height: self.minimum_height   
+      #     orientation: 'vertical'
+      TextInput:
+        multiline: True
         id: recycle_view
-        size_hint: .7, 1
-        viewclass: 'Label'
-        RecycleBoxLayout:
-          default_size: None, dp(20)
-          default_size_hint: 1, None
-          size_hint_y: None
-          height: self.minimum_height
-          orientation: 'vertical'
+        size_hint: .6, 1
+        color: 0, 0, 0, 1
+        font_name: 'resources/fonts/msyh'
+        text: 'mouse pos'
       Button:
-        size_hint: .3, 1
+        size_hint: .2, 1
         id: pause
         on_press: app.pause()
         font_name: 'resources/fonts/msyh'
-        font_size: sp(45)
+        font_size: sp(30)
         text: 'pause'
+      Button:
+        size_hint: .2, 1
+        id: rect
+        on_press: app.show_mouse_pos()
+        font_name: 'resources/fonts/msyh'
+        font_size: sp(30)
+        text: 'test'
   # Hard Code
   BoxLayout:
     size_hint: None,None
