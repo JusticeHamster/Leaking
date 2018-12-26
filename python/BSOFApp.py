@@ -65,9 +65,6 @@ class BSOFApp(kivy.app.App):
     self.scale    = self.settings['scale']
     self.wsize    = None
     self.classes  = []
-    # init data in recycle_view
-    # self.form.ids['recycle_view'].data = [{'text': 'all paras'}]
-    kivy.core.window.Window.bind(mouse_pos = self.show_mouse_pos)
     self.logger.debug('设置回调函数')
     self.model.every_frame = self.every_frame
     self.model.before_every_video = self.before_every_video
@@ -182,9 +179,6 @@ class BSOFApp(kivy.app.App):
       if widget is None:
         return
       with widget.canvas:
-        # w, h = self.model.now['size']
-        # macos = 2 if self.settings['Retina'] else 1
-        # size = (w * self.scale * macos, h * self.scale * macos)
         size = self.form.ids.get('now_image').size
         kivy.graphics.Rectangle(texture=texture, size=size, pos=widget.pos)
     self.logger.debug('初始化texture')
@@ -253,12 +247,8 @@ class BSOFApp(kivy.app.App):
       btn.text = translate('Pause')
     self.model.pause()
 
-  def show_mouse_pos(self, _ , pos):
-    x=pos[0]
-    y=pos[1]
-    pos=f'x:{x}\ny:{y}'
-    self.form.ids['recycle_view'].text = pos
-
+  def on_mouse_pos(self, window , pos):
+    self.form.ids['recycle_view'].text = f'x:{pos[0]}\ny:{pos[1]}'
 
   def on_stop(self):
     """
@@ -293,6 +283,8 @@ class BSOFApp(kivy.app.App):
       form    窗口类
     """
     kivy.core.window.Window.bind(on_resize=self.on_resize)
+    kivy.core.window.Window.bind(mouse_pos=self.on_mouse_pos)
+    # 设置背景色
     kivy.core.window.Window.clearcolor = (1, 1, 1, 1)
     """
     创建canvas

@@ -109,9 +109,6 @@ class BSOFModel:
     frame = self.fgbg.apply(frame)
     self.logger.debug('Binary')
     _, binary = cv2.threshold(frame, 127, 255, cv2.THRESH_BINARY)
-    # 自适应阈值辣鸡
-    # binary = cv2.adaptiveThreshold(frame,255,cv2.ADAPTIVE_THRESH_MEAN_C,\
-    #                 cv2.THRESH_BINARY,3,5)
     self.logger.debug('Denoise')
     binary = denoise(binary, 'bilater')
     binary = denoise(binary, 'morph_open')
