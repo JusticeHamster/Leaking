@@ -221,14 +221,16 @@ class BSOFApp(kivy.app.App):
     """
     resize
 
-    解释:          留空       Label Layout 留空
-    (w * (2 + 2 + 0.4), h / (0.9 * 0.85 * .9)) 由kivy文件中的比例所定
-    scale 为缩放比例
+    解释:window上大小经过严格计算
+    width:300*2(两个视频宽度)+10(两视频中间spacing)+400(饼图宽度)+20(视频和饼图spacing)
+    height:50(label高度)+300/1080*1920(视频高度)+100(button高度)+10(button和视频的spacing)+20(上下高度padding)
+    retina:-520和-350是玄学出来的
+    各参数由kivy文件中的比例所定
     """
     if self.settings['Retina']:
-      self.wsize = (dp(300*2+10-100),dp(50+300/1080*1920+50+20-300))
+      self.wsize = (dp(300*2+10+400+20-520),dp(50+300/1080*1920+100+10+20-350))
     else:
-      self.wsize = (dp(300*2+10+400+20),dp(50+300/1080*1920+100+20))
+      self.wsize = (dp(300*2+10+400+20),dp(50+300/1080*1920+100+10+20))
     self.dirty['video'] = True
     self.logger.debug(self.wsize)
 
