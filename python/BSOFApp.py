@@ -247,7 +247,7 @@ class BSOFApp(kivy.app.App):
       btn.text = translate('Pause')
     self.model.pause()
 
-  def touch_down(self, x, y):
+  def on_mouse_pos(self, x, y):
     self.form.ids['parameter'].text = f'x:{x}\ny:{y}'
 
   def on_stop(self):
