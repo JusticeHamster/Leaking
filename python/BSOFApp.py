@@ -181,8 +181,8 @@ class BSOFApp(kivy.app.App):
       if widget is None:
         return
       with widget.canvas:
-        w, h = self.model.now['size']
-        macos = 2 if self.settings['Retina'] else 1
+        # w, h = self.model.now['size']
+        # macos = 2 if self.settings['Retina'] else 1
         # size = (w * self.scale * macos, h * self.scale * macos)
         size = self.form.ids.get('now_image').size
         kivy.graphics.Rectangle(texture=texture, size=size, pos=widget.pos)
