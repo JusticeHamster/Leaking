@@ -10,7 +10,7 @@ import cv2
 lktools
 """
 import lktools.Timer
-from lktools.PreProcess   import get_rect_property, video_capture_size, bgr_to_hsv, gray_to_bgr, subtraction
+from lktools.PreProcess   import video_capture_size, bgr_to_hsv, gray_to_bgr, subtraction
 from lktools.OpticalFlow  import optical_flow_rects
 from lktools.SIFT         import siftImageAlignment
 from lktools.Denoise      import denoise
@@ -34,6 +34,7 @@ class BSOFModel:
       before_every_video:  回调函数，每个视频开始前调用，方便其它程序处理
       thread_stop:         判断该线程是否该终止，由持有该模型的宿主修改
       state:               是否暂停
+      box_scale:           蓝框的比例(<leftdown>, <rightup>)
 
     做一次clear
     """
@@ -49,6 +50,7 @@ class BSOFModel:
     self.before_every_video = None
     self.thread_stop        = False
     self.state              = BSOFModel.RUNNING
+    self.box_scale          = ((1 / 16, 1 / 4), (15 / 16, 2.9 / 4))
     self.setup()
 
   def __getattribute__(self, name):
@@ -74,13 +76,12 @@ class BSOFModel:
         exit(1)
 
   @lktools.Timer.timer_decorator
-  def catch_abnormal(self, src, size):
+  def catch_abnormal(self, src):
     """
     对一帧图像进行处理，找到异常就用框圈出来。
 
     Args:
       src:    原图
-      size:   图片尺寸，生成框使用
 
     Self:
       lastn:  前N帧图片，用于对齐
@@ -93,7 +94,7 @@ class BSOFModel:
     """
     frame = src
     self.logger.debug('rect')
-    rect = get_rect_property(size) 
+    rect = self.box
     self.logger.debug('optical flow')
     if self.OF:
       flow_rects, OF_binary = optical_flow_rects(
@@ -118,8 +119,8 @@ class BSOFModel:
     BS_binary = binary
     self.logger.debug('findObject')
     bs_rects = findObject(binary, rect)
-    self.logger.debug('rects')
-    rects = [rect]
+    self.logger.debug('蓝框')
+    rects = [(*rect, (0xFF, 0, 0))]
     rects.extend(bs_rects)
     if self.OF:
       rects.extend(flow_rects)
@@ -306,14 +307,14 @@ class BSOFModel:
         )
         self.fgbg.apply(self.lastn)
       self.last = original
-    def trim(frame, size):
+    def trim(frame):
       """
       对图片进行裁剪
       """
       if self.rect_mask is None:
-        (x1, y1), (x2, y2), *_ = get_rect_property(size)
+        (x1, y1), (x2, y2) = self.box
         self.rect_mask = np.zeros(frame.shape, dtype=np.uint8)
-        self.rect_mask[y2:y1, x1:x2] = 255
+        self.rect_mask[y1:y2, x1:x2] = 255
       return self.rect_mask & frame.copy()
 
     self.logger.debug('----------------------')
@@ -350,11 +351,11 @@ class BSOFModel:
 
       self.logger.debug('裁剪原始图片')
 
-      frame = trim(frame, size)
+      frame = trim(frame)
 
       self.logger.debug('找到异常的矩形（其中第一个矩形为检测范围的矩形）')
 
-      rects, abnormal = self.catch_abnormal(frame, size)
+      rects, abnormal = self.catch_abnormal(frame)
 
       self.logger.debug('分类')
 
@@ -394,15 +395,16 @@ class BSOFModel:
     """
     每个视频处理完之后对相关变量的清理
 
-    videowriter: 会在这里release，并且设置为None
-    cv:          会清理所有窗口
-    judge_cache: judge使用的缓存，初始化为空list
-    nframes:     计数器，为loop使用，初始化为0
-    last:        上一帧
-    lastn:       前N帧
-    fgbg:        BS_MOG2模型
-    now:         存储处理过程的当前帧等信息，是dict
-    normal_frame:正常帧
+    videowriter:  会在这里release，并且设置为None
+    cv:           会清理所有窗口
+    judge_cache:  judge使用的缓存，初始化为空list
+    nframes:      计数器，为loop使用，初始化为0
+    last:         上一帧
+    lastn:        前N帧
+    fgbg:         BS_MOG2模型
+    now:          存储处理过程的当前帧等信息，是dict
+    normal_frame: 正常帧
+    box_cache:    缓存box的具体坐标
     """
     self.logger.debug('导出视频')
     if self.file_output and (self.videoWriter is not None):
@@ -421,6 +423,41 @@ class BSOFModel:
     )
     self.now = {}
     self.normal_frame = None
+    self.box_cache = None
+
+  @property
+  def box(self):
+    """
+    计算当前蓝框的具体坐标
+    放入缓存box_cache
+    """
+    if self.box_cache is not None:
+      return self.box_cache
+    size = self.now.get('size')
+    if size is None:
+      return
+    (x1, y1), (x2, y2) = self.box_scale
+    w, h = size
+    self.box_cache = (
+      (int(x1 * w), h - int(y2 * h)),
+      (int(x2 * w), h - int(y1 * h))
+    )
+    self.logger.info(self.box_cache)
+    return self.box_cache
+
+  @box.setter
+  def box(self, rect):
+    """
+    根据一个比例的rect改变box的位置。
+    不影响其它参数（如color）
+
+    example:
+      ((0.0, 0.5), (0.5, 1.0))
+        leftdown     rightup
+    """
+    self.box_scale = rect
+    self.box_cache = None
+    self.rect_mask = None
 
   RUNNING = 'running'
   PAUSED  = 'paused'

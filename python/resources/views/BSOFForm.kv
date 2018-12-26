@@ -32,8 +32,8 @@ BSOFForm:        # top GUI component class
           size_hint: None, None
           size: dp(300),dp(300/1080*1920)
           id: now_image
-          on_touch_down: app.on_mouse_pos(args[1].pos[0]-self.x, args[1].pos[1]-self.y)
-          on_touch_up: app.on_mouse_pos(args[1].pos[0]-self.x, args[1].pos[1]-self.y)
+          on_touch_down: app.on_mouse_down(args[1].pos, self.pos, self.size)
+          on_touch_up: app.on_mouse_up(args[1].pos, self.pos, self.size)
       # right abnormal frame
       BoxLayout:
         orientation: 'vertical'

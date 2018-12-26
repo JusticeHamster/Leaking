@@ -16,6 +16,7 @@ lktools
 import lktools.Loader
 import lktools.LoggerFactory
 from lktools.Translator import translate
+from lktools.PreProcess import point_in_rect, trim_to_rect
 """
 GUI
   warning: 必须导入，用于kivy创建类
@@ -50,9 +51,10 @@ class BSOFApp(kivy.app.App):
       textures:        缓存
       clock:           定时调用
       dirty:           判断是否处理完一帧(视频)，防止定时调用重复计算
-      state:           当前状态，可以暂停:{RUNNING, PAUSED}
+      states:          当前状态，包含暂停状态:{RUNNING, PAUSED}, 绘制蓝框的状态:{READY, DOING, FREEZE, NOT_READY}
       scale:           视频缩放
       wsize:           当前window size
+      mouse_pos:       鼠标位置信息
       classes:         分类信息，格式为pizza格式( ('title', percentage, 'color'), ... )
     """
     self.settings = lktools.Loader.get_settings()
@@ -61,9 +63,10 @@ class BSOFApp(kivy.app.App):
     self.textures = {}
     self.clock    = kivy.clock.Clock.schedule_interval(self.on_clock, 1 / self.settings['app_fps'])
     self.dirty    = {'frame': False, 'video': False, 'classes': False}
-    self.state    = BSOFApp.RUNNING
+    self.states   = {'APP': BSOFApp.RUNNING, 'BOX': BSOFApp.READY}
     self.scale    = self.settings['scale']
     self.wsize    = None
+    self.mouse_pos= None
     self.classes  = []
     self.logger.debug('设置回调函数')
     self.model.every_frame = self.every_frame
@@ -101,7 +104,7 @@ class BSOFApp(kivy.app.App):
       self.logger.debug('刷新canvas')
       self.form.ids[id].canvas.ask_update()
     self.logger.debug(f'------------- {delta_time}')
-    if self.state is BSOFApp.PAUSED:
+    if self.states['APP'] is BSOFApp.PAUSED:
       self.logger.debug('暂停中')
       return
     if self.model.state is BSOFModel.STOPPED:
@@ -220,7 +223,6 @@ class BSOFApp(kivy.app.App):
     width:300*2(两个视频宽度)+10(两视频中间spacing)+400(饼图宽度)+20(视频和饼图spacing)
     height:50(label高度)+300/1080*1920(视频高度)+100(button高度)+10(button和视频的spacing)+20(上下高度padding)
     retina:-520和-350是玄学出来的
-    各参数由kivy文件中的比例所定
     """
     if self.settings['Retina']:
       self.wsize = (dp(300*2+10+400+20-520),dp(50+300/1080*1920+100+10+20-350))
@@ -239,16 +241,106 @@ class BSOFApp(kivy.app.App):
     if btn is None:
       self.logger.error('pause button not found')
       return
-    if self.state is BSOFApp.RUNNING:
-      self.state = BSOFApp.PAUSED
+    if self.states['APP'] is BSOFApp.RUNNING:
+      self.states['APP'] = BSOFApp.PAUSED
       btn.text = translate('Continue')
-    elif self.state is BSOFApp.PAUSED:
-      self.state = BSOFApp.RUNNING
+    elif self.states['APP'] is BSOFApp.PAUSED:
+      self.states['APP'] = BSOFApp.RUNNING
       btn.text = translate('Pause')
     self.model.pause()
 
-  def on_mouse_pos(self, x, y):
+  @staticmethod
+  def __mouse_pos(pos, widget_pos, widget_size):
+    """
+    计算鼠标在控件中的相对位置并返回
+
+    Args:
+      pos         鼠标位置
+      widget_pos  控件位置
+      widget_size 控件长宽
+    Return:
+      若在控件内，则返回相对坐标
+      若在控件外，则返回None
+    """
+    leftdown = widget_pos
+    rightup = (leftdown[0] + widget_size[0], leftdown[1] + widget_size[1])
+    return point_in_rect(pos, (leftdown, rightup))
+
+  @staticmethod
+  def __rect_properties(old_pos, new_pos, widget_pos, widget_size):
+    """
+    计算蓝框位置的比例并返回
+    """
+    x0, y0 = widget_pos
+    w, h = widget_size
+    rect = trim_to_rect((
+      (old_pos[0] + x0, old_pos[1] + y0),
+      new_pos
+    ), (
+      widget_pos,
+      (x0 + w, y0 + h)
+    ))
+    if rect is None:
+      return
+    (x1, y1), (x2, y2) = rect
+    return (
+      ((x1 - x0) / w, (y1 - y0) / h),
+      ((x2 - x0) / w, (y2 - y0) / h)
+    )
+
+  def __mouse_pos_text(self):
+    """
+    用于鼠标位置的可视化
+    """
+    x, y = self.mouse_pos
     self.form.ids['parameter'].text = f'x:{x}\ny:{y}'
+
+  NOT_READY = 'not_ready'
+  READY     = 'ready'
+  DOING     = 'doing'
+  FREEZE    = 'freeze'
+
+  def on_mouse_down(self, pos, widget_pos, widget_size):
+    """
+    按下鼠标左键
+    """
+    if self.states['BOX'] is not BSOFApp.READY:
+      return
+    pos = BSOFApp.__mouse_pos(pos, widget_pos, widget_size)
+    if pos is None:
+      return
+    self.states['BOX'] = BSOFApp.DOING
+    self.mouse_pos = pos
+    self.__mouse_pos_text()
+    self.pause()
+
+  def on_mouse_up(self, pos, widget_pos, widget_size):
+    """
+    按下鼠标右键
+    """
+    if self.states['BOX'] is not BSOFApp.DOING:
+      return
+    self.states['BOX'] = BSOFApp.READY
+    rect = BSOFApp.__rect_properties(self.mouse_pos, pos, widget_pos, widget_size)
+    self.model.box = rect
+    self.mouse_pos = None
+    self.pause()
+
+  def on_mouse_enter(self, window):
+    """
+    鼠标进入界面事件
+    """
+    if self.states['BOX'] is not BSOFApp.FREEZE:
+      return
+    self.states['BOX'] = BSOFApp.DOING
+
+  def on_mouse_leave(self, window):
+    """
+    鼠标离开界面事件
+    """
+    if self.states['BOX'] is not BSOFApp.DOING:
+      return
+    self.states['BOX'] = BSOFApp.FREEZE
 
   def on_stop(self):
     """
@@ -283,6 +375,8 @@ class BSOFApp(kivy.app.App):
       form    窗口类
     """
     kivy.core.window.Window.bind(on_resize=self.on_resize)
+    kivy.core.window.Window.bind(on_cursor_enter=self.on_mouse_enter)
+    kivy.core.window.Window.bind(on_cursor_enter=self.on_mouse_leave)
     # 设置背景色
     kivy.core.window.Window.clearcolor = (1, 1, 1, 1)
     """
