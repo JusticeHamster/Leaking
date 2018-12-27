@@ -312,6 +312,8 @@ class BSOFApp(kivy.app.App):
     self.states['BOX'] = BSOFApp.DOING
     self.mouse_pos = pos
     self.__mouse_pos_text()
+    if self.states['APP'] is BSOFApp.PAUSED:
+      return
     self.pause()
 
   def on_mouse_up(self, pos, widget_pos, widget_size):
