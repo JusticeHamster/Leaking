@@ -443,7 +443,6 @@ class BSOFModel:
       (int(x1 * w), h - int(y2 * h)),
       (int(x2 * w), h - int(y1 * h))
     )
-    self.logger.info(self.box_cache)
     return self.box_cache
 
   @box.setter
