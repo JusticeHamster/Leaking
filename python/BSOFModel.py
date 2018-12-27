@@ -291,8 +291,9 @@ class BSOFModel:
 
         self.videoWriter.write(np.uint8(frame))
       elif self.opencv_output:
-        cv2.imshow(f'{self.pinyin}', frame)
-        cv2.imshow(f'{self.pinyin} abnormal BS', self.now['abnormal']['BS'])
+        py = self.now['pinyin']
+        cv2.imshow(f'{py}', frame)
+        cv2.imshow(f'{py} abnormal BS', self.now['abnormal']['BS'])
         if cv2.waitKey(self.delay) == 27:
           self.logger.debug('ESC 停止')
           self.thread_stop = True
@@ -410,7 +411,6 @@ class BSOFModel:
     now:          存储处理过程的当前帧等信息，是dict
     normal_frame: 正常帧
     box_cache:    缓存box的具体坐标
-    pinyin:       中文名字的拼音
     """
     self.logger.debug('导出视频')
     if self.file_output and (self.videoWriter is not None):
@@ -430,7 +430,6 @@ class BSOFModel:
     self.now = {}
     self.normal_frame = None
     self.box_cache = None
-    self.pinyin = None
 
   @property
   def box(self):
@@ -483,23 +482,26 @@ class BSOFModel:
     """
     self.clear()
 
+  def foreach(self, single_func):
+    for name, video in self.videos:
+      self.now['name'] = name
+      self.now['pinyin'] = pinyin.get_pinyin(name, ' ')
+      single_func(video)
+      if self.thread_stop:
+        break
+    self.state = BSOFModel.STOPPED
+
   def classification(self):
     """
     对每一个视频进行处理
     """
-    for name, video in self.videos:
-      self.now['name'] = name
-      self.pinyin = pinyin.get_pinyin(name, ' ')
-      self.one_video(video)
-      if self.thread_stop:
-        break
-    self.state = BSOFModel.STOPPED
+    self.foreach(self.one_video)
 
   def generate(self):
     """
     计算模型，保存到settings['model_path']
     """
-    pass
+    self.foreach(lambda video: self.logger.info(video))
 
 if __name__ == '__main__':
   model = BSOFModel(True)
