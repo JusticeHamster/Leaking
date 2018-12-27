@@ -59,7 +59,7 @@ class BSOFModel:
       如果self.NAME访问时，self不含属性NAME，则会在settings中查找。
       所以只要self和settings中含有同名属性就会报错。
 
-    请避免传入的settings与self中由同名property。
+    请避免传入的settings与self中含同名property。
     """
     try:
       obj = super().__getattribute__(name)
