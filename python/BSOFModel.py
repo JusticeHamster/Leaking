@@ -7,6 +7,11 @@ opencv
 """
 import cv2
 """
+中文转拼音
+"""
+from xpinyin import Pinyin
+pinyin = Pinyin()
+"""
 lktools
 """
 import lktools.Timer
@@ -35,6 +40,7 @@ class BSOFModel:
       thread_stop:         判断该线程是否该终止，由持有该模型的宿主修改
       state:               是否暂停
       box_scale:           蓝框的比例(<leftdown>, <rightup>)
+      model:               此次任务是否为计算model
 
     做一次clear
     """
@@ -287,8 +293,9 @@ class BSOFModel:
 
         self.videoWriter.write(np.uint8(frame))
       elif self.opencv_output:
-        cv2.imshow(f'{name}', frame)
-        cv2.imshow(f'{name}_abnormal_BS', self.now['abnormal']['BS'])
+        pinyin_name = pinyin.get_pinyin(name, ' ')
+        cv2.imshow(f'{pinyin_name}', frame)
+        cv2.imshow(f'{pinyin_name} abnormal BS', self.now['abnormal']['BS'])
         if cv2.waitKey(self.delay) == 27:
           self.logger.debug('ESC 停止')
           self.thread_stop = True
