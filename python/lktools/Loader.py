@@ -26,6 +26,7 @@ template = """{
   "frame_range"       : [0, 100],         // 取[a, b]帧
   "img_path"          : "images.tmp",     // 图片存取路径
   "video_path"        : "videos.tmp",     // 视频存取路径
+  "model_path"        : "BSOF.model",     // Models路径
   "file_output"       : false,            // 是否输出到文件夹
   "interval"          : 10,               // 用前N帧图片作为修正的标准
   "fps"               : 10,               // 保存视频帧数
@@ -79,7 +80,7 @@ def get_settings():
     (
       'path', 'debug_level',
       'img_path', 'video_path',
-      'language',
+      'language', 'model_path'
     ), str
   )
   checker.check(

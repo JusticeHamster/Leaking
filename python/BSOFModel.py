@@ -24,7 +24,7 @@ class BSOFModel:
   """
   整个模型
   """
-  def __init__(self, opencv_output, *args):
+  def __init__(self, opencv_output):
     """
     初始化必要变量
 
@@ -40,7 +40,6 @@ class BSOFModel:
       thread_stop:         判断该线程是否该终止，由持有该模型的宿主修改
       state:               是否暂停
       box_scale:           蓝框的比例(<leftdown>, <rightup>)
-      model:               此次任务是否为计算model
 
     做一次clear
     """
@@ -57,7 +56,6 @@ class BSOFModel:
     self.thread_stop        = False
     self.state              = BSOFModel.RUNNING
     self.box_scale          = ((1 / 16, 1 / 4), (15 / 16, 2.9 / 4))
-    self.model              = '--model' in args
     self.setup()
 
   def __getattribute__(self, name):
@@ -293,9 +291,8 @@ class BSOFModel:
 
         self.videoWriter.write(np.uint8(frame))
       elif self.opencv_output:
-        pinyin_name = pinyin.get_pinyin(name, ' ')
-        cv2.imshow(f'{pinyin_name}', frame)
-        cv2.imshow(f'{pinyin_name} abnormal BS', self.now['abnormal']['BS'])
+        cv2.imshow(f'{self.pinyin}', frame)
+        cv2.imshow(f'{self.pinyin} abnormal BS', self.now['abnormal']['BS'])
         if cv2.waitKey(self.delay) == 27:
           self.logger.debug('ESC 停止')
           self.thread_stop = True
@@ -413,6 +410,7 @@ class BSOFModel:
     now:          存储处理过程的当前帧等信息，是dict
     normal_frame: 正常帧
     box_cache:    缓存box的具体坐标
+    pinyin:       中文名字的拼音
     """
     self.logger.debug('导出视频')
     if self.file_output and (self.videoWriter is not None):
@@ -432,6 +430,7 @@ class BSOFModel:
     self.now = {}
     self.normal_frame = None
     self.box_cache = None
+    self.pinyin = None
 
   @property
   def box(self):
@@ -484,17 +483,29 @@ class BSOFModel:
     """
     self.clear()
 
-  def run(self):
+  def classification(self):
     """
     对每一个视频进行处理
     """
     for name, video in self.videos:
       self.now['name'] = name
+      self.pinyin = pinyin.get_pinyin(name, ' ')
       self.one_video(video)
       if self.thread_stop:
         break
     self.state = BSOFModel.STOPPED
 
+  def generate(self):
+    """
+    计算模型，保存到settings['model_path']
+    """
+    pass
+
 if __name__ == '__main__':
-  from sys import argv
-  BSOFModel(True, *argv[1:]).run()
+  model = BSOFModel(True)
+  import sys
+  generate = '--model' in sys.argv
+  if generate:
+    model.generate()
+  else:
+    model.classification()
