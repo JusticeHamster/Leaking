@@ -19,7 +19,7 @@ class BSOFModel:
   """
   整个模型
   """
-  def __init__(self, opencv_output):
+  def __init__(self, opencv_output, *args):
     """
     初始化必要变量
 
@@ -51,6 +51,7 @@ class BSOFModel:
     self.thread_stop        = False
     self.state              = BSOFModel.RUNNING
     self.box_scale          = ((1 / 16, 1 / 4), (15 / 16, 2.9 / 4))
+    self.model              = '--model' in args
     self.setup()
 
   def __getattribute__(self, name):
@@ -489,4 +490,5 @@ class BSOFModel:
     self.state = BSOFModel.STOPPED
 
 if __name__ == '__main__':
-  BSOFModel(True).run()
+  from sys import argv
+  BSOFModel(True, *argv[1:]).run()
