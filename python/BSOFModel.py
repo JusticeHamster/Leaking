@@ -56,7 +56,6 @@ class BSOFModel:
     self.thread_stop        = False
     self.state              = BSOFModel.RUNNING
     self.box_scale          = ((1 / 16, 1 / 4), (15 / 16, 2.9 / 4))
-    self.setup()
 
   def __getattribute__(self, name):
     """
@@ -431,6 +430,44 @@ class BSOFModel:
     self.normal_frame = None
     self.box_cache = None
 
+  def classification(self):
+    """
+    对视频做异常帧检测并分类
+    """
+    self.clear()
+    self.foreach(self.one_video)
+
+  def generate(self):
+    """
+    计算模型，保存到settings['model_path']
+    """
+    self.foreach(lambda video: self.logger.info(video))
+
+  def foreach(self, single_func):
+    """
+    对每一个视频，运行single_func去处理该视频。
+    设置name、path、pinyin等信息。
+    """
+    for name, video in self.videos:
+      self.now['name'] = name
+      self.now['pinyin'] = pinyin.get_pinyin(name, ' ')
+      single_func(video)
+      if self.thread_stop:
+        break
+    self.state = BSOFModel.STOPPED
+
+  RUNNING = 'running'
+  PAUSED  = 'paused'
+  STOPPED = 'stopped'
+  def pause(self):
+    """
+    暂停
+    """
+    if self.state is BSOFModel.RUNNING:
+      self.state = BSOFModel.PAUSED
+    elif self.state is BSOFModel.PAUSED:
+      self.state = BSOFModel.RUNNING
+
   @property
   def box(self):
     """
@@ -463,45 +500,6 @@ class BSOFModel:
     self.box_scale = rect
     self.box_cache = None
     self.rect_mask = None
-
-  RUNNING = 'running'
-  PAUSED  = 'paused'
-  STOPPED = 'stopped'
-  def pause(self):
-    """
-    暂停
-    """
-    if self.state is BSOFModel.RUNNING:
-      self.state = BSOFModel.PAUSED
-    elif self.state is BSOFModel.PAUSED:
-      self.state = BSOFModel.RUNNING
-
-  def setup(self):
-    """
-    等价于clear，为了接口分离
-    """
-    self.clear()
-
-  def foreach(self, single_func):
-    for name, video in self.videos:
-      self.now['name'] = name
-      self.now['pinyin'] = pinyin.get_pinyin(name, ' ')
-      single_func(video)
-      if self.thread_stop:
-        break
-    self.state = BSOFModel.STOPPED
-
-  def classification(self):
-    """
-    对每一个视频进行处理
-    """
-    self.foreach(self.one_video)
-
-  def generate(self):
-    """
-    计算模型，保存到settings['model_path']
-    """
-    self.foreach(lambda video: self.logger.info(video))
 
 if __name__ == '__main__':
   model = BSOFModel(True)

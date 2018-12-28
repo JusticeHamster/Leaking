@@ -76,7 +76,7 @@ class BSOFApp(kivy.app.App):
     self.form.pizza(self.classes)
 
     self.logger.debug('运行model')
-    self.model_runner = threading.Thread(target=self.model.run)
+    self.model_runner = threading.Thread(target=self.model.classification)
     self.model_runner.start()
 
   def on_clock(self, delta_time):
