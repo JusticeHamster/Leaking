@@ -20,6 +20,7 @@ import lktools.Checker
 
 template = """{
   "path"              : "../video",       // 视频路径
+  "class_info"        : "class_info.json",// 视频所属标签，用于分类
   "videos"            : ["*"],            // 视频列表，"*"为通配符
   "delay"             : 10,               // 视频播放延迟，用于cv2.waitKey第一个参数
   "height"            : 480,              // 视频高度限定，宽度会自动计算
@@ -110,6 +111,7 @@ def get_settings():
 
   logger.debug('check legal')
 
+  checker.check('path', checker.has_file, 'class_info')
   checker.check('videos', checker.len_not_zero)
   checker.check('frame_range', checker.range)
   checker.check('debug_level', checker.debug_level)
