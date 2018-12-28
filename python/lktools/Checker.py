@@ -23,13 +23,17 @@ class Checker:
       if not s:
         self.logger.error(item)
         self.dirty = True
+      return s
     if isinstance(name, (tuple, list)):
+      s = True
       for n in name:
-        __check(n, assert_type, *args)
+        s = s and __check(n, assert_type, *args)
+      return s
     elif isinstance(name, str):
-      __check(name, assert_type, *args)
+      return __check(name, assert_type, *args)
     else:
       self.logger.error(f'error attribute name: {name}')
+      return False
 
   def exist(self, name):
     item = self.container.get(name)
@@ -65,14 +69,25 @@ class Checker:
       return f'range {name}[0] must <= {name}[1]', False
     return item, True
 
-  def debug_level(self, name):
+  def within(self, name, _list):
     item, s = self.exist(name)
     if not s:
       return item, False
-    debug_list = ('debug', 'info', 'warn', 'error', 'critical')
-    if item not in debug_list:
-      return f'"{name}" was "{item}", not in {debug_list}', False
-    return item, True
+    def __within(self, name, item, _list):
+      if item not in _list:
+        return f'"{name}" is "{item}", not in {_list}', False
+      return item, True
+    if isinstance(item, dict):
+      # 如果是dict，只检查values
+      item = list(item.values())
+    if isinstance(item, (tuple, list)):
+      for it in item:
+        info, s = __within(self, name, it, _list)
+        if not s:
+          return info, False
+      return item, True
+    else:
+      return __within(self, name, item, _list)
 
   def exists_file(self, name):
     item, s = self.exist(name)

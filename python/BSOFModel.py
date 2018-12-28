@@ -20,6 +20,11 @@ from lktools.OpticalFlow  import optical_flow_rects
 from lktools.SIFT         import siftImageAlignment
 from lktools.Denoise      import denoise
 from lktools.FindObject   import findObject
+"""
+类别
+"""
+from resources.data import Abnormal
+
 class BSOFModel:
   """
   整个模型
@@ -139,27 +144,6 @@ class BSOFModel:
       abnormal['BS'] = gray_to_bgr(BS_binary) & src
     return rects, abnormal
 
-  """
-  类别常量
-  """
-  '''液体异常'''
-  ACID_SOLUTION     = '酸碱溶液'
-  WATER             = '水'
-  EDIBLE_OIL        = '食用油'
-  MOTOR_OIL         = '机油'
-  COAL_WATER_SLURRY = '水煤浆'
-  '''气体异常'''
-  WATER_VAPOR       = '水蒸气'
-  SMOKE             = '烟'
-  '''明火异常'''
-  OPEN_FIRE         = '明火'
-  ELECTRIC_SPARK    = '电火花'
-  '''粉尘异常'''
-  LEAKAGE_DUST      = '漏料粉尘'
-  FUNNEL_COAL_ASH   = '漏斗煤灰'
-  '''未知'''
-  UNKNOWN           = 'unknown'
-
   @lktools.Timer.timer_decorator
   def judge(self, src, rects, binary):
     """
@@ -184,17 +168,17 @@ class BSOFModel:
     # _ = bgr_to_hsv(src)
     # 测试所有类别的颜色等信息
     return (
-      (BSOFModel.ACID_SOLUTION    , 9),
-      (BSOFModel.WATER            , 9),
-      (BSOFModel.EDIBLE_OIL       , 9),
-      (BSOFModel.MOTOR_OIL        , 9),
-      (BSOFModel.COAL_WATER_SLURRY, 9),
-      (BSOFModel.WATER_VAPOR      , 9),
-      (BSOFModel.SMOKE            , 9),
-      (BSOFModel.OPEN_FIRE        , 9),
-      (BSOFModel.ELECTRIC_SPARK   , 9),
-      (BSOFModel.LEAKAGE_DUST     , 9),
-      (BSOFModel.FUNNEL_COAL_ASH  , 10),
+      (Abnormal.Abnormal.ACID_SOLUTION    , 9),
+      (Abnormal.Abnormal.WATER            , 9),
+      (Abnormal.Abnormal.EDIBLE_OIL       , 9),
+      (Abnormal.Abnormal.MOTOR_OIL        , 9),
+      (Abnormal.Abnormal.COAL_WATER_SLURRY, 9),
+      (Abnormal.Abnormal.WATER_VAPOR      , 9),
+      (Abnormal.Abnormal.SMOKE            , 9),
+      (Abnormal.Abnormal.OPEN_FIRE        , 9),
+      (Abnormal.Abnormal.ELECTRIC_SPARK   , 9),
+      (Abnormal.Abnormal.LEAKAGE_DUST     , 9),
+      (Abnormal.Abnormal.FUNNEL_COAL_ASH  , 10),
     )
 
   @lktools.Timer.timer_decorator

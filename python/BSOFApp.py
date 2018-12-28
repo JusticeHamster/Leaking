@@ -35,6 +35,10 @@ import kivy.core.window
 import kivy.garden
 from kivy.graphics.texture import Texture
 from kivy.metrics import dp
+"""
+分类信息
+"""
+from resources.data import Abnormal
 
 class BSOFApp(kivy.app.App):
   """
@@ -127,28 +131,6 @@ class BSOFApp(kivy.app.App):
       self.form.pizza(self.classes)
       self.dirty['classes'] = False
 
-  """
-  不同分类对应的颜色
-  """
-  color = {
-    # 液体异常
-    BSOFModel.ACID_SOLUTION     : 'EE00EE',
-    BSOFModel.WATER             : 'BBFFFF',
-    BSOFModel.EDIBLE_OIL        : 'EEC900',
-    BSOFModel.MOTOR_OIL         : '000000',
-    BSOFModel.COAL_WATER_SLURRY : '696969',
-    # 气体异常
-    BSOFModel.WATER_VAPOR       : 'FCFCFC',
-    BSOFModel.SMOKE             : 'D9D9D9',
-    # 明火异常
-    BSOFModel.OPEN_FIRE         : 'EE0000',
-    BSOFModel.ELECTRIC_SPARK    : 'EEEE00',
-    # 粉尘异常
-    BSOFModel.LEAKAGE_DUST      : '00FFFF',
-    BSOFModel.FUNNEL_COAL_ASH   : '000080',
-  }
-  UNKNOWN_COLOR = '00FF00',
-
   def every_frame(self):
     """
     每一帧都会调用该函数
@@ -192,7 +174,7 @@ class BSOFApp(kivy.app.App):
     self.logger.debug('更新分类信息')
     classes = self.model.now['classes']
     if classes is not None:
-      self.classes = tuple(map(lambda i: (*i, BSOFApp.color.get(i[0], BSOFApp.UNKNOWN_COLOR)), classes))
+      self.classes = tuple(map(lambda i: (*i, Abnormal.Abnormal.color(i[0])), classes))
       self.dirty['classes'] = True
 
   def before_every_video(self):
