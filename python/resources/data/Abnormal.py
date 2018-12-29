@@ -74,5 +74,5 @@ class Abnormal:
   }
 
   @staticmethod
-  def color(name):
-    return Abnormal.COLOR.get(name, Abnormal.UNKNOWN)
+  def color(clazz):
+    return Abnormal.COLOR.get(clazz, Abnormal.COLOR[Abnormal.UNKNOWN])
