@@ -11,7 +11,7 @@ class Checker:
   """
   用于类型、值合法性检查
   """
-  def __init__(self, logger, container):
+  def __init__(self, logger, container=None):
     self.logger = lktools.LoggerFactory.LoggerFactory.getChild(logger, 'Checker')
     self.container = container
     self.dirty = False
@@ -36,7 +36,10 @@ class Checker:
       return False
 
   def exist(self, name):
-    item = self.container.get(name)
+    if self.container is None:
+      item = name
+    else:
+      item = self.container.get(name)
     if item is None:
       return f'"{name}" must exists', False
     return item, True

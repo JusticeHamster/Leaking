@@ -15,6 +15,7 @@ pinyin = Pinyin()
 lktools
 """
 import lktools.Timer
+import lktools.Checker
 from lktools.PreProcess   import video_capture_size, bgr_to_hsv, gray_to_bgr, subtraction
 from lktools.OpticalFlow  import optical_flow_rects
 from lktools.SIFT         import siftImageAlignment
@@ -29,12 +30,13 @@ class BSOFModel:
   """
   整个模型
   """
-  def __init__(self, opencv_output):
+  def __init__(self, opencv_output, generation):
     """
     初始化必要变量
 
     初始化
       opencv_output:       是否利用cv2.imgshow()显示每一帧图片
+      generation:          是否训练模型
       settings:            一个字典，由Loader从用户自定义json文件中读取
       judge_cache:         为judge使用的cache，每个单独的视频有一个单独的cache
       rect_mask:           做整个视频裁剪的mask
@@ -48,11 +50,13 @@ class BSOFModel:
 
     做一次clear
     """
-    self.opencv_output = opencv_output
-    self.settings = lktools.Loader.get_settings()
-    self.logger = lktools.LoggerFactory.LoggerFactory(
+    self.opencv_output      = opencv_output
+    self.generation         = generation
+    self.settings           = lktools.Loader.get_settings()
+    self.logger             = lktools.LoggerFactory.LoggerFactory(
       'BS_OF', level=self.settings['debug_level']
     ).logger
+    self.checker            = lktools.Checker.Checker(self.logger)
     self.judge_cache        = None
     self.rect_mask          = None
     self.videoWriter        = None
@@ -61,6 +65,9 @@ class BSOFModel:
     self.thread_stop        = False
     self.state              = BSOFModel.RUNNING
     self.box_scale          = ((1 / 16, 1 / 4), (15 / 16, 2.9 / 4))
+    # check
+    if self.generation:
+      self.checker.check(self.model_path, self.checker.exists_file)
 
   def __getattribute__(self, name):
     """
@@ -147,7 +154,7 @@ class BSOFModel:
   @lktools.Timer.timer_decorator
   def judge(self, src, rects, binary):
     """
-    对识别出的异常区域进行分类。
+    对识别出的异常区域进行分类或训练（根据self.generation）。
 
     Args:
       src:    原图
@@ -160,29 +167,34 @@ class BSOFModel:
     Return:
       ( (class, probablity), ... )
     """
-    self.logger.debug('第一个框是检测范围，不是异常')
-    if len(rects) <= 1:
+    def classify(src, rects, binary):
+      self.logger.debug('第一个框是检测范围，不是异常')
+      if len(rects) <= 1:
+        return
+      rects = rects[1:]
+      self.logger.debug('首先准备一个该帧的HSV图像')
+      # _ = bgr_to_hsv(src)
+      # 测试所有类别的颜色等信息
+      return (
+        (Abnormal.Abnormal.ACID_SOLUTION    , 9),
+        (Abnormal.Abnormal.WATER            , 9),
+        (Abnormal.Abnormal.EDIBLE_OIL       , 9),
+        (Abnormal.Abnormal.MOTOR_OIL        , 9),
+        (Abnormal.Abnormal.COAL_WATER_SLURRY, 9),
+        (Abnormal.Abnormal.WATER_VAPOR      , 9),
+        (Abnormal.Abnormal.SMOKE            , 9),
+        (Abnormal.Abnormal.OPEN_FIRE        , 9),
+        (Abnormal.Abnormal.ELECTRIC_SPARK   , 9),
+        (Abnormal.Abnormal.LEAKAGE_DUST     , 9),
+        (Abnormal.Abnormal.FUNNEL_COAL_ASH  , 10),
+      )
+    def generate(src, rects, binary):
       return
-    rects = rects[1:]
-    self.logger.debug('首先准备一个该帧的HSV图像')
-    # _ = bgr_to_hsv(src)
-    # 测试所有类别的颜色等信息
-    return (
-      (Abnormal.Abnormal.ACID_SOLUTION    , 9),
-      (Abnormal.Abnormal.WATER            , 9),
-      (Abnormal.Abnormal.EDIBLE_OIL       , 9),
-      (Abnormal.Abnormal.MOTOR_OIL        , 9),
-      (Abnormal.Abnormal.COAL_WATER_SLURRY, 9),
-      (Abnormal.Abnormal.WATER_VAPOR      , 9),
-      (Abnormal.Abnormal.SMOKE            , 9),
-      (Abnormal.Abnormal.OPEN_FIRE        , 9),
-      (Abnormal.Abnormal.ELECTRIC_SPARK   , 9),
-      (Abnormal.Abnormal.LEAKAGE_DUST     , 9),
-      (Abnormal.Abnormal.FUNNEL_COAL_ASH  , 10),
-    )
+    func = generate if self.generation else classify
+    return func(src, rects, binary)
 
   @lktools.Timer.timer_decorator
-  def one_video(self, path):
+  def one_video_classification(self, path):
     """
     处理一个单独的视频
     """
@@ -378,9 +390,7 @@ class BSOFModel:
 
     capture.release()
 
-    self.clear()
-
-  def clear(self):
+  def clear_classification(self):
     """
     每个视频处理完之后对相关变量的清理
 
@@ -391,16 +401,15 @@ class BSOFModel:
     last:         上一帧
     lastn:        前N帧
     fgbg:         BS_MOG2模型
-    now:          存储处理过程的当前帧等信息，是dict
     normal_frame: 正常帧
     box_cache:    缓存box的具体坐标
     """
-    self.logger.debug('导出视频')
     if self.file_output and (self.videoWriter is not None):
+      self.logger.debug('导出视频')
       self.videoWriter.release()
       self.videoWriter = None
-    self.logger.debug('销毁窗口')
     if self.opencv_output and not self.linux:
+      self.logger.debug('销毁窗口')
       cv2.destroyAllWindows()
     self.judge_cache = []
     self.nframes = 0
@@ -410,7 +419,6 @@ class BSOFModel:
       varThreshold=self.varThreshold,
       detectShadows=self.detectShadows
     )
-    self.now = {}
     self.normal_frame = None
     self.box_cache = None
 
@@ -418,24 +426,24 @@ class BSOFModel:
     """
     对视频做异常帧检测并分类
     """
-    self.clear()
-    self.foreach(self.one_video)
+    self.foreach(self.one_video_classification, self.clear_classification)
 
-  def generate(self):
+  def foreach(self, single_func, clear_func):
     """
-    计算模型，保存到settings['model_path']
-    """
-    self.foreach(lambda video: self.logger.info(video))
+    对每一个视频，运行single_func去处理该视频，最后用clear_func清理变量。
 
-  def foreach(self, single_func):
-    """
-    对每一个视频，运行single_func去处理该视频。
+    设置now dict。
+
     设置name、path、pinyin等信息。
     """
+    clear_func()
+    self.now = {}
     for name, video in self.videos:
       self.now['name'] = name
       self.now['pinyin'] = pinyin.get_pinyin(name, ' ')
       single_func(video)
+      self.now.clear()
+      clear_func()
       if self.thread_stop:
         break
     self.state = BSOFModel.STOPPED
@@ -486,10 +494,6 @@ class BSOFModel:
     self.rect_mask = None
 
 if __name__ == '__main__':
-  model = BSOFModel(True)
   import sys
-  generate = '--model' in sys.argv
-  if generate:
-    model.generate()
-  else:
-    model.classification()
+  model = BSOFModel(True, '--model' in sys.argv)
+  model.classification()
