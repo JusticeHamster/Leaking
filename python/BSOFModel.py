@@ -47,6 +47,7 @@ class BSOFModel:
       thread_stop:         判断该线程是否该终止，由持有该模型的宿主修改
       state:               是否暂停
       box_scale:           蓝框的比例(<leftdown>, <rightup>)
+      generation_cache     generation cache
 
     做一次clear
     """
@@ -65,9 +66,19 @@ class BSOFModel:
     self.thread_stop        = False
     self.state              = BSOFModel.RUNNING
     self.box_scale          = ((1 / 16, 1 / 4), (15 / 16, 2.9 / 4))
-    # check
-    if self.generation:
+    self.generation_cache   = {'X': [], 'Y': []}
+    self.check()
+
+  def check(self):
+    """
+    测试，失败就关闭
+    """
+    if not self.generation:
+      self.logger.debug('测试model文件是否存在')
       self.checker.check(self.model_path, self.checker.exists_file)
+    if self.checker.dirty:
+      self.thread_stop = True
+      self.state = BSOFModel.STOPPED
 
   def __getattribute__(self, name):
     """
@@ -167,11 +178,11 @@ class BSOFModel:
     Return:
       ( (class, probablity), ... )
     """
+    self.logger.debug('第一个框是检测范围，不是异常')
+    if len(rects) <= 1:
+      return
+    rects = rects[1:]
     def classify(src, rects, binary):
-      self.logger.debug('第一个框是检测范围，不是异常')
-      if len(rects) <= 1:
-        return
-      rects = rects[1:]
       self.logger.debug('首先准备一个该帧的HSV图像')
       # _ = bgr_to_hsv(src)
       # 测试所有类别的颜色等信息
@@ -179,7 +190,10 @@ class BSOFModel:
         9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10,
       ])
     def generate(src, rects, binary):
-      return
+      X = [len(rects)]
+      Y = [Abnormal.Abnormal.abnormal(self.class_info[self.now['name']])]
+      self.generation_cache['X'].append(X)
+      self.generation_cache['Y'].append(Y)
     func = generate if self.generation else classify
     return func(src, rects, binary)
 
@@ -416,6 +430,9 @@ class BSOFModel:
     """
     对视频做异常帧检测并分类
     """
+    if self.state is BSOFModel.STOPPED:
+      self.logger.info('model has stopped.')
+      return
     self.foreach(self.one_video_classification, self.clear_classification)
 
   def foreach(self, single_func, clear_func):
@@ -432,8 +449,8 @@ class BSOFModel:
       self.now['name'] = name
       self.now['pinyin'] = pinyin.get_pinyin(name, ' ')
       single_func(video)
-      self.now.clear()
       clear_func()
+      self.now.clear()
       if self.thread_stop:
         break
     self.state = BSOFModel.STOPPED
