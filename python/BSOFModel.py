@@ -16,7 +16,7 @@ lktools
 """
 import lktools.Timer
 import lktools.Checker
-from lktools.PreProcess   import video_capture_size, bgr_to_hsv, gray_to_bgr, subtraction
+from lktools.PreProcess   import video_capture_size, bgr_to_hsv, gray_to_bgr, subtraction, rect_wh
 from lktools.OpticalFlow  import optical_flow_rects
 from lktools.SIFT         import siftImageAlignment
 from lktools.Denoise      import denoise
@@ -190,8 +190,8 @@ class BSOFModel:
         9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10,
       ])
     def generate(src, rects, binary):
-      X = [len(rects)]
-      Y = [Abnormal.Abnormal.abnormal(self.class_info[self.now['name']])]
+      X = list(map(rect_wh, rects))
+      Y = Abnormal.Abnormal.abnormal(self.class_info[self.now['name']])
       self.generation_cache['X'].append(X)
       self.generation_cache['Y'].append(Y)
     func = generate if self.generation else classify

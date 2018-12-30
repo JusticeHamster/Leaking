@@ -81,6 +81,13 @@ def trim_to_rect(rect1, rect2):
     return
   return (x11, y11), (x12, y12)
 
+def rect_wh(rect):
+  """
+  计算一个矩形的宽高比
+  """
+  (x0, y0), (x1, y1), *_ = rect
+  return abs((x0 - x1) / (y0 - y1))
+
 def point_in_rect(point, rect):
   """
   判断一个点是否在一个矩形中
