@@ -50,6 +50,19 @@ class Abnormal:
   def classes():
     return list(Abnormal.ABNORMAL.values())
 
+  @staticmethod
+  def abnormals(probabilities):
+    """
+    根据传入的概率，返回( (class, probability), ... )
+    """
+    classes = Abnormal.classes()
+    if len(probabilities) < len(classes):
+      return
+    return tuple(map(
+      lambda clz, prob: (clz, prob),
+      classes, probabilities
+    ))
+
   """
   不同分类对应的颜色
   """

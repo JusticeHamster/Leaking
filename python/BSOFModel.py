@@ -30,7 +30,7 @@ class BSOFModel:
   """
   整个模型
   """
-  def __init__(self, opencv_output, generation):
+  def __init__(self, opencv_output, generation=False):
     """
     初始化必要变量
 
@@ -175,19 +175,9 @@ class BSOFModel:
       self.logger.debug('首先准备一个该帧的HSV图像')
       # _ = bgr_to_hsv(src)
       # 测试所有类别的颜色等信息
-      return (
-        (Abnormal.Abnormal.ACID_SOLUTION    , 9),
-        (Abnormal.Abnormal.WATER            , 9),
-        (Abnormal.Abnormal.EDIBLE_OIL       , 9),
-        (Abnormal.Abnormal.MOTOR_OIL        , 9),
-        (Abnormal.Abnormal.COAL_WATER_SLURRY, 9),
-        (Abnormal.Abnormal.WATER_VAPOR      , 9),
-        (Abnormal.Abnormal.SMOKE            , 9),
-        (Abnormal.Abnormal.OPEN_FIRE        , 9),
-        (Abnormal.Abnormal.ELECTRIC_SPARK   , 9),
-        (Abnormal.Abnormal.LEAKAGE_DUST     , 9),
-        (Abnormal.Abnormal.FUNNEL_COAL_ASH  , 10),
-      )
+      return Abnormal.Abnormal.abnormals([
+        9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10,
+      ])
     def generate(src, rects, binary):
       return
     func = generate if self.generation else classify
