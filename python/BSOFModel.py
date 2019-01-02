@@ -48,7 +48,7 @@ class BSOFModel:
       state:               是否暂停
       box_scale:           蓝框的比例(<leftdown>, <rightup>)
       generation_cache     generation cache
-      debug_continue       debug状态运行是否继续
+      debug_param          debug相关参数
 
     做一次clear
     """
@@ -68,7 +68,7 @@ class BSOFModel:
     self.state              = BSOFModel.RUNNING
     self.box_scale          = ((1 / 16, 1 / 4), (15 / 16, 2.9 / 4))
     self.generation_cache   = {'X': [], 'Y': []}
-    self.debug_continue     = False
+    self.debug_param        = {'continue': False, 'step': 0}
     self.check()
 
   def check(self):
@@ -205,7 +205,7 @@ class BSOFModel:
         else:
           info = func(*args)
         self.logger.info(info)
-        self.debug_continue = False
+        self.debug_param['continue'] = False
       # 选择最大的矩形
       max_rect = max(rects, key=rect_size)
       mat = matrix_within_rect(src, max_rect)
@@ -362,10 +362,21 @@ class BSOFModel:
       """
       if not self.debug_per_frame:
         return
-      if self.debug_continue:
+      if self.debug_param['continue']:
+        return
+      if self.debug_param['step'] > 0:
+        self.debug_param['step'] -= 1
         return
       c = input()
-      self.debug_continue = c != 'n'
+      if len(c) > 0 and c[0] == 'n':
+        try:
+          self.debug_param['step'] = int(c[1:])
+        except:
+          self.debug_param['step'] = 0
+      else:
+        self.debug_param['continue'] = True
+      if c == 'q':
+        self.thread_stop = True
 
     self.logger.debug('----------------------')
 
@@ -435,10 +446,10 @@ class BSOFModel:
 
       self.logger.debug('判断该线程是否结束')
 
+      debug()
+
       if self.thread_stop:
         break
-
-      debug()
 
     capture.release()
 

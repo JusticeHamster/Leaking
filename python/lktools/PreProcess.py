@@ -70,7 +70,7 @@ def matrix_within_rect(matrix, rect):
   (x1, y1), (x2, y2) = rect
   if x1 >= x2 or y1 >= y2:
     return
-  return matrix[x1:x2, y1:y2]
+  return matrix[y1:y2, x1:x2]
 
 def trim_to_rect(rect1, rect2):
   """
