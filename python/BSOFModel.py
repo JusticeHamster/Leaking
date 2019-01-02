@@ -357,6 +357,8 @@ class BSOFModel:
     def debug():
       """
       debug模式
+      输入'n'并回车，跳到下一帧。
+      直接回车，跳到下一个异常帧。
       """
       if not self.debug_per_frame:
         return
