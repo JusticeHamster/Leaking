@@ -202,7 +202,6 @@ class BSOFModel:
       if self.debug_per_frame:
         self.logger.debug('逐帧debug')
         self.logger.info(mean)
-        input()
       X = [mean]
       if self.now.get('Y') is None:
         self.now['Y'] = Abnormal.Abnormal.abnormal(self.class_info[self.now['name']])
@@ -412,6 +411,9 @@ class BSOFModel:
 
       if self.thread_stop:
         break
+
+      if self.debug_per_frame:
+        input()
 
     capture.release()
 
