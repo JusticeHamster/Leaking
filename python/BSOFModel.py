@@ -603,5 +603,8 @@ class BSOFModel:
 
 if __name__ == '__main__':
   import sys
-  model = BSOFModel('--show' in sys.argv, '--model' in sys.argv)
+  nothing = len(sys.argv)
+  show = '--show' in sys.argv
+  generate = '--model' in sys.argv
+  model = BSOFModel(nothing or show, generate)
   model.classification()
