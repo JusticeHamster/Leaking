@@ -216,6 +216,9 @@ class BSOFModel:
       mean = mat.mean(axis=(0, 1))
       debug(max_rect)
       debug(mean, func=lambda c: f'r: {c[0]:.2f}, g: {c[1]:.2f}, b: {c[2]:.2f}')
+      # 颜色
+      # 周长面积比
+      # 面积增长率
       X = [mean]
       if self.now.get('Y') is None:
         self.now['Y'] = Abnormal.Abnormal.abnormal(self.class_info[self.now['name']])
