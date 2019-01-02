@@ -603,7 +603,7 @@ class BSOFModel:
 
 if __name__ == '__main__':
   import sys
-  nothing = len(sys.argv)
+  nothing = len(sys.argv) == 0
   show = '--show' in sys.argv
   generate = '--model' in sys.argv
   model = BSOFModel(nothing or show, generate)
