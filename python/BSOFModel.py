@@ -216,6 +216,9 @@ class BSOFModel:
       mean = mat.mean(axis=(0, 1))
       debug(max_rect)
       debug(mean, func=lambda c: f'r: {c[0]:.2f}, g: {c[1]:.2f}, b: {c[2]:.2f}')
+      # 颜色
+      # 周长面积比
+      # 面积增长率
       X = [mean]
       if self.now.get('Y') is None:
         self.now['Y'] = Abnormal.Abnormal.abnormal(self.class_info[self.now['name']])
@@ -492,6 +495,17 @@ class BSOFModel:
     对视频做异常帧检测并分类
     """
     self.foreach(self.one_video_classification, self.clear_classification)
+    if not self.generation:
+      return
+    try:
+      from sklearn import svm
+      from sklearn.externals import joblib
+    except:
+      return
+    self.logger.debug('训练模型')
+    lin_clf = svm.LinearSVC()
+    lin_clf.fit(self.generation_cache['X'], self.generation_cache['Y'])
+    joblib.dump(lin_clf, self.model_path)
 
   def foreach(self, single_func, clear_func):
     """
