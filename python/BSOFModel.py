@@ -495,6 +495,17 @@ class BSOFModel:
     对视频做异常帧检测并分类
     """
     self.foreach(self.one_video_classification, self.clear_classification)
+    if not self.generation:
+      return
+    try:
+      from sklearn import svm
+      from sklearn.externals import joblib
+    except:
+      return
+    self.logger.debug('训练模型')
+    lin_clf = svm.LinearSVC()
+    lin_clf.fit(self.generation_cache['X'], self.generation_cache['Y'])
+    joblib.dump(lin_clf, self.model_path)
 
   def foreach(self, single_func, clear_func):
     """
