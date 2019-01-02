@@ -76,6 +76,7 @@ class BSOFModel:
     self.debug_param        = {'continue': False, 'step': 0}
     self.check()
 
+  @lktools.Timer.timer_decorator
   def check(self):
     """
     测试，失败就关闭
@@ -203,6 +204,7 @@ class BSOFModel:
         info = func(*args)
       self.logger.info(info)
       self.debug_param['continue'] = False
+    @lktools.Timer.timer_decorator
     def attributes(src, range_rect, rects, abnormal):
       """
       生成特征
@@ -223,6 +225,7 @@ class BSOFModel:
       # 周长面积比
       # 面积增长率
       return [*mean]
+    @lktools.Timer.timer_decorator
     def classify(src, range_rect, rects, abnormal):
       """
       分类
@@ -233,6 +236,7 @@ class BSOFModel:
       y = self.classifier.predict_proba(X)
       proba = dict(zip(self.classifier.classes_, y[0]))
       return self.abnormals.accumulate_abnormals(proba)
+    @lktools.Timer.timer_decorator
     def generate(src, range_rect, rects, abnormal):
       """
       生成模型
@@ -250,6 +254,7 @@ class BSOFModel:
     """
     处理一个单独的视频
     """
+    @lktools.Timer.timer_decorator
     def loop(size):
       """
       如果线程结束
@@ -288,6 +293,7 @@ class BSOFModel:
         self.lastn = frame
         return True
       return frame
+    @lktools.Timer.timer_decorator
     def save(frame, frame_trim, frame_rects, abnormal, classes):
       """
       保存相关信息至self.now，便于其它类使用（如App）
@@ -305,6 +311,7 @@ class BSOFModel:
       self.now['frame_rects'] = frame_rects
       self.now['abnormal']    = abnormal
       self.now['classes']     = classes
+    @lktools.Timer.timer_decorator
     def output(frame, size):
       """
       输出一帧处理过的图像（有异常框）
@@ -347,6 +354,7 @@ class BSOFModel:
         if cv2.waitKey(self.delay) == 27:
           self.logger.debug('ESC 停止')
           self.thread_stop = True
+    @lktools.Timer.timer_decorator
     def update(original):
       """
       如果@nframes计数为@interval的整数倍:
@@ -363,6 +371,7 @@ class BSOFModel:
         )
         self.fgbg.apply(self.lastn)
       self.last = original
+    @lktools.Timer.timer_decorator
     def trim(frame):
       """
       对图片进行裁剪
@@ -510,6 +519,7 @@ class BSOFModel:
       detectShadows=self.detectShadows
     )
 
+  @lktools.Timer.timer_decorator
   def classification(self):
     """
     对视频做异常帧检测并分类
@@ -531,6 +541,7 @@ class BSOFModel:
     classifier.fit(self.generation_cache['X'], self.generation_cache['Y'])
     joblib.dump(classifier, self.model_path)
 
+  @lktools.Timer.timer_decorator
   def foreach(self, single_func, clear_func):
     """
     对每一个视频，运行single_func去处理该视频，最后用clear_func清理变量。
@@ -567,6 +578,7 @@ class BSOFModel:
       self.state = BSOFModel.RUNNING
 
   @property
+  @lktools.Timer.timer_decorator
   def box(self):
     """
     计算当前蓝框的具体坐标
