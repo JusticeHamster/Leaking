@@ -438,9 +438,6 @@ class BSOFModel:
     """
     对视频做异常帧检测并分类
     """
-    if self.state is BSOFModel.STOPPED:
-      self.logger.info('model has stopped.')
-      return
     self.foreach(self.one_video_classification, self.clear_classification)
 
   def foreach(self, single_func, clear_func):
@@ -451,6 +448,9 @@ class BSOFModel:
 
     设置name、path、pinyin等信息。
     """
+    if self.state is BSOFModel.STOPPED:
+      self.logger.info('model has stopped.')
+      return
     clear_func()
     self.now = {}
     for name, video in self.videos:
