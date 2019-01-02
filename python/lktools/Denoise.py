@@ -31,11 +31,11 @@ def denoise(img, which=None, args=None):
   def bilater(img, args=(9, 75, 75)):
     logger.debug('双边滤波')
     return cv2.bilateralFilter(img,*args)
-  def morph_open(img, args=None):
+  def morph_open(img, args=(3, 3)):
     logger.debug('形态学处理——开运算')
     logger.debug('定义结构元素')
 
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(3, 3))
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT,args)
 
     logger.debug('图像二值化')
 
