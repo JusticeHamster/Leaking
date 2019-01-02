@@ -16,7 +16,7 @@ lktools
 """
 import lktools.Timer
 import lktools.Checker
-from lktools.PreProcess   import video_capture_size, bgr_to_hsv, gray_to_bgr, subtraction, rect_wh
+from lktools.PreProcess   import video_capture_size, bgr_to_hsv, gray_to_bgr, subtraction, matrix_within_rect, rect_size
 from lktools.OpticalFlow  import optical_flow_rects
 from lktools.SIFT         import siftImageAlignment
 from lktools.Denoise      import denoise
@@ -178,25 +178,38 @@ class BSOFModel:
     Return:
       ( (class, probablity), ... )
     """
-    self.logger.debug('第一个框是检测范围，不是异常')
     if len(rects) <= 1:
       return
-    rects = rects[1:]
-    def classify(src, rects, binary):
+    self.logger.debug('第一个框是检测范围，不是异常')
+    def classify(src, range_rect, rects, binary):
       self.logger.debug('首先准备一个该帧的HSV图像')
       # _ = bgr_to_hsv(src)
       # 测试所有类别的颜色等信息
       return Abnormal.Abnormal.abnormals([
         9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10,
       ])
-    def generate(src, rects, binary):
-      X = list(map(rect_wh, rects))
+    def generate(src, range_rect, rects, binary):
+      mat = matrix_within_rect(
+        src,
+        # 选择最大的矩形
+        max(rects, key=rect_size)
+      )
+      if mat is None or mat.size == 0:
+        self.logger.debug('矩阵没有正确取区域或是区域内为空则返回')
+        return
+      self.logger.debug('求平均rgb')
+      mean = mat.mean(axis=(0, 1))
+      if self.debug_per_frame:
+        self.logger.debug('逐帧debug')
+        self.logger.info(mean)
+        input()
+      X = [mean]
       if self.now.get('Y') is None:
         self.now['Y'] = Abnormal.Abnormal.abnormal(self.class_info[self.now['name']])
       self.generation_cache['X'].append(X)
       self.generation_cache['Y'].append(self.now['Y'])
     func = generate if self.generation else classify
-    return func(src, rects, binary)
+    return func(src, rects[0], rects[1:], binary)
 
   @lktools.Timer.timer_decorator
   def one_video_classification(self, path):

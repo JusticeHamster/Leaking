@@ -48,6 +48,7 @@ template = """{
   "detectShadows"     : false,            // 高斯混合模型的阴影识别，True开启后影响速度
   "language"          : "Chinese",        // 所使用的语言
   "Retina"            : false,            // 是否是Retina高清屏幕，它的像素数量不一样，会影响显示的计算
+  "debug_per_frame"   : false,            // model逐帧调试，回车进入下一帧
 }"""
 user_settings = None
 
@@ -97,7 +98,7 @@ def get_settings():
     (
       'file_output', 'time_debug',
       'linux', 'sift', 'OF', 'detectShadows',
-      'Retina',
+      'Retina', 'debug_per_frame',
     ), bool
   )
   checker.check(
