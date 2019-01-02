@@ -56,7 +56,6 @@ class BSOFApp(kivy.app.App):
       clock:           定时调用
       dirty:           判断是否处理完一帧(视频)，防止定时调用重复计算
       states:          当前状态，包含暂停状态:{RUNNING, PAUSED}, 绘制蓝框的状态:{READY, DOING, FREEZE, NOT_READY}
-      scale:           视频缩放
       wsize:           当前window size
       mouse_pos:       鼠标位置信息
       classes:         分类信息，格式为pizza格式( ('title', percentage, 'color'), ... )
@@ -68,7 +67,6 @@ class BSOFApp(kivy.app.App):
     self.clock    = kivy.clock.Clock.schedule_interval(self.on_clock, 1 / self.settings['app_fps'])
     self.dirty    = {'frame': False, 'video': False, 'classes': False}
     self.states   = {'APP': BSOFApp.RUNNING, 'BOX': BSOFApp.READY}
-    self.scale    = self.settings['scale']
     self.wsize    = None
     self.mouse_pos= None
     self.classes  = []
@@ -270,12 +268,11 @@ class BSOFApp(kivy.app.App):
       ((x2 - x0) / w, (y2 - y0) / h)
     )
 
-  def __mouse_pos_text(self):
+  def video_info_text(self, text):
     """
-    用于鼠标位置的可视化
+    当前视频信息可视化
     """
-    x, y = self.mouse_pos
-    self.form.ids['parameter'].text = f'x:{x}\ny:{y}'
+    self.form.ids['parameter'].text = f''
 
   NOT_READY = 'not_ready'
   READY     = 'ready'
@@ -293,7 +290,6 @@ class BSOFApp(kivy.app.App):
       return
     self.states['BOX'] = BSOFApp.DOING
     self.mouse_pos = pos
-    self.__mouse_pos_text()
     if self.states['APP'] is BSOFApp.PAUSED:
       return
     self.pause()

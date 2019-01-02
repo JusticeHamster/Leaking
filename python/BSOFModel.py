@@ -139,10 +139,10 @@ class BSOFModel:
     _, binary = cv2.threshold(frame, 127, 255, cv2.THRESH_BINARY)
     self.logger.debug('Denoise')
     binary = denoise(binary, 'bilater')
-    binary = denoise(binary, 'morph_open')
-    binary = denoise(binary, 'dilation')
-    binary = denoise(binary, 'dilation')
-    binary = denoise(binary, 'erode')
+    binary = denoise(binary, 'morph_open', (2, 2))
+    binary = denoise(binary, 'dilation', ((2, 2), 1))
+    binary = denoise(binary, 'dilation', ((2, 2), 1))
+    binary = denoise(binary, 'erode', ((2, 2), 2))
     BS_binary = binary
     self.logger.debug('findObject')
     bs_rects = findObject(binary, rect)
@@ -191,9 +191,10 @@ class BSOFModel:
       ])
     def generate(src, rects, binary):
       X = list(map(rect_wh, rects))
-      Y = Abnormal.Abnormal.abnormal(self.class_info[self.now['name']])
+      if self.now.get('Y') is None:
+        self.now['Y'] = Abnormal.Abnormal.abnormal(self.class_info[self.now['name']])
       self.generation_cache['X'].append(X)
-      self.generation_cache['Y'].append(Y)
+      self.generation_cache['Y'].append(self.now['Y'])
     func = generate if self.generation else classify
     return func(src, rects, binary)
 
@@ -223,13 +224,16 @@ class BSOFModel:
         return False
       if self.state is BSOFModel.PAUSED:
         return True
-      if self.nframes >= self.frame_range[1]:
+      l_range, r_range = self.frame_range
+      if r_range < 0:
+        r_range += self.now['count']
+      if self.nframes > r_range:
         return False
       success, frame = capture.read()
       if not success:
         return False
       self.nframes += 1
-      if self.nframes < self.frame_range[0]:
+      if self.nframes < l_range:
         return True
       frame = cv2.resize(frame, size)
       if self.last is None:
@@ -317,7 +321,10 @@ class BSOFModel:
       对图片进行裁剪
       """
       if self.rect_mask is None:
-        (x1, y1), (x2, y2) = self.box
+        box = self.box
+        if box is None:
+          return
+        (x1, y1), (x2, y2) = box
         self.rect_mask = np.zeros(frame.shape, dtype=np.uint8)
         self.rect_mask[y1:y2, x1:x2] = 255
       return self.rect_mask & frame.copy()
@@ -329,6 +336,7 @@ class BSOFModel:
     capture, h, w, fps, count = video_capture_size(path, self.height)
     size = (w, h)
     self.now['size'] = size
+    self.now['count'] = count
     self.logger.info(f'''
       read {path}.
       from frame {self.frame_range[0]} to {self.frame_range[1]}.

@@ -21,7 +21,7 @@ class Checker:
       check_t = type(assert_type) == type
       item, s = self.type_test(name, assert_type, *args) if check_t else assert_type(name, *args)
       if not s:
-        self.logger.error(item)
+        self.logger.error(f'{item}( during {assert_type} check )')
         self.dirty = True
       return s
     if isinstance(name, (tuple, list)):
@@ -68,7 +68,7 @@ class Checker:
       return f'range "{name}" must have and only have 2 elements', False
     if item[0] < 0:
       return f'range {name}[0] must > 0', False
-    if item[0] > item[1]:
+    if item[1] >= 0 and item[0] > item[1]:
       return f'range {name}[0] must <= {name}[1]', False
     return item, True
 

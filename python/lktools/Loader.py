@@ -29,7 +29,7 @@ template = """{
   "videos"            : ["*"],            // 视频列表，"*"为通配符
   "delay"             : 10,               // 视频播放延迟，用于cv2.waitKey第一个参数
   "height"            : 480,              // 视频高度限定，宽度会自动计算
-  "frame_range"       : [0, 100],         // 取[a, b]帧
+  "frame_range"       : [0, -1],          // 取[a, b]帧，b可以是负数，表示倒数第abs(b)帧
   "img_path"          : "images.tmp",     // 图片存取路径
   "video_path"        : "videos.tmp",     // 视频存取路径
   "model_path"        : "BSOF.model",     // Model路径
@@ -46,7 +46,6 @@ template = """{
   "app_fps"           : 60,               // app刷新率
   "varThreshold"      : 121.0,            // 高斯混合模型的阈值，决定模型是否灵敏，越小越敏感
   "detectShadows"     : false,            // 高斯混合模型的阴影识别，True开启后影响速度
-  "scale"             : 0.6,              // 视频在APP里显示的缩放
   "language"          : "Chinese",        // 所使用的语言
   "Retina"            : false,            // 是否是Retina高清屏幕，它的像素数量不一样，会影响显示的计算
 }"""
@@ -109,8 +108,7 @@ def get_settings():
   )
   checker.check(
     (
-      'compression_ratio', 'varThreshold', 
-      'scale',
+      'compression_ratio', 'varThreshold',
     ), float
   )
 
@@ -125,7 +123,7 @@ def get_settings():
       'delay', 'height',
       'interval', 'fps',
       'limit_size', 'compression_ratio',
-      'app_fps', 'varThreshold', 'scale',
+      'app_fps', 'varThreshold',
     ), checker.plus
   )
 
