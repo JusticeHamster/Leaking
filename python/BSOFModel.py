@@ -25,6 +25,11 @@ from lktools.FindObject   import findObject
 类别
 """
 from resources.data import Abnormal
+"""
+sklearn
+"""
+from sklearn import svm
+from sklearn.externals import joblib
 
 class BSOFModel:
   """
@@ -165,14 +170,14 @@ class BSOFModel:
     return rects, abnormal
 
   @lktools.Timer.timer_decorator
-  def judge(self, src, rects, binary):
+  def judge(self, src, rects, abnormal):
     """
     对识别出的异常区域进行分类或训练（根据self.generation）。
 
     Args:
       src:    原图
       rects:  框的list
-      binary: 二值图像的dict，有'OF'和'BS'两个属性
+      abnormal: 异常部分的dict，有'OF'和'BS'两个属性
 
     Self:
       judge_cache:   可长期持有的缓存，如果需要处理多帧的话
@@ -186,26 +191,22 @@ class BSOFModel:
     if len(rects) <= 1:
       return
     self.logger.debug('第一个框是检测范围，不是异常')
-    def classify(src, range_rect, rects, binary):
-      self.logger.debug('首先准备一个该帧的HSV图像')
-      # _ = bgr_to_hsv(src)
-      # 测试所有类别的颜色等信息
-      return Abnormal.Abnormal.abnormals([
-        9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10,
-      ])
-    def generate(src, range_rect, rects, binary):
-      def debug(*args, func=None):
-        """
-        debug
-        """
-        if not self.debug_per_frame:
-          return
-        if func is None:
-          info = args
-        else:
-          info = func(*args)
-        self.logger.info(info)
-        self.debug_param['continue'] = False
+    def debug(*args, func=None):
+      """
+      debug
+      """
+      if not self.debug_per_frame:
+        return
+      if func is None:
+        info = args
+      else:
+        info = func(*args)
+      self.logger.info(info)
+      self.debug_param['continue'] = False
+    def attributes(src, range_rect, rects, abnormal):
+      """
+      生成特征
+      """
       # 选择最大的矩形
       max_rect = max(rects, key=rect_size)
       mat = matrix_within_rect(src, max_rect)
@@ -214,18 +215,35 @@ class BSOFModel:
         return
       self.logger.debug('求平均rgb')
       mean = mat.mean(axis=(0, 1))
+      self.logger.debug('归一化')
+      mean /= mean.sum()
       debug(max_rect)
       debug(mean, func=lambda c: f'r: {c[0]:.2f}, g: {c[1]:.2f}, b: {c[2]:.2f}')
       # 颜色
       # 周长面积比
       # 面积增长率
-      X = [mean]
+      return [*mean]
+    def classify(src, range_rect, rects, abnormal):
+      """
+      分类
+      """
+      # self.logger.debug('首先准备一个该帧的HSV图像')
+      # _ = bgr_to_hsv(src)
+      X = [attributes(src, range_rect, rects, abnormal)]
+      y = self.classifier.predict_proba(X)
+      proba = dict(zip(self.classifier.classes_, y[0]))
+      return self.abnormals.accumulate_abnormals(proba)
+    def generate(src, range_rect, rects, abnormal):
+      """
+      生成模型
+      """
+      X = attributes(src, range_rect, rects, abnormal)
+      self.generation_cache['X'].append(X)
       if self.now.get('Y') is None:
         self.now['Y'] = Abnormal.Abnormal.abnormal(self.class_info[self.now['name']])
-      self.generation_cache['X'].append(X)
       self.generation_cache['Y'].append(self.now['Y'])
     func = generate if self.generation else classify
-    return func(src, rects[0], rects[1:], binary)
+    return func(src, rects[0], rects[1:], abnormal)
 
   @lktools.Timer.timer_decorator
   def one_video_classification(self, path):
@@ -460,16 +478,17 @@ class BSOFModel:
     """
     每个视频处理完之后对相关变量的清理
 
-    videowriter:  会在这里release，并且设置为None
-    cv:           会清理所有窗口
-    judge_cache:  judge使用的缓存，初始化为空list
-    nframes:      计数器，为loop使用，初始化为0
-    last:         上一帧
-    lastn:        前N帧
-    normal_frame: 正常帧
-    box_cache:    缓存box的具体坐标
+    videowriter:         会在这里release，并且设置为None
+    cv:                  会清理所有窗口
+    judge_cache:         judge使用的缓存，初始化为空list
+    nframes:             计数器，为loop使用，初始化为0
+    last:                上一帧
+    lastn:               前N帧
+    normal_frame:        正常帧
+    box_cache:           缓存box的具体坐标
     skip_first_abnormal: 跳过第一个异常帧，第一次会被识别为整个区域
-    fgbg:         BS_MOG2模型
+    abnormals            异常实例
+    fgbg:                BS_MOG2模型
     """
     if self.file_output and (self.videoWriter is not None):
       self.logger.debug('导出视频')
@@ -485,6 +504,7 @@ class BSOFModel:
     self.normal_frame        = None
     self.box_cache           = None
     self.skip_first_abnormal = True
+    self.abnormals           = Abnormal.Abnormal()
     self.fgbg                = cv2.createBackgroundSubtractorMOG2(
       varThreshold=self.varThreshold,
       detectShadows=self.detectShadows
@@ -494,18 +514,22 @@ class BSOFModel:
     """
     对视频做异常帧检测并分类
     """
+    if not self.generation:
+      self.classifier = joblib.load(self.model_path)
     self.foreach(self.one_video_classification, self.clear_classification)
     if not self.generation:
       return
-    try:
-      from sklearn import svm
-      from sklearn.externals import joblib
-    except:
-      return
     self.logger.debug('训练模型')
-    lin_clf = svm.LinearSVC()
-    lin_clf.fit(self.generation_cache['X'], self.generation_cache['Y'])
-    joblib.dump(lin_clf, self.model_path)
+    kwargs = {
+      'gamma'                   : 'scale',
+      'decision_function_shape' : 'ovo',
+      'max_iter'                : self.max_iter,
+      'probability'             : True,
+    }
+    classifier = svm.SVC(**kwargs)
+    self.logger.info(kwargs)
+    classifier.fit(self.generation_cache['X'], self.generation_cache['Y'])
+    joblib.dump(classifier, self.model_path)
 
   def foreach(self, single_func, clear_func):
     """

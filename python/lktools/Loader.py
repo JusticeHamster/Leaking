@@ -49,6 +49,7 @@ template = """{
   "language"          : "Chinese",        // 所使用的语言
   "Retina"            : false,            // 是否是Retina高清屏幕，它的像素数量不一样，会影响显示的计算
   "debug_per_frame"   : false,            // model逐帧调试，回车进入下一帧
+  "max_iter"          : -1,               // SVC的最大迭代次数
 }"""
 user_settings = None
 
@@ -105,6 +106,7 @@ def get_settings():
     (
       'delay', 'height', 'interval',
       'fps', 'limit_size', 'app_fps',
+      'max_iter',
     ), int
   )
   checker.check(
@@ -119,6 +121,7 @@ def get_settings():
   checker.check('videos', checker.len_not_zero)
   checker.check('frame_range', checker.range)
   checker.check('debug_level', checker.within, ('debug', 'info', 'warn', 'error', 'critical'))
+  checker.check('max_iter', checker.plus_or_minus1)
   checker.check(
     (
       'delay', 'height',

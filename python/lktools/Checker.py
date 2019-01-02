@@ -60,6 +60,17 @@ class Checker:
       return f'"{name}" must > 0', False
     return item, True
 
+  def plus_or_minus1(self, name):
+    item, s = self.plus(name)
+    if s:
+      return item, True
+    item, s = self.exist(name)
+    if not s:
+      return item, False
+    if not (item == -1):
+      return f'"{name}" must > 0 or == -1', False
+    return item, True
+
   def range(self, name):
     item, s = self.exist(name)
     if not s:

@@ -172,7 +172,10 @@ class BSOFApp(kivy.app.App):
     self.logger.debug('更新分类信息')
     classes = self.model.now['classes']
     if classes is not None:
-      self.classes = tuple(map(lambda i: (*i, Abnormal.Abnormal.color(i[0])), classes))
+      self.classes = (
+        (k, v, Abnormal.Abnormal.color(k))
+        for k, v in classes.items()
+      )
       self.dirty['classes'] = True
 
   def before_every_video(self):
