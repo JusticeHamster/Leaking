@@ -37,28 +37,46 @@ def subtraction(mat1, mat2, distance=0):
     mat[mat < distance] = 0
   return mat.astype(numpy.uint8)
 
+def min_max(rect):
+  """
+  将一个任意两点组成的rect，转换为(min, min), (max, max)的rect
+  """
+  if rect is None:
+    return
+  (x1, y1), (x2, y2), *_ = rect
+  if x1 == x2 or y1 == y2:
+    return
+  if x1 < x2:
+    x_min = x1
+    x_max = x2
+  else:
+    x_min = x2
+    x_max = x1
+  if y1 < y2:
+    y_min = y1
+    y_max = y2
+  else:
+    y_min = y2
+    y_max = y1
+  return (x_min, y_min), (x_max, y_max)
+
+def matrix_within_rect(matrix, rect):
+  """
+  取出matrix中，rect部分的值
+  """
+  rect = min_max(rect)
+  if rect is None:
+    return
+  (x1, y1), (x2, y2) = rect
+  if x1 >= x2 or y1 >= y2:
+    return
+  return matrix[x1:x2, y1:y2]
+
 def trim_to_rect(rect1, rect2):
   """
   将rect1缩到rect2内部，裁剪掉外部多余部分
   rect1与rect2为一个矩形的任意两个对角点
   """
-  def min_max(rect):
-    (x1, y1), (x2, y2), *_ = rect
-    if x1 == x2 or y1 == y2:
-      return
-    if x1 < x2:
-      x_min = x1
-      x_max = x2
-    else:
-      x_min = x2
-      x_max = x1
-    if y1 < y2:
-      y_min = y1
-      y_max = y2
-    else:
-      y_min = y2
-      y_max = y1
-    return (x_min, y_min), (x_max, y_max)
   mm1 = min_max(rect1)
   if mm1 is None:
     return
@@ -84,17 +102,36 @@ def trim_to_rect(rect1, rect2):
 def rect_wh(rect):
   """
   计算一个矩形的宽高比
+  rect为一个矩形的任意两个对角点
   """
-  (x0, y0), (x1, y1), *_ = rect
+  rect = min_max(rect)
+  if rect is None:
+    return
+  (x0, y0), (x1, y1) = rect
   return abs((x0 - x1) / (y0 - y1))
+
+def rect_size(rect):
+  """
+  计算一个矩形的面积
+  rect为一个矩形的任意两个对角点
+  """
+  rect = min_max(rect)
+  if rect is None:
+    return
+  (x0, y0), (x1, y1) = rect
+  return abs((x0 - x1) * (y0 - y1))
 
 def point_in_rect(point, rect):
   """
   判断一个点是否在一个矩形中
+  rect为一个矩形的任意两个对角点
 
   若是，返回点在矩形中的相对坐标
   否则返回None
   """
+  rect = min_max(rect)
+  if rect is None:
+    return
   leftdown, rightup = rect
   x, y = point
   if x < leftdown[0] or y < leftdown[1]:
@@ -102,16 +139,6 @@ def point_in_rect(point, rect):
   if x > rightup[0] or y > rightup[1]:
     return
   return x - leftdown[0], y - leftdown[1]
-
-def rect_in_rect(rect1, rect2):
-  """
-  判断矩形rect1是否在矩形rect2中。
-  矩形点有要求，不支持任意的两个对角点。
-  """
-  logger.warning_times('this func is deprecated, please use trim_to_rect instead')
-  (x11, y11), (x12, y12), *_ = rect1
-  (x21, y21), (x22, y22), *_ = rect2
-  return x11 >= x21 and x12 <= x22 and y12 <= y21 and y11 >= y22
 
 def gray_to_bgr(img):
   """
