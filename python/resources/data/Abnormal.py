@@ -50,18 +50,32 @@ class Abnormal:
   def classes():
     return list(Abnormal.ABNORMAL.values())
 
-  @staticmethod
-  def abnormals(probabilities):
+  def __init__(self):
+    self.accumulate_clear()
+
+  def accumulate_clear(self):
     """
-    根据传入的概率，返回( (class, probability), ... )
+    清空变量
     """
-    classes = Abnormal.classes()
-    if len(probabilities) < len(classes):
-      return
-    return tuple(map(
-      lambda clz, prob: (clz, prob),
-      classes, probabilities
-    ))
+    self.__abnormals = {
+      c: 0 for c in Abnormal.classes()
+    }
+    self.__abnormals_count = 0
+
+  def accumulate_abnormals(self, probabilities):
+    """
+    累计的abnormals
+
+    返回平均值的dict
+    """
+    for c in self.__abnormals.keys():
+      self.__abnormals[c] += probabilities.get(c, 0)
+    self.__abnormals_count += 1
+    return {
+      k: int(100 * v / self.__abnormals_count)
+      for k, v in self.__abnormals.items()
+      if v > 0
+    }
 
   """
   不同分类对应的颜色
