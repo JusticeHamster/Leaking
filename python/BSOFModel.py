@@ -48,6 +48,7 @@ class BSOFModel:
       state:               是否暂停
       box_scale:           蓝框的比例(<leftdown>, <rightup>)
       generation_cache     generation cache
+      debug_continue       debug状态运行是否继续
 
     做一次clear
     """
@@ -67,6 +68,7 @@ class BSOFModel:
     self.state              = BSOFModel.RUNNING
     self.box_scale          = ((1 / 16, 1 / 4), (15 / 16, 2.9 / 4))
     self.generation_cache   = {'X': [], 'Y': []}
+    self.debug_continue     = False
     self.check()
 
   def check(self):
@@ -178,6 +180,9 @@ class BSOFModel:
     Return:
       ( (class, probablity), ... )
     """
+    if self.skip_first_abnormal:
+      self.skip_first_abnormal = False
+      return
     if len(rects) <= 1:
       return
     self.logger.debug('第一个框是检测范围，不是异常')
@@ -189,19 +194,28 @@ class BSOFModel:
         9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 10,
       ])
     def generate(src, range_rect, rects, binary):
-      mat = matrix_within_rect(
-        src,
-        # 选择最大的矩形
-        max(rects, key=rect_size)
-      )
+      def debug(*args, func=None):
+        """
+        debug
+        """
+        if not self.debug_per_frame:
+          return
+        if func is None:
+          info = args
+        else:
+          info = func(*args)
+        self.logger.info(info)
+        self.debug_continue = False
+      # 选择最大的矩形
+      max_rect = max(rects, key=rect_size)
+      mat = matrix_within_rect(src, max_rect)
       if mat is None or mat.size == 0:
         self.logger.debug('矩阵没有正确取区域或是区域内为空则返回')
         return
       self.logger.debug('求平均rgb')
       mean = mat.mean(axis=(0, 1))
-      if self.debug_per_frame:
-        self.logger.debug('逐帧debug')
-        self.logger.info(mean)
+      debug(max_rect)
+      debug(mean, func=lambda c: f'r: {c[0]:.2f}, g: {c[1]:.2f}, b: {c[2]:.2f}')
       X = [mean]
       if self.now.get('Y') is None:
         self.now['Y'] = Abnormal.Abnormal.abnormal(self.class_info[self.now['name']])
@@ -340,6 +354,16 @@ class BSOFModel:
         self.rect_mask = np.zeros(frame.shape, dtype=np.uint8)
         self.rect_mask[y1:y2, x1:x2] = 255
       return self.rect_mask & frame.copy()
+    def debug():
+      """
+      debug模式
+      """
+      if not self.debug_per_frame:
+        return
+      if self.debug_continue:
+        return
+      c = input()
+      self.debug_continue = c != 'n'
 
     self.logger.debug('----------------------')
 
@@ -412,8 +436,7 @@ class BSOFModel:
       if self.thread_stop:
         break
 
-      if self.debug_per_frame:
-        input()
+      debug()
 
     capture.release()
 
@@ -427,9 +450,10 @@ class BSOFModel:
     nframes:      计数器，为loop使用，初始化为0
     last:         上一帧
     lastn:        前N帧
-    fgbg:         BS_MOG2模型
     normal_frame: 正常帧
     box_cache:    缓存box的具体坐标
+    skip_first_abnormal: 跳过第一个异常帧，第一次会被识别为整个区域
+    fgbg:         BS_MOG2模型
     """
     if self.file_output and (self.videoWriter is not None):
       self.logger.debug('导出视频')
@@ -438,16 +462,17 @@ class BSOFModel:
     if self.opencv_output and not self.linux:
       self.logger.debug('销毁窗口')
       cv2.destroyAllWindows()
-    self.judge_cache = []
-    self.nframes = 0
-    self.last = None
-    self.lastn = None
-    self.fgbg = cv2.createBackgroundSubtractorMOG2(
+    self.judge_cache         = []
+    self.nframes             = 0
+    self.last                = None
+    self.lastn               = None
+    self.normal_frame        = None
+    self.box_cache           = None
+    self.skip_first_abnormal = True
+    self.fgbg                = cv2.createBackgroundSubtractorMOG2(
       varThreshold=self.varThreshold,
       detectShadows=self.detectShadows
     )
-    self.normal_frame = None
-    self.box_cache = None
 
   def classification(self):
     """
@@ -519,9 +544,11 @@ class BSOFModel:
       ((0.0, 0.5), (0.5, 1.0))
         leftdown     rightup
     """
-    self.box_scale = rect
-    self.box_cache = None
-    self.rect_mask = None
+    self.box_scale           = rect
+    self.box_cache           = None
+    self.rect_mask           = None
+    # 重新设置box scale之后，需要忽略一帧
+    self.skip_first_abnormal = True
 
 if __name__ == '__main__':
   import sys
