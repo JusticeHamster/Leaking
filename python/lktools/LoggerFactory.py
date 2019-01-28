@@ -82,8 +82,9 @@ class LoggerFactory:
 
   @staticmethod
   def default():
-    LoggerFactory.lock.acquire()
     if LoggerFactory.__default_logger is None:
-      LoggerFactory.__default_logger = LoggerFactory('Default').logger
-    LoggerFactory.lock.release()
+      LoggerFactory.lock.acquire()
+      if LoggerFactory.__default_logger is None:
+        LoggerFactory.__default_logger = LoggerFactory('Default').logger
+      LoggerFactory.lock.release()
     return LoggerFactory.__default_logger
