@@ -188,16 +188,16 @@ class BSOFModel:
     """
     if self.skip_first_abnormal:
       self.skip_first_abnormal = False
-      return
+      return None, None
     if len(rects) <= 1:
-      return
+      return None, None
     self.logger.debug('第一个框是检测范围，不是异常')
     def debug(*args, func=None):
       """
       debug
       """
       if not self.debug_per_frame:
-        return
+        return None, None
       if func is None:
         info = args
       else:

@@ -27,7 +27,7 @@ class BSOFGraph(kivy.uix.widget.Widget):
   '''
 
   @staticmethod
-  def load(serie, **kwargs):
+  def load(*args, **kwargs):
     """
     serie: ( ('class', percentage, 'color'), ... )
     """
