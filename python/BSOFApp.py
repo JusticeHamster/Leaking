@@ -177,6 +177,8 @@ class BSOFApp(kivy.app.App):
         for k, v in classes.items()
       )
       self.dirty['classes'] = True
+    attributes = self.model.now['attributes']
+    self.form.ids.get('color_palette').canvas.color = attributes[0]
 
   def before_every_video(self):
     """
