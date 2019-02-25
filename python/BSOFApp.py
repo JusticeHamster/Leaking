@@ -34,7 +34,8 @@ import kivy.clock
 import kivy.core.window
 import kivy.garden
 from kivy.graphics.texture import Texture
-from kivy.metrics import dp
+from kivy.graphics import Color, Rectangle
+from kivy.metrics import dp, sp
 """
 分类信息
 """
@@ -178,7 +179,13 @@ class BSOFApp(kivy.app.App):
       )
       self.dirty['classes'] = True
     attributes = self.model.now['attributes']
-    self.form.ids.get('color_palette').canvas.color = attributes[0]
+    if not attributes:
+      return
+    with self.form.ids.get('color_palette').canvas:
+      Color(*attributes[0])
+      Rectangle(pos= (self.form.ids.get('color_palette').x, self.form.ids.get('color_palette').y + sp(20)),
+      size=(sp(50),sp(50)))
+        
 
   def before_every_video(self):
     """
