@@ -349,6 +349,7 @@ B: {b:.2f}
       model_runner          等待线程
     """
     self.logger.debug('准备退出，呼叫线程关闭')
+    self.logger.info('about to leave')
     self.model.thread_stop = True
     self.model_runner.join()
 
