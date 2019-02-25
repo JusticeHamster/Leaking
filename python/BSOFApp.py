@@ -187,6 +187,9 @@ class BSOFApp(kivy.app.App):
         Color(*attributes[0])
         Rectangle(pos= (color_palette.x, color_palette.y + dp(20)),
         size=(dp(50),dp(50)))
+      self.form.ids.get('mean_color').text = 'R: ' + str(attributes[0][0]) + '\n' + \
+                                             'G: ' + str(attributes[0][1]) + '\n' + \
+                                             'B: ' + str(attributes[0][2])
         
 
   def before_every_video(self):
