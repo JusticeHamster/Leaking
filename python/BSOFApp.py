@@ -388,4 +388,4 @@ if __name__ == '__main__':
     """
     其它error
     """
-    lktools.LoggerFactory.LoggerFactory.default().error(e)
+    lktools.LoggerFactory.LoggerFactory.default().error_tb(e)

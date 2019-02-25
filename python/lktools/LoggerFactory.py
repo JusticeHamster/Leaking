@@ -68,6 +68,16 @@ class LoggerFactory:
     logger.warning_times = functools.partial(XXX_times, logger.warning)
     logger.debug_times   = functools.partial(XXX_times, logger.debug)
 
+    """
+    提供打印traceback的功能
+    """
+    def __error_tb(func, error):
+      import traceback
+      tb = '\n{}'.format(''.join(traceback.format_tb(error.__traceback__)))
+      func(tb)
+
+    logger.error_tb = functools.partial(__error_tb, logger.error)
+
     self.logger = logger
 
   @staticmethod

@@ -184,7 +184,7 @@ class BSOFModel:
       judge_cache:   可长期持有的缓存，如果需要处理多帧的话
 
     Return:
-      ( (class, probablity), ... )
+      ( (class, probablity), ... ), (attribute)
     """
     if self.skip_first_abnormal:
       self.skip_first_abnormal = False
@@ -235,7 +235,7 @@ class BSOFModel:
       X = [attributes(src, range_rect, rects, abnormal)]
       y = self.classifier.predict_proba(X)
       proba = dict(zip(self.classifier.classes_, y[0]))
-      return self.abnormals.accumulate_abnormals(proba)
+      return self.abnormals.accumulate_abnormals(proba), X
     @lktools.Timer.timer_decorator
     def generate(src, range_rect, rects, abnormal):
       """
@@ -245,7 +245,7 @@ class BSOFModel:
       self.generation_cache['X'].append(X)
       if self.now.get('Y') is None:
         self.now['Y'] = Abnormal.Abnormal.abnormal(self.class_info[self.now['name']])
-      self.generation_cache['Y'].append(self.now['Y'])
+      self.generation_cache['Y'].append(self.now['Y']), X
     func = generate if self.generation else classify
     return func(src, rects[0], rects[1:], abnormal)
 
@@ -294,7 +294,7 @@ class BSOFModel:
         return True
       return frame
     @lktools.Timer.timer_decorator
-    def save(frame, frame_trim, frame_rects, abnormal, classes):
+    def save(frame, frame_trim, frame_rects, abnormal, classes, attributes):
       """
       保存相关信息至self.now，便于其它类使用（如App）
 
@@ -305,12 +305,14 @@ class BSOFModel:
         abnormal:          当前帧的异常图像，是一个dict，有两个值{'OF', 'BS'}
                             分别代表光流法、高斯混合模型产生的异常图像
         classes:           当前帧的类别
+        attributes:        特征
       """
       self.now['frame']       = frame
       self.now['frame_trim']  = frame_trim
       self.now['frame_rects'] = frame_rects
       self.now['abnormal']    = abnormal
       self.now['classes']     = classes
+      self.now['attributes']  = attributes
     @lktools.Timer.timer_decorator
     def output(frame, size):
       """
@@ -451,7 +453,7 @@ class BSOFModel:
 
       self.logger.debug('分类')
 
-      classes = self.judge(frame, rects, abnormal)
+      classes, attributes = self.judge(frame, rects, abnormal)
 
       self.logger.debug('绘制矩形')
 
@@ -459,7 +461,7 @@ class BSOFModel:
 
       self.logger.debug('存储相关信息')
 
-      save(l, frame, frame_rects, abnormal, classes)
+      save(l, frame, frame_rects, abnormal, classes, attributes)
 
       self.logger.debug('输出图像')
 

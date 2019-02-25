@@ -14,7 +14,7 @@ class BSOFForm(kivy.uix.boxlayout.BoxLayout):
   """
   def __init__(self, *args, **kwargs):
     super().__init__(*args, **kwargs)
-    self.graph  = None
+    self.graph = None
 
   @staticmethod
   def load():
