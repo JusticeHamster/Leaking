@@ -182,10 +182,10 @@ class BSOFApp(kivy.app.App):
     self.logger.debug('更新特征 [debug]')
     attributes = self.model.now['attributes']
     if attributes is not None:
-        with self.form.ids.get('color_palette').canvas:
+      with self.form.ids.get('color_palette').canvas:
         Color(*attributes[0])
-        Rectangle(pos= (self.form.ids.get('color_palette').x, self.form.ids.get('color_palette').y + sp(20)),
-        size=(sp(50),sp(50)))
+        Rectangle(pos= (self.form.ids.get('color_palette').x, self.form.ids.get('color_palette').y + dp(20)),
+        size=(dp(50),dp(50)))
         
 
   def before_every_video(self):
