@@ -33,4 +33,4 @@ class BSOFForm(kivy.uix.boxlayout.BoxLayout):
 
     graph_area = self.ids['graph_area']
     self.graph = GUI.BSOFGraph.BSOFGraph.load(serie=serie, **kwargs)
-    graph_area.add_widget(self.graph)
+    graph_area.add_widget(self.graph.get_widget())
