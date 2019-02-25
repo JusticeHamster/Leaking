@@ -29,6 +29,9 @@ class BSOFGraph(kivy.uix.widget.Widget):
       font_name=kwargs.get('font_name', 'resources/fonts/msyh'),
     )
   '''
+  """
+  serie: ( ('class', percentage, 'color'), ... )
+  """
   serie = ListProperty()
 
   def __init__(self, **kwargs):
@@ -59,7 +62,4 @@ class BSOFGraph(kivy.uix.widget.Widget):
 
   @staticmethod
   def load(*args, **kwargs):
-    """
-    serie: ( ('class', percentage, 'color'), ... )
-    """
     return BSOFGraph(**kwargs)

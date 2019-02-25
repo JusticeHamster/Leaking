@@ -245,7 +245,7 @@ class BSOFModel:
       self.generation_cache['X'].append(X)
       if self.now.get('Y') is None:
         self.now['Y'] = Abnormal.Abnormal.abnormal(self.class_info[self.now['name']])
-      self.generation_cache['Y'].append(self.now['Y']), X
+      self.generation_cache['Y'].append(self.now['Y']), None
     func = generate if self.generation else classify
     return func(src, rects[0], rects[1:], abnormal)
 

@@ -290,7 +290,7 @@ B: {b:.2f}
     """
     当前视频信息可视化
     """
-    self.form.ids['parameter'].text = f''
+    self.form.ids['parameter'].text = ''
 
   NOT_READY = 'not_ready'
   READY     = 'ready'
