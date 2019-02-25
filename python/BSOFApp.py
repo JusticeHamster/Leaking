@@ -58,7 +58,7 @@ class BSOFApp(kivy.app.App):
       states:          当前状态，包含暂停状态:{RUNNING, PAUSED}, 绘制蓝框的状态:{READY, DOING, FREEZE, NOT_READY}
       wsize:           当前window size
       mouse_pos:       鼠标位置信息
-      classes:         分类信息，格式为pizza格式( ('title', percentage, 'color'), ... )
+      classes:         分类信息，格式为histogram格式( ('title', percentage, 'color'), ... )
     """
     self.settings = lktools.Loader.get_settings()
     self.logger   = lktools.LoggerFactory.LoggerFactory('App').logger
@@ -74,8 +74,8 @@ class BSOFApp(kivy.app.App):
     self.model.every_frame = self.every_frame
     self.model.before_every_video = self.before_every_video
 
-    self.logger.debug('创建pizza')
-    self.form.pizza(self.classes)
+    self.logger.debug('创建柱状图')
+    self.form.histogram(self.classes)
 
     self.logger.debug('运行model')
     self.model_runner = threading.Thread(target=self.model.classification)
@@ -125,8 +125,8 @@ class BSOFApp(kivy.app.App):
       kivy.core.window.Window.size = self.wsize
       self.dirty['video'] = False
     if self.dirty['classes']:
-      self.logger.debug('重画pizza')
-      self.form.pizza(self.classes)
+      self.logger.debug('重绘')
+      self.form.histogram(self.classes)
       self.dirty['classes'] = False
 
   def every_frame(self):

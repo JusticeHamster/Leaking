@@ -23,14 +23,10 @@ class BSOFForm(kivy.uix.boxlayout.BoxLayout):
     """
     return kivy.lang.Builder.load_file('resources/views/BSOFForm.kv')
 
-  def pizza(self, *args, **kwargs):
+  def histogram(self, serie, **kwargs):
     """
-    添加pizza图
-
-    第一个参数为serie
+    添加柱状图
     """
-    serie = args[0]
-
     if self.graph is not None:
       self.graph.serie = serie
       return
