@@ -72,9 +72,8 @@ class Abnormal:
       self.__abnormals[c] += probabilities.get(c, 0)
     self.__abnormals_count += 1
     return {
-      k: int(100 * v / self.__abnormals_count)
+      k: 100 * v / self.__abnormals_count
       for k, v in self.__abnormals.items()
-      if v > 0
     }
 
   """
