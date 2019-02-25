@@ -75,6 +75,7 @@ class LoggerFactory:
       import traceback
       tb = '\n{}'.format(''.join(traceback.format_tb(error.__traceback__)))
       func(tb)
+      func(error)
 
     logger.error_tb = functools.partial(__error_tb, logger.error)
 
