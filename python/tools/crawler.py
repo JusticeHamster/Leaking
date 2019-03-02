@@ -63,7 +63,7 @@ class Crawler:
             shutil.copyfileobj(result.raw, f)
       except requests.HTTPError as httpError:
         print(httpError)
-      except KeyboardInterrupt as key:
+      except KeyboardInterrupt:
         print('stopping...')
         return
 
