@@ -2,12 +2,15 @@ import requests
 import re
 import shutil
 import os
+import multiprocessing
 
-class Crawler:
+class Crawler(object):
   def __init__(self, site: str):
+    self.site = site
+
     self.__content = None
     self.__result = None
-    self.site = site
+    self.__dir = '.'
 
   @property
   def content(self):
@@ -48,27 +51,47 @@ class Crawler:
     '''
     self.result = re.compile(pattern).findall(self.content)
 
-  def download(self, directory: str):
+  def download_one(self, url, name):
+    try:
+      result = requests.get(url, stream=True, headers={'User-agent': 'Mozilla/5.0'})
+      if result.status_code == 200:
+        with open(f'{self.__dir}/{name}.jpg', 'wb') as f:
+          result.raw.decode_content = True
+          shutil.copyfileobj(result.raw, f)
+    except requests.HTTPError as httpError:
+      print(httpError)
+
+  '''
+    pickleable
+  '''
+  def __call__(self, un):
+    return self.download_one(un[0], un[1])
+
+  '''
+    并行化
+  '''
+  def download(self, directory: str, workers: int = 1):
     print('downloading...')
     if self.result is None:
       return
     if not os.path.exists(directory):
       os.mkdir(directory)
-    for url, name in self.result:
-      try:
-        result = requests.get(url, stream=True, headers={'User-agent': 'Mozilla/5.0'})
-        if result.status_code == 200:
-          with open(f'{directory}/{name}.jpg', 'wb') as f:
-            result.raw.decode_content = True
-            shutil.copyfileobj(result.raw, f)
-      except requests.HTTPError as httpError:
-        print(httpError)
-      except KeyboardInterrupt:
-        print('stopping...')
-        return
+    self.__dir = directory
+    if workers == 1:
+      for url, name in self.result:
+        try:
+          self.download_one(url, name)
+        except KeyboardInterrupt:
+          print('stopping')
+          return 
+    else:
+      pool = multiprocessing.Pool(workers)
+      pool.map_async(self, self.result)
+      pool.close()
+      pool.join()
 
 if __name__ == '__main__':
   crawler = Crawler(r'https://visualhunt.com/search/instant/?q={}')
   crawler.fetch('fire')
   crawler.analyse(r'(https://visualhunt\.com/photos/\d+/(.+?)\.jpg\?s=s)')
-  crawler.download('imgs')
+  crawler.download('imgs', workers=5)
