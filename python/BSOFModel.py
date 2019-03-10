@@ -224,7 +224,7 @@ class BSOFModel:
       # 颜色
       # 周长面积比
       # 面积增长率
-      return [*mean]
+      return [*mean, len(rects)]
     @lktools.Timer.timer_decorator
     def classify(src, range_rect, rects, abnormal):
       """
@@ -245,7 +245,8 @@ class BSOFModel:
       self.generation_cache['X'].append(X)
       if self.now.get('Y') is None:
         self.now['Y'] = Abnormal.Abnormal.abnormal(self.class_info[self.now['name']])
-      self.generation_cache['Y'].append(self.now['Y']), None
+      self.generation_cache['Y'].append(self.now['Y'])
+      return None, None
     func = generate if self.generation else classify
     return func(src, rects[0], rects[1:], abnormal)
 
