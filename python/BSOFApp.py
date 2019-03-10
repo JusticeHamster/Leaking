@@ -191,7 +191,7 @@ class BSOFApp(kivy.app.App):
       self.form.ids.get('mean_color').text = f'''R: {r:.2f}
 G: {g:.2f}
 B: {b:.2f}
-S: {s}
+S: {s:.0f}
 '''
 
   def before_every_video(self):

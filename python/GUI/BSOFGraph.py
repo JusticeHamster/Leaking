@@ -90,7 +90,9 @@ class BSOFGraph(kivy.uix.widget.Widget):
       self.y_pos, list(map(lambda s: s[1], self.serie)),
       align='center', color='blue'
     )
+    '''
     self.plt_widget.draw()
+    '''
 
   def get_widget(self):
     return self.plt_widget
