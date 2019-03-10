@@ -30,6 +30,10 @@ sklearn
 """
 from sklearn import svm
 from sklearn.externals import joblib
+"""
+reduce
+"""
+from functools import reduce
 
 class BSOFModel:
   """
@@ -197,7 +201,7 @@ class BSOFModel:
       debug
       """
       if not self.debug_per_frame:
-        return None, None
+        return
       if func is None:
         info = args
       else:
@@ -221,10 +225,14 @@ class BSOFModel:
       mean /= mean.sum()
       debug(max_rect)
       debug(mean, func=lambda c: f'r: {c[0]:.2f}, g: {c[1]:.2f}, b: {c[2]:.2f}')
-      # 颜色
-      # 周长面积比
-      # 面积增长率
-      return [*mean, len(rects)]
+      # ⬆️颜色
+      size = reduce(lambda s, r: s + rect_size(r), rects, 0)
+      size /= len(rects)
+      debug(size)
+      # ⬆️平均面积
+      # ⬆️周长面积比
+      # ⬆️面积增长率
+      return [*mean, size]
     @lktools.Timer.timer_decorator
     def classify(src, range_rect, rects, abnormal):
       """
