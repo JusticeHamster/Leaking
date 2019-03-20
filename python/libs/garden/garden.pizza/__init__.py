@@ -138,22 +138,17 @@ class Pizza(RelativeLayout):
         self.clear_widgets()  # Clean widget tree
         offset_rotation = 0  # In degrees
         last_value = 0
-        last_value_color = '000000'
 
         for title, value, color in self.serie:
             # 不显示 0%
             if value == 0:
                 continue
             # 防止重叠
-            small = value < 5
-            bsmall = last_value < 5 and small
-            value_offset = -30 if small else 0
-            value_offset = 0 if bsmall else value_offset
-            title_offset = 50 if bsmall else 0
+            title_offset = 50 if last_value < 5 and value < 5 else 0
 
             angle = math.radians(((value * 3.6) / 2.0) + offset_rotation)
-            value_x_pt = (math.sin(angle)) * (self.legend_value_rayon + value_offset)
-            value_y_pt = (math.cos(angle)) * (self.legend_value_rayon + value_offset)
+            value_x_pt = (math.sin(angle)) * self.legend_value_rayon
+            value_y_pt = (math.cos(angle)) * self.legend_value_rayon
             title_x_pt = (math.sin(angle)) * (self.legend_title_rayon + title_offset)
             title_y_pt = (math.cos(angle)) * (self.legend_title_rayon + title_offset)
 
@@ -169,7 +164,7 @@ class Pizza(RelativeLayout):
             value_color = ''.join(map(lambda c: f'{0xf - int(c, 16):x}', color))
             value_args = {
                 'size_hint'     : (None, None),
-                'text'          : f'[color={last_value_color if small else value_color}]{value:.1f}%[/color]',
+                'text'          : '' if value < 3 else f'[color={value_color}]{value:.1f}%[/color]',
                 'center_x'      : self.chart_center + value_x_pt,
                 'center_y'      : self.chart_center + value_y_pt,
                 'markup'        : True,
@@ -184,7 +179,6 @@ class Pizza(RelativeLayout):
 
             offset_rotation += value * 3.6
             last_value = value
-            last_value_color = value_color
 
 
 class ChartApp(App):

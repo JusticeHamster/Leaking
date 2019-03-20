@@ -215,7 +215,7 @@ class BSOFModel:
       """
       # 选择最大的矩形
       max_rect = max(rects, key=rect_size)
-      mat = matrix_within_rect(src, max_rect)
+      mat = matrix_within_rect(abnormal['BS'], max_rect)
       if mat is None or mat.size == 0:
         self.logger.debug('矩阵没有正确取区域或是区域内为空则返回')
         return
