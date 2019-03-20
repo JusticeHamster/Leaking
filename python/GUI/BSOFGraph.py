@@ -32,7 +32,7 @@ class BSOFGraph(kivy.uix.widget.Widget):
   """
   显示类
   """
-  ''' deprecated 饼图 pizza
+  #''' deprecated 饼图 pizza
   @staticmethod
   def load(*args, **kwargs):
     """
@@ -47,11 +47,11 @@ class BSOFGraph(kivy.uix.widget.Widget):
       chart_border=kwargs.get('chart_border', dp(1)),
       font_name=kwargs.get('font_name', 'resources/fonts/msyh'),
     )
-  '''
+  #'''
   """
   serie: ( ('class', percentage, 'color'), ... )
   """
-  #"""
+  """
   serie = ListProperty()
 
   def __init__(self, **kwargs):
@@ -101,4 +101,4 @@ class BSOFGraph(kivy.uix.widget.Widget):
   @staticmethod
   def load(*args, **kwargs):
     return BSOFGraph(**kwargs)
-  #"""
+  """
