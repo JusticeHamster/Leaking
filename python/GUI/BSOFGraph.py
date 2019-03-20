@@ -11,10 +11,13 @@ import matplotlib.pyplot as plt
 kivy
 """
 import kivy.uix.widget
-# import kivy.garden.pizza
 from kivy.metrics import dp
 from kivy.properties import ListProperty
 from kivy.garden.matplotlib.backend_kivy import FigureCanvasKivy
+"""
+pizza
+"""
+import kivy.garden.pizza
 """
 abnormal
 """
@@ -48,6 +51,7 @@ class BSOFGraph(kivy.uix.widget.Widget):
   """
   serie: ( ('class', percentage, 'color'), ... )
   """
+  #"""
   serie = ListProperty()
 
   def __init__(self, **kwargs):
@@ -90,13 +94,11 @@ class BSOFGraph(kivy.uix.widget.Widget):
       self.y_pos, list(map(lambda s: s[1], self.serie)),
       align='center', color='blue'
     )
-    '''
     self.plt_widget.draw()
-    '''
 
   def get_widget(self):
     return self.plt_widget
-
   @staticmethod
   def load(*args, **kwargs):
     return BSOFGraph(**kwargs)
+  #"""

@@ -226,13 +226,9 @@ class BSOFModel:
       debug(max_rect)
       debug(mean, func=lambda c: f'r: {c[0]:.2f}, g: {c[1]:.2f}, b: {c[2]:.2f}')
       # ⬆️颜色
-      size = reduce(lambda s, r: s + rect_size(r), rects, 0)
-      size /= len(rects)
-      debug(size)
-      # ⬆️平均面积
       # ⬆️周长面积比
       # ⬆️面积增长率
-      return [*mean, size]
+      return [*mean]
     @lktools.Timer.timer_decorator
     def classify(src, range_rect, rects, abnormal):
       """
