@@ -182,15 +182,19 @@ class BSOFApp(kivy.app.App):
     self.logger.debug('更新特征 [debug]')
     attributes = self.model.now['attributes']
     if attributes is not None:
+      '''
       color_palette = self.form.ids.get('color_palette')
       with color_palette.canvas:
         Color(*attributes[0])
         Rectangle(pos= (color_palette.x, color_palette.y + dp(20)),
         size=(dp(50),dp(50)))
-      r, g, b, *_ = attributes[0]
-      self.form.ids.get('mean_color').text = f'''R: {r:.2f}
-G: {g:.2f}
-B: {b:.2f}
+      '''
+      h, s, l, m, s, *_ = attributes[0]
+      self.form.ids.get('mean_color').text = f'''H: {h:.2f}
+S: {s:.2f}
+周长面积比: {l:.2f}
+面积增长率: {m:.2f}
+中心相对移动: {s:.2f}
 '''
 
   def before_every_video(self):

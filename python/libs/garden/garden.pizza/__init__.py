@@ -137,14 +137,14 @@ class Pizza(RelativeLayout):
         '''
         self.clear_widgets()  # Clean widget tree
         offset_rotation = 0  # In degrees
-        last_value = 0
+        last_offset = 0
 
         for title, value, color in self.serie:
             # 不显示 0%
             if value == 0:
                 continue
             # 防止重叠
-            title_offset = 50 if last_value < 5 and value < 5 else 0
+            title_offset = 50 if value < 5 and last_offset == 0 else 0
 
             angle = math.radians(((value * 3.6) / 2.0) + offset_rotation)
             value_x_pt = (math.sin(angle)) * self.legend_value_rayon
@@ -164,7 +164,7 @@ class Pizza(RelativeLayout):
             value_color = ''.join(map(lambda c: f'{0xf - int(c, 16):x}', color))
             value_args = {
                 'size_hint'     : (None, None),
-                'text'          : '' if value < 3 else f'[color={value_color}]{value:.1f}%[/color]',
+                'text'          : '' if value < 5 else f'[color={value_color}]{value:.1f}%[/color]',
                 'center_x'      : self.chart_center + value_x_pt,
                 'center_y'      : self.chart_center + value_y_pt,
                 'markup'        : True,
@@ -178,7 +178,7 @@ class Pizza(RelativeLayout):
             self.add_widget(Label(**value_args))
 
             offset_rotation += value * 3.6
-            last_value = value
+            last_offset = title_offset
 
 
 class ChartApp(App):

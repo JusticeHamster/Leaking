@@ -16,7 +16,7 @@ lktools
 """
 import lktools.Timer
 import lktools.Checker
-from lktools.PreProcess   import video_capture_size, bgr_to_hsv, gray_to_bgr, subtraction, matrix_within_rect, rect_size
+from lktools.PreProcess   import video_capture_size, bgr_to_hsv, gray_to_bgr, subtraction, matrix_within_rect, rect_size, rect_center
 from lktools.OpticalFlow  import optical_flow_rects
 from lktools.SIFT         import siftImageAlignment
 from lktools.Denoise      import denoise
@@ -169,8 +169,10 @@ class BSOFModel:
       self.normal_frame = src
     abnormal = {}
     if OF_binary is not None:
+      abnormal['OF_Binary'] = OF_binary
       abnormal['OF'] = gray_to_bgr(OF_binary) & src
     if BS_binary is not None:
+      abnormal['BS_Binary'] = BS_binary
       abnormal['BS'] = gray_to_bgr(BS_binary) & src
     return rects, abnormal
 
@@ -219,16 +221,38 @@ class BSOFModel:
       if mat is None or mat.size == 0:
         self.logger.debug('矩阵没有正确取区域或是区域内为空则返回')
         return
-      self.logger.debug('求平均rgb')
-      mean = mat.mean(axis=(0, 1))
-      self.logger.debug('归一化')
-      mean /= mean.sum()
+      # ⬇️颜色
+      self.logger.debug('转换为HSV')
+      hsv_mat = bgr_to_hsv(mat)
+      self.logger.debug('求均值')
+      hsv = hsv_mat.mean(axis=(0, 1))
       debug(max_rect)
-      debug(mean, func=lambda c: f'r: {c[0]:.2f}, g: {c[1]:.2f}, b: {c[2]:.2f}')
-      # ⬆️颜色
-      # ⬆️周长面积比
-      # ⬆️面积增长率
-      return [*mean]
+      debug(hsv, func=lambda c: f'h: {c[0]:.2f}, s: {c[1]:.2f}, v: {c[2]:.2f}')
+      # ⬇️周长面积比
+      binary = matrix_within_rect(abnormal['BS_Binary'], max_rect)
+      _, contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+      def length_of_area(c):
+        length = cv2.arcLength(c, True)
+        area = cv2.contourArea(c)
+        if area == 0:
+          return 0
+        return length / area
+      len_area = np.mean(tuple(map(length_of_area, contours)))
+      # ⬇️面积增长率
+      area = sum(map(cv2.contourArea, contours))
+      last_area = self.judge_cache['area']
+      if area > last_area > 0:
+        self.judge_cache['max_area_rate'] = max((area - last_area) / last_area, self.judge_cache['max_area_rate'])
+      self.judge_cache['area'] = area
+      # ⬇️中心相对移动
+      center = rect_center(max_rect)
+      last_center = self.judge_cache.get('center')
+      center_offset = 0.0
+      if last_center is not None:
+        center_offset = np.linalg.norm((center[0] - last_center[0], center[1] - last_center[1]))
+      self.judge_cache['center'] = center
+      # 返回
+      return [hsv[0], hsv[1], len_area, self.judge_cache['max_area_rate'], center_offset]
     @lktools.Timer.timer_decorator
     def classify(src, range_rect, rects, abnormal):
       """
@@ -513,7 +537,7 @@ class BSOFModel:
     if self.opencv_output and not self.linux:
       self.logger.debug('销毁窗口')
       cv2.destroyAllWindows()
-    self.judge_cache         = []
+    self.judge_cache         = { 'area': 0, 'max_area_rate': 0 }
     self.nframes             = 0
     self.last                = None
     self.lastn               = None

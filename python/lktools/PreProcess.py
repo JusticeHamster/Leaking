@@ -108,7 +108,7 @@ def rect_wh(rect):
   if rect is None:
     return
   (x0, y0), (x1, y1) = rect
-  return abs((x0 - x1) / (y0 - y1))
+  return (x1 - x0) / (y1 - y0)
 
 def rect_size(rect):
   """
@@ -119,7 +119,18 @@ def rect_size(rect):
   if rect is None:
     return
   (x0, y0), (x1, y1) = rect
-  return abs((x0 - x1) * (y0 - y1))
+  return (x1 - x0) * (y1 - y0)
+
+def rect_center(rect):
+  """
+  计算一个矩形的中心
+  rect为一个矩形的任意两个对角点
+  """
+  rect = min_max(rect)
+  if rect is None:
+    return
+  (x0, y0), (x1, y1) = rect
+  return (x1 - x0) // 2, (y1 - y0) // 2
 
 def point_in_rect(point, rect):
   """

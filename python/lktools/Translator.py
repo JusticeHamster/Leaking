@@ -24,5 +24,8 @@ def translate(raw, language=None):
   if dictionary is None:
     with open(f'resources/strings/{language}.json', encoding='utf-8') as f:
       dictionary = json5.load(f)
+    if dictionary is None:
+      logger.error(f'cannot read language ({language}) file.')
+      return
     dictionaries[language] = dictionary
   return dictionary.get(raw)
