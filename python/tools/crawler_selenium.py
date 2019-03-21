@@ -1,9 +1,11 @@
-from selenium import webdriver
+import selenium.webdriver
+import time
 
-browser = webdriver.Chrome()
+browser = selenium.webdriver.Chrome()
 
-browser.get("http://www.baidu.com")
-js = "window.scrollTo(0,document.body.scrollHeight)"
-browser.execute_script(js)
-print(browser.page_source)
+browser.get(r'https://visualhunt.com/search/instant/?q=fire')
+js = "window.scrollTo(0, document.body.scrollHeight);"
+while (True):
+  if input() == 's':
+    browser.execute_script(js)
 browser.close() 

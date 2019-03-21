@@ -1,12 +1,15 @@
-import requests
 import re
 import shutil
 import os
 import multiprocessing
+import selenium.webdriver
+import requests
+import time
 
 class Crawler(object):
   def __init__(self, site: str):
     self.site = site
+    self.driver = selenium.webdriver.Chrome()
 
     self.__content = None
     self.__result = None
@@ -28,14 +31,30 @@ class Crawler(object):
   def result(self, new: list):
     self.__result = new
 
-  def fetch(self, text: str):
+  SCROLL_UP = 'window.scrollTo(0, -100);'
+  SCROLL_DOWN = 'window.scrollTo(0, document.body.scrollHeight);'
+
+  def wait_ready(self):
+    state = ''
+    while state != 'complete':
+      time.sleep(1)
+      state = self.driver.execute_script('return document.readyState')
+
+  def wait(self, t: int = 1):
+    time.sleep(t)
+
+  def fetch(self, text: str, number: int):
     print('fetching...')
-    try:
-      response = requests.get(self.site.format(text), headers={'User-agent': 'Mozilla/5.0'})
-      if response.status_code == 200:
-        self.content = response.text
-    except Exception as e:
-      print(e)
+    self.driver.get(self.site.format(text))
+    self.wait_ready()
+    for i in range(number):
+      self.wait(1)
+      self.driver.execute_script(Crawler.SCROLL_UP)
+      self.wait(2)
+      self.driver.execute_script(Crawler.SCROLL_DOWN)
+      print(f'{i * 100 / number:.2f}%')
+    self.content = self.driver.page_source
+    self.driver.close()
 
   '''
     参考
@@ -58,8 +77,10 @@ class Crawler(object):
         with open(f'{self.__dir}/{name}.jpg', 'wb') as f:
           result.raw.decode_content = True
           shutil.copyfileobj(result.raw, f)
-    except requests.HTTPError as httpError:
-      print(httpError)
+    except KeyboardInterrupt as k:
+      raise k
+    except Exception as e:
+      print(e)
 
   '''
     pickleable
@@ -90,8 +111,25 @@ class Crawler(object):
       pool.close()
       pool.join()
 
-if __name__ == '__main__':
+  def quit(self):
+    self.driver.quit()
+
+DIR = 'imgs/'
+
+def main(search: str, number: int, workers: int):
   crawler = Crawler(r'https://visualhunt.com/search/instant/?q={}')
-  crawler.fetch('fire')
+  crawler.fetch(search, number)
   crawler.analyse(r'(https://visualhunt\.com/photos/\d+/(.+?)\.jpg\?s=s)')
-  crawler.download('imgs', workers=5)
+  if not os.path.exists(DIR):
+    os.mkdir(DIR)
+  crawler.download(DIR + search, workers=workers)
+  crawler.quit()
+
+if __name__ == '__main__':
+  import sys
+  argv = sys.argv
+  search = argv[1]
+  number = int(argv[2])
+  workers = int(argv[3])
+  if len(argv) == 4 and len(search) != 0 and number > 0 and workers > 0:
+    main(search, number, workers)
