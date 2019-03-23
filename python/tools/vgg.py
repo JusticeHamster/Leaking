@@ -1,6 +1,10 @@
 import torch.nn as nn
 import math
 
+'''
+  参考：
+  http://www.pianshen.com/article/2050135642/
+'''
 class VGG(nn.Module):
 
   def __init__(self, features, num_classes=1000, init_weights=True):
