@@ -29,22 +29,11 @@ class Crawler(object):
       self.wait()
       state = self.driver.execute_script('return document.readyState')
 
-  RETRY_TIMES = 10
-
   def fetch(self, text: str, number: int):
     def __fetch(text: str, number: int):
-      for t in range(Crawler.RETRY_TIMES):
-        try:
-          self.driver.maximize_window()
-          self.driver.get(self.site.format(text))
-          self.wait_ready()
-          break
-        except:
-          if t < Crawler.RETRY_TIMES:
-            print(f'retry... [{t}/{Crawler.RETRY_TIMES}]')
-          else:
-            print(f'{t} times error... stop, please check internet connection')
-            return
+      self.driver.maximize_window()
+      self.driver.get(self.site.format(text))
+      self.wait_ready()
       pos = 0
       self.total = 1
       while self.total < number:
