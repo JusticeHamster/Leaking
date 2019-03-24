@@ -36,7 +36,7 @@ class Crawler(object):
       self.wait_ready()
       pos = 0
       self.total = 1
-      for _ in range(number):
+      while self.total < number:
         pos += 500
         self.driver.execute_script(Crawler.SCROLL_DOWN.format(pos))
         while True:
