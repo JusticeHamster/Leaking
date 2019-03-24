@@ -39,7 +39,6 @@ class Crawler(object):
       for _ in range(number):
         pos += 500
         self.driver.execute_script(Crawler.SCROLL_DOWN.format(pos))
-        self.wait(10)
         while True:
           try:
             e = self.driver.find_element_by_xpath(self.xpath.format(self.total))
@@ -47,6 +46,7 @@ class Crawler(object):
             self.total += 1
           except:
             break
+        self.wait(10)
       self.driver.close()
     try:
       __fetch(text, number)
