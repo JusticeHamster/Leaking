@@ -24,10 +24,10 @@ class Crawler(object):
     time.sleep(t)
 
   def wait_ready(self):
-    state = ''
-    while state != 'complete':
+    while True:
       self.wait()
-      state = self.driver.execute_script('return document.readyState')
+      if self.driver.execute_script('return document.readyState') == 'complete':
+        break
 
   def fetch(self, text: str, number: int):
     def __fetch(text: str, number: int):
