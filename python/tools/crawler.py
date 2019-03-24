@@ -28,6 +28,7 @@ class Crawler(object):
         break
 
   SCROLL_DOWN = 'document.documentElement.scrollTop={}'
+  TRY_TIME = 10
 
   def fetch(self, text: str, number: int):
     def __fetch(text: str, number: int):
@@ -37,7 +38,8 @@ class Crawler(object):
       pos = 0
       self.total = 1
       indexes = [1] * self.xpath_count
-      while self.total < number:
+      try_time = 0
+      while self.total < number and try_time < Crawler.TRY_TIME:
         pos += 500
         self.driver.execute_script(Crawler.SCROLL_DOWN.format(pos))
         curr_index = self.xpath_count - 1
@@ -45,6 +47,7 @@ class Crawler(object):
           try:
             e = self.driver.find_element_by_xpath(self.xpath.format(*indexes))
             self.pics.append(e.get_attribute('src'))
+            try_time = 0
             self.total += 1
             indexes[-1] += 1
           except:
@@ -54,6 +57,7 @@ class Crawler(object):
               indexes[curr_index] += 1
             else:
               break
+        try_time += 1
         self.wait(10)
       self.driver.close()
     try:
@@ -75,7 +79,7 @@ class Crawler(object):
       url = self.pics.pop(0)
       print(f'{count}/{self.total}: {url}')
       try:
-        result = requests.get(url, stream=True, headers={'User-agent': 'Mozilla/5.0'})
+        result = requests.get(url, stream=True, headers={'User-agent': 'Mozilla/5.0'}, timeout=60)
         if result.status_code == 200:
           with open(f'{self.directory}/{count}.jpg', 'wb') as f:
             result.raw.decode_content = True
@@ -83,9 +87,6 @@ class Crawler(object):
       except KeyboardInterrupt:
         print('stop...')
         break
-      except Exception as e:
-        print(e)
-        return
       count += 1
     self.__stop = False
 
@@ -110,23 +111,26 @@ params = [
 #  },
 ]
 
-def main(search: str, number: int):
-  for param in params:
-    param['directory'] = param['directory'].format(search)
-    crawler = Crawler(**param)
-    fetch = threading.Thread(target=crawler.fetch, args=(search, number, ))
-    download = threading.Thread(target=crawler.download)
-    fetch.start()
-    download.start()
-    fetch.join()
-    download.join()
-    crawler.quit()
+def main(searches: list, number: int):
+  for search in searches:
+    if len(search) == 0:
+      continue
+    for param in params:
+      param['directory'] = param['directory'].format(search)
+      crawler = Crawler(**param)
+      fetch = threading.Thread(target=crawler.fetch, args=(search, number, ))
+      download = threading.Thread(target=crawler.download)
+      fetch.start()
+      download.start()
+      fetch.join()
+      download.join()
+      crawler.quit()
 
 if __name__ == '__main__':
   import sys
   argv = sys.argv
-  if len(argv) == 3:
-    search = argv[1]
-    number = int(argv[2])
-    if len(search) != 0 and number > 0:
+  if len(argv) >= 3:
+    number = int(argv[1])
+    search = argv[2:]
+    if number > 0:
       main(search, number)
