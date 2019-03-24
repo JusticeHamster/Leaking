@@ -9,7 +9,7 @@ class Crawler(object):
   def __init__(self, site: str, xpath: str, directory: str):
     self.site = site
     self.driver = selenium.webdriver.Chrome()
-    self.xpath = xpath
+    self.xpath, self.xpath_count = xpath
     self.pics = []
     self.directory = directory
     self.total = 1
@@ -17,8 +17,6 @@ class Crawler(object):
 
     if not os.path.exists(directory):
       os.makedirs(directory)
-
-  SCROLL_DOWN = 'document.documentElement.scrollTop={}'
 
   def wait(self, t: int = 1):
     time.sleep(t)
@@ -29,6 +27,8 @@ class Crawler(object):
       if self.driver.execute_script('return document.readyState') == 'complete':
         break
 
+  SCROLL_DOWN = 'document.documentElement.scrollTop={}'
+
   def fetch(self, text: str, number: int):
     def __fetch(text: str, number: int):
       self.driver.maximize_window()
@@ -36,16 +36,24 @@ class Crawler(object):
       self.wait_ready()
       pos = 0
       self.total = 1
+      indexes = [1] * self.xpath_count
       while self.total < number:
         pos += 500
         self.driver.execute_script(Crawler.SCROLL_DOWN.format(pos))
+        curr_index = self.xpath_count - 1
         while True:
           try:
-            e = self.driver.find_element_by_xpath(self.xpath.format(self.total))
+            e = self.driver.find_element_by_xpath(self.xpath.format(*indexes))
             self.pics.append(e.get_attribute('src'))
             self.total += 1
+            indexes[-1] += 1
           except:
-            break
+            if curr_index > 0:
+              indexes[curr_index] = 1
+              curr_index -= 1
+              indexes[curr_index] += 1
+            else:
+              break
         self.wait(10)
       self.driver.close()
     try:
@@ -87,14 +95,19 @@ class Crawler(object):
 params = [
   {
     'site': r'https://stocksnap.io/search/{}',
-    'xpath': r'//*[@id="main"]/a[{}]/img',
+    'xpath': [r'//*[@id="main"]/a[{}]/img', 1],
     'directory': 'imgs/{}/stocksnap',
   },
   {
     'site': r'https://visualhunt.com/search/instant/?q={}',
-    'xpath': r'//*[@id="layout"]/div[3]/div/div[1]/div[{}]/a[1]/img',
+    'xpath': [r'//*[@id="layout"]/div[3]/div/div[1]/div[{}]/a[1]/img', 1],
     'directory': 'imgs/{}/visualhunt',
   },
+#  {
+#    'site': r'http://image.baidu.com/search/index?tn=baiduimage&ps=1&ct=201326592&lm=-1&cl=2&nc=1&ie=utf-8&word={}',
+#    'xpath': [r'//*[@id="imgid"]/div[{}]/ul/li[{}]/div/a/img', 2],
+#    'directory': 'imgs/{}/baidu',
+#  },
 ]
 
 def main(search: str, number: int):
