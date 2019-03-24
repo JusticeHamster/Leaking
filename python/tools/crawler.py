@@ -29,11 +29,22 @@ class Crawler(object):
       self.wait()
       state = self.driver.execute_script('return document.readyState')
 
+  RETRY_TIMES = 10
+
   def fetch(self, text: str, number: int):
     def __fetch(text: str, number: int):
-      self.driver.maximize_window()  
-      self.driver.get(self.site.format(text))
-      self.wait_ready()
+      for t in range(Crawler.RETRY_TIMES):
+        try:
+          self.driver.maximize_window()
+          self.driver.get(self.site.format(text))
+          self.wait_ready()
+          break
+        except:
+          if t < Crawler.RETRY_TIMES:
+            print(f'retry... [{t}/{Crawler.RETRY_TIMES}]')
+          else:
+            print(f'{t} times error... stop, please check internet connection')
+            return
       pos = 0
       self.total = 1
       while self.total < number:
@@ -84,19 +95,30 @@ class Crawler(object):
   def quit(self):
     self.driver.quit()
 
+params = [
+  {
+    'site': r'https://stocksnap.io/search/{}',
+    'xpath': r'//*[@id="main"]/a[{}]/img',
+    'directory': 'imgs/{}/stocksnap',
+  },
+  {
+    'site': r'https://visualhunt.com/search/instant/?q={}',
+    'xpath': r'//*[@id="layout"]/div[3]/div/div[1]/div[{}]/a[1]/img',
+    'directory': 'imgs/{}/visualhunt',
+  },
+]
+
 def main(search: str, number: int):
-  crawler = Crawler(
-    r'https://stocksnap.io/search/{}',
-    xpath=r'//*[@id="main"]/a[{}]/img',
-    directory=f'imgs/{search}'
-  )
-  fetch = threading.Thread(target=crawler.fetch, args=(search, number, ))
-  download = threading.Thread(target=crawler.download)
-  fetch.start()
-  download.start()
-  fetch.join()
-  download.join()
-  crawler.quit()
+  for param in params:
+    param['directory'] = param['directory'].format(search)
+    crawler = Crawler(**param)
+    fetch = threading.Thread(target=crawler.fetch, args=(search, number, ))
+    download = threading.Thread(target=crawler.download)
+    fetch.start()
+    download.start()
+    fetch.join()
+    download.join()
+    crawler.quit()
 
 if __name__ == '__main__':
   import sys
