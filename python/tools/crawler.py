@@ -87,6 +87,9 @@ class Crawler(object):
       except KeyboardInterrupt:
         print('stop...')
         break
+      except Exception as e:
+        print(e)
+        continue
       count += 1
     self.__stop = False
 
