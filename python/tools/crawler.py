@@ -119,6 +119,7 @@ def main(searches: list, number: int):
     if len(search) == 0:
       continue
     for param in params:
+      param = param.copy()
       param['directory'] = param['directory'].format(search)
       crawler = Crawler(**param)
       fetch = threading.Thread(target=crawler.fetch, args=(search, number, ))
