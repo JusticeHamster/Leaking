@@ -77,19 +77,22 @@ class Crawler(object):
       if self.__stop and len(self.pics) == 0:
         break
       url = self.pics.pop(0)
-      print(f'{count}/{self.total}: {url}')
-      try:
-        result = requests.get(url, stream=True, headers={'User-agent': 'Mozilla/5.0'}, timeout=60)
-        if result.status_code == 200:
-          with open(f'{self.directory}/{count}.jpg', 'wb') as f:
-            result.raw.decode_content = True
-            shutil.copyfileobj(result.raw, f)
-      except KeyboardInterrupt:
-        print('stop...')
-        break
-      except Exception as e:
-        print(e)
-        continue
+      img_path = f'{self.directory}/{count}.jpg'
+      if os.path.exists(img_path):
+        print(f'{img_path} already exists.')
+      else:
+        print(f'{count}/{self.total}: {url}')
+        try:
+          result = requests.get(url, stream=True, headers={'User-agent': 'Mozilla/5.0'}, timeout=60)
+          if result.status_code == 200:
+            with open(img_path, 'wb') as f:
+              result.raw.decode_content = True
+              shutil.copyfileobj(result.raw, f)
+        except KeyboardInterrupt:
+          print('stop...')
+          break
+        except Exception as e:
+          print(e)
       count += 1
     self.__stop = False
 
