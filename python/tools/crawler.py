@@ -137,24 +137,24 @@ class Crawler(object):
     self.driver.quit()
 
 params = {
-#  'stocksnap' : {
-#    'site': r'https://stocksnap.io/search/{0}',
-#    'xpath': [r'//*[@id="main"]/a[{}]/img', 1],
-#  },
-#  'visualhunt' : {
-#    'site': r'https://visualhunt.com/search/instant/?q={0}',
-#    'xpath': [r'//*[@id="layout"]/div[3]/div/div[1]/div[{}]/a[1]/img', 1],
-#  },
+  'stocksnap' : {
+    'site': r'https://stocksnap.io/search/{0}',
+    'xpath': [r'//*[@id="main"]/a[{}]/img', 1],
+    'screenshot': True,
+  },
+  'visualhunt' : {
+    'site': r'https://visualhunt.com/search/instant/?q={0}',
+    'xpath': [r'//*[@id="layout"]/div[3]/div/div[1]/div[{}]/a[1]/img', 1],
+    'screenshot': True,
+  },
   'baidu' : {
     'site': r'http://image.baidu.com/search/index?tn=baiduimage&ps=1&ct=201326592&lm=-1&cl=2&nc=1&ie=utf-8&word={0}',
     'xpath': [r'//*[@id="imgid"]/div[{}]/ul/li[{}]/div/a/img', 2],
-    'wait': True,
     'screenshot': True,
   },
   'google' : {
     'site': r'https://www.google.com/search?tbm=isch&q={0}',
     'xpath': [r'//*[@id="rg_s"]/div[{}]/a[1]/img', 1],
-    'wait': True,
     'screenshot': True,
   },
 }
