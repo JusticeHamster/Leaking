@@ -111,7 +111,7 @@ params = {
   'pinterest' : {
     'site': r'https://www.pinterest.com/search/pins/?q={0}&rs=typed&term_meta[]={0}%7Ctyped',
     'xpath': [
-      r'/html/body/div[2]/div/div[1]/div/div[1]/div[1]/div[3]/div/div/div/div/div[1]/div/div/div[1]/div[{}]/div/div/div/div/div/div[1]/a/div[1]/div[1]/div/div/div/div/img',
+      r'/html/body/div[2]/div/div[1]/div/div[1]/div[1]/div[3]/div/div/div/div[2]/div[1]/div/div/div/div[1]/div[{}]/div/div/div/div/div/div/div[1]/a/div[1]/div[1]/div/div/div/div/img',
       1
     ],
   },
