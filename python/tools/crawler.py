@@ -105,19 +105,22 @@ class Crawler(object):
           binary_data = binascii.a2b_base64(data)
           with open(path, 'wb') as f:
             f.write(binary_data)
-        # 判断data是网址还是图片数据
-        dl = download_data if data[:10] == 'data:image' else download_url
-        if dl and data:
-          try:
-            dl(img_path, data)
-          except KeyboardInterrupt:
-            print('stop...')
+        if data:
+          # 判断data是网址还是图片数据
+          dl = download_data if data[:10] == 'data:image' else download_url
+          if dl:
+            try:
+              dl(img_path, data)
+            except KeyboardInterrupt:
+              print('stop...')
+              break
+            except Exception as e:
+              print(e)
+          else:
+            print('error type')
             break
-          except Exception as e:
-            print(e)
         else:
-          print('error type')
-          break
+          print('empty data')
       count += 1
     self.__stop = False
 
