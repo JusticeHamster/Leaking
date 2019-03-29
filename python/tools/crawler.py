@@ -61,7 +61,6 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
             if e is None:
               raise Exception()
             if self.screen_shot:
-              print(self.total, indexes)
               self.pics.append(e)
             else:
               self.pics.append(e.get_attribute('src'))
@@ -77,6 +76,8 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
               break
         try_time += 1
         self.wait(10)
+      print(f'{self.total} >= {number} || {try_time} >= {Crawler.TRY_TIME}')
+      print(f'{text}: close')
       self.driver.close()
     try:
       __fetch(text, number)
