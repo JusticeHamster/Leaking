@@ -90,7 +90,7 @@ class Crawler(object):
             headers={
               'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.63 Safari/537.36'
             },
-            timeout=60
+            timeout=30
           )
           if result.status_code == 200:
             with open(path, 'wb') as f:
@@ -142,7 +142,7 @@ params = {
   },
   'google' : {
     'site': r'https://www.google.com/search?tbm=isch&q={0}',
-    'xpath': [r'//*[@id="rg_s"]/div[{}]/a[1]', 1],
+    'xpath': [r'//*[@id="rg_s"]/div[{}]/a[1]/img', 1],
   },
 }
 
