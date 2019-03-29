@@ -7,7 +7,7 @@ import time
 import binascii
 
 class Crawler(object):
-  def __init__(self, site: str, xpath: str, directory: str, wait: bool = False):
+  def __init__(self, site: str, xpath: str, directory: str, screenshot: bool = False, wait: bool = False):
     self.site = site
     self.driver = selenium.webdriver.Chrome()
     self.xpath, self.xpath_count = xpath
@@ -15,6 +15,7 @@ class Crawler(object):
     self.directory = directory
     self.total = 1
     self.wait_key = wait
+    self.screen_shot = screenshot
     self.__stop = False
 
     if not os.path.exists(directory):
@@ -52,7 +53,10 @@ class Crawler(object):
         while True:
           try:
             e = self.driver.find_element_by_xpath(self.xpath.format(*indexes))
-            self.pics.append(e.get_attribute('src'))
+            if self.screen_shot:
+              e.screenshot(f'{self.directory}/{self.total}.jpg')
+            else:
+              self.pics.append(e.get_attribute('src'))
             try_time = 0
             self.total += 1
             indexes[-1] += 1
@@ -136,20 +140,24 @@ params = {
   'stocksnap' : {
     'site': r'https://stocksnap.io/search/{0}',
     'xpath': [r'//*[@id="main"]/a[{}]/img', 1],
+    'screenshot': True,
   },
   'visualhunt' : {
     'site': r'https://visualhunt.com/search/instant/?q={0}',
     'xpath': [r'//*[@id="layout"]/div[3]/div/div[1]/div[{}]/a[1]/img', 1],
+    'screenshot': True,
   },
   'baidu' : {
     'site': r'http://image.baidu.com/search/index?tn=baiduimage&ps=1&ct=201326592&lm=-1&cl=2&nc=1&ie=utf-8&word={0}',
     'xpath': [r'//*[@id="imgid"]/div[{}]/ul/li[{}]/div/a/img', 2],
     'wait': True,
+    'screenshot': True,
   },
   'google' : {
     'site': r'https://www.google.com/search?tbm=isch&q={0}',
     'xpath': [r'//*[@id="rg_s"]/div[{}]/a[1]/img', 1],
     'wait': True,
+    'screenshot': True,
   },
 }
 
