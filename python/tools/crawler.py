@@ -100,7 +100,7 @@ class Crawler(object):
           'url':  download_url,
           'data': download_data,
         }.get(self.type)
-        if dl:
+        if dl and data:
           try:
             dl(data)
           except KeyboardInterrupt:
