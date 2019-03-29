@@ -85,11 +85,19 @@ class Crawler(object):
         print(f'{count}/{self.total}', end=': ')
         def download_url(path, url):
           print(url)
-          result = requests.get(url, stream=True, headers={'User-agent': 'Mozilla/5.0'}, timeout=60)
+          result = requests.get(
+            url, stream=True,
+            headers={
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.63 Safari/537.36'
+            },
+            timeout=60
+          )
           if result.status_code == 200:
             with open(path, 'wb') as f:
               result.raw.decode_content = True
               shutil.copyfileobj(result.raw, f)
+          else:
+            print(result.status_code)
         def download_data(path, data):
           # data:image/jpeg;base64,...
           data = data[23:]
