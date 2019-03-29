@@ -110,6 +110,14 @@ params = [
     'xpath': [r'//*[@id="layout"]/div[3]/div/div[1]/div[{}]/a[1]/img', 1],
     'directory': 'imgs/{}/visualhunt',
   },
+  {
+    'site': r'',
+    'xpath': [
+      r'/html/body/div[2]/div/div[1]/div/div[1]/div[1]/div[3]/div/div/div/div/div[1]/div/div/div[1]/div[{}]/div/div/div/div/div/div[1]/a/div[1]/div[1]/div/div/div/div/img',
+      1
+    ],
+    'directory': 'imgs/{}/pinterest',
+  },
 #  {
 #    'site': r'http://image.baidu.com/search/index?tn=baiduimage&ps=1&ct=201326592&lm=-1&cl=2&nc=1&ie=utf-8&word={}',
 #    'xpath': [r'//*[@id="imgid"]/div[{}]/ul/li[{}]/div/a/img', 2],
