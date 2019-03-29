@@ -123,10 +123,10 @@ params = {
 }
 
 def main(searches: list, number: int):
-  for name, search in searches.items():
+  for search in searches:
     if len(search) == 0:
       continue
-    for param in params:
+    for name, param in params.items():
       crawler = Crawler(**param, directory=f'imgs/{search}/{name}')
       fetch = threading.Thread(target=crawler.fetch, args=(search, number, ))
       download = threading.Thread(target=crawler.download)
