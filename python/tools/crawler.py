@@ -32,7 +32,11 @@ class Crawler(object):
       if self.driver.execute_script('return document.readyState') == 'complete':
         break
 
-  SCROLL_DOWN = 'document.documentElement.scrollTop={}'
+  SCROLL_DOWN   = 'document.documentElement.scrollTop={}'
+  SCROLL_BOTTOM = 'window.scrollTo(0, document.body.scrollHeight);'
+  SCROLL_CENTER = '''var viewPortHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+var elementTop = arguments[0].getBoundingClientRect().top;
+window.scrollBy(0, elementTop - viewPortHeight / 3);'''
   TRY_TIME = 10
 
   def fetch(self, text: str, number: int):
@@ -48,14 +52,17 @@ class Crawler(object):
       try_time = 0
       while self.total < number and try_time < Crawler.TRY_TIME:
         pos += 500
-        self.driver.execute_script(Crawler.SCROLL_DOWN.format(pos))
+        if not self.screen_shot:
+          self.driver.execute_script(Crawler.SCROLL_DOWN.format(pos))
         curr_index = self.xpath_count - 1
         while True:
           try:
             e = self.driver.find_element_by_xpath(self.xpath.format(*indexes))
+            if e is None:
+              raise Exception()
             if self.screen_shot:
-              e.screenshot(f'{self.directory}/{self.total}.png')
-              self.wait()
+              print(self.total, indexes)
+              self.pics.append(e)
             else:
               self.pics.append(e.get_attribute('src'))
             try_time = 0
@@ -88,9 +95,15 @@ class Crawler(object):
       if self.__stop and len(self.pics) == 0:
         break
       data = self.pics.pop(0)
-      img_path = f'{self.directory}/{count}.jpg'
+      img_path = f'{self.directory}/{count}.'
+      if self.screen_shot:
+        img_path += 'png'
+      else:
+        img_path += 'jpg'
       if os.path.exists(img_path):
         print(f'{img_path} already exists.')
+        if self.screen_shot:
+          self.driver.execute_script(Crawler.SCROLL_BOTTOM)
       else:
         print(f'{count}/{self.total}', end=': ')
         def download_url(path, url):
@@ -115,9 +128,17 @@ class Crawler(object):
           binary_data = binascii.a2b_base64(data)
           with open(path, 'wb') as f:
             f.write(binary_data)
+        def screenshot(path, element):
+          self.driver.execute_script(Crawler.SCROLL_CENTER, element)
+          self.wait()
+          print('screenshot')
+          element.screenshot(path)
         if data:
-          # 判断data是网址还是图片数据
-          dl = download_data if data[:10] == 'data:image' else download_url
+          if self.screen_shot:
+            dl = screenshot
+          else:
+            # 判断data是网址还是图片数据
+            dl = download_data if data[:10] == 'data:image' else download_url
           if dl:
             try:
               dl(img_path, data)
