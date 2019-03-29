@@ -7,19 +7,22 @@ import time
 import binascii
 
 class Crawler(object):
-  def __init__(self, site: str, xpath: str, directory: str):
+  def __init__(self, site: str, xpath: str, directory: str, wait: int = 0):
     self.site = site
     self.driver = selenium.webdriver.Chrome()
     self.xpath, self.xpath_count = xpath
     self.pics = []
     self.directory = directory
     self.total = 1
+    self.wait_time = wait
     self.__stop = False
 
     if not os.path.exists(directory):
       os.makedirs(directory)
 
   def wait(self, t: int = 1):
+    if t < 1:
+      return
     time.sleep(t)
 
   def wait_ready(self):
@@ -36,6 +39,7 @@ class Crawler(object):
       self.driver.maximize_window()
       self.driver.get(self.site.format(text))
       self.wait_ready()
+      self.wait(self.wait_time)
       pos = 0
       self.total = 1
       indexes = [1] * self.xpath_count
@@ -139,10 +143,12 @@ params = {
   'baidu' : {
     'site': r'http://image.baidu.com/search/index?tn=baiduimage&ps=1&ct=201326592&lm=-1&cl=2&nc=1&ie=utf-8&word={0}',
     'xpath': [r'//*[@id="imgid"]/div[{}]/ul/li[{}]/div/a/img', 2],
+    'wait': 20,
   },
   'google' : {
     'site': r'https://www.google.com/search?tbm=isch&q={0}',
     'xpath': [r'//*[@id="rg_s"]/div[{}]/a[1]/img', 1],
+    'wait': 20,
   },
 }
 
