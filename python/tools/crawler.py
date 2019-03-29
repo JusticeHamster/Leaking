@@ -99,40 +99,35 @@ class Crawler(object):
   def quit(self):
     self.driver.quit()
 
-params = [
-  {
+params = {
+  'stocksnap' : {
     'site': r'https://stocksnap.io/search/{0}',
     'xpath': [r'//*[@id="main"]/a[{}]/img', 1],
-    'directory': 'imgs/{}/stocksnap',
   },
-  {
+  'visualhunt' : {
     'site': r'https://visualhunt.com/search/instant/?q={0}',
     'xpath': [r'//*[@id="layout"]/div[3]/div/div[1]/div[{}]/a[1]/img', 1],
-    'directory': 'imgs/{}/visualhunt',
   },
-  {
+  'pinterest' : {
     'site': r'https://www.pinterest.com/search/pins/?q={0}&rs=typed&term_meta[]={0}%7Ctyped',
     'xpath': [
       r'/html/body/div[2]/div/div[1]/div/div[1]/div[1]/div[3]/div/div/div/div/div[1]/div/div/div[1]/div[{}]/div/div/div/div/div/div[1]/a/div[1]/div[1]/div/div/div/div/img',
       1
     ],
-    'directory': 'imgs/{}/pinterest',
   },
-#  {
+#  'baidu' : {
 #    'site': r'http://image.baidu.com/search/index?tn=baiduimage&ps=1&ct=201326592&lm=-1&cl=2&nc=1&ie=utf-8&word={0}',
 #    'xpath': [r'//*[@id="imgid"]/div[{}]/ul/li[{}]/div/a/img', 2],
 #    'directory': 'imgs/{}/baidu',
 #  },
-]
+}
 
 def main(searches: list, number: int):
-  for search in searches:
+  for name, search in searches.items():
     if len(search) == 0:
       continue
     for param in params:
-      param = param.copy()
-      param['directory'] = param['directory'].format(search)
-      crawler = Crawler(**param)
+      crawler = Crawler(**param, directory=f'imgs/{search}/{name}')
       fetch = threading.Thread(target=crawler.fetch, args=(search, number, ))
       download = threading.Thread(target=crawler.download)
       fetch.start()
