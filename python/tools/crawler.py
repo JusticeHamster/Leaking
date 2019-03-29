@@ -4,14 +4,13 @@ import requests
 import shutil
 import threading
 import time
-from binascii import a2b_base64
+import binascii
 
 class Crawler(object):
-  def __init__(self, site: str, xpath: str, img_type: str, directory: str):
+  def __init__(self, site: str, xpath: str, directory: str):
     self.site = site
     self.driver = selenium.webdriver.Chrome()
     self.xpath, self.xpath_count = xpath
-    self.type = img_type
     self.pics = []
     self.directory = directory
     self.total = 1
@@ -84,25 +83,25 @@ class Crawler(object):
         print(f'{img_path} already exists.')
       else:
         print(f'{count}/{self.total}', end=': ')
-        def download_url(url):
+        def download_url(path, url):
           print(url)
           result = requests.get(url, stream=True, headers={'User-agent': 'Mozilla/5.0'}, timeout=60)
           if result.status_code == 200:
-            with open(img_path, 'wb') as f:
+            with open(path, 'wb') as f:
               result.raw.decode_content = True
               shutil.copyfileobj(result.raw, f)
-        def download_data(data):
+        def download_data(path, data):
+          # data:image/jpeg;base64,...
+          data = data[23:]
           print(len(data))
-          binary_data = a2b_base64(data)
-          with open(img_path, 'wb') as f:
+          binary_data = binascii.a2b_base64(data)
+          with open(path, 'wb') as f:
             f.write(binary_data)
-        dl = {
-          'url':  download_url,
-          'data': download_data,
-        }.get(self.type)
+        # 判断data是网址还是图片数据
+        dl = download_data if data[:10] == 'data:image' else download_url
         if dl and data:
           try:
-            dl(data)
+            dl(img_path, data)
           except KeyboardInterrupt:
             print('stop...')
             break
@@ -119,22 +118,18 @@ class Crawler(object):
 
 params = {
   'stocksnap' : {
-    'img_type': 'url',
     'site': r'https://stocksnap.io/search/{0}',
     'xpath': [r'//*[@id="main"]/a[{}]/img', 1],
   },
   'visualhunt' : {
-    'img_type': 'url',
     'site': r'https://visualhunt.com/search/instant/?q={0}',
     'xpath': [r'//*[@id="layout"]/div[3]/div/div[1]/div[{}]/a[1]/img', 1],
   },
   'baidu' : {
-    'img_type': 'data',
     'site': r'http://image.baidu.com/search/index?tn=baiduimage&ps=1&ct=201326592&lm=-1&cl=2&nc=1&ie=utf-8&word={0}',
     'xpath': [r'//*[@id="imgid"]/div[{}]/ul/li[{}]/div/a/img', 2],
   },
   'google' : {
-    'img_type': 'data',
     'site': r'https://www.google.com/search?tbm=isch&q={0}',
     'xpath': [r'//*[@id="rg_s"]/div[{}]/a[1]', 1],
   },
