@@ -22,7 +22,7 @@ class Crawler(object):
       os.makedirs(directory)
 
   def wait(self, t: int = 1):
-    if t < 1:
+    if t <= 0:
       return
     time.sleep(t)
 
@@ -55,6 +55,7 @@ class Crawler(object):
             e = self.driver.find_element_by_xpath(self.xpath.format(*indexes))
             if self.screen_shot:
               e.screenshot(f'{self.directory}/{self.total}.png')
+              self.wait()
             else:
               self.pics.append(e.get_attribute('src'))
             try_time = 0
@@ -136,7 +137,7 @@ class Crawler(object):
   def quit(self):
     self.driver.quit()
 
-params = {
+'''
   'stocksnap' : {
     'site': r'https://stocksnap.io/search/{0}',
     'xpath': [r'//*[@id="main"]/a[{}]/img', 1],
@@ -147,6 +148,9 @@ params = {
     'xpath': [r'//*[@id="layout"]/div[3]/div/div[1]/div[{}]/a[1]/img', 1],
     'screenshot': True,
   },
+'''
+
+params = {
   'baidu' : {
     'site': r'http://image.baidu.com/search/index?tn=baiduimage&ps=1&ct=201326592&lm=-1&cl=2&nc=1&ie=utf-8&word={0}',
     'xpath': [r'//*[@id="imgid"]/div[{}]/ul/li[{}]/div/a/img', 2],
