@@ -4,12 +4,14 @@ import requests
 import shutil
 import threading
 import time
+from binascii import a2b_base64
 
 class Crawler(object):
-  def __init__(self, site: str, xpath: str, directory: str):
+  def __init__(self, site: str, xpath: str, img_type: str, directory: str):
     self.site = site
     self.driver = selenium.webdriver.Chrome()
     self.xpath, self.xpath_count = xpath
+    self.type = img_type
     self.pics = []
     self.directory = directory
     self.total = 1
@@ -76,23 +78,39 @@ class Crawler(object):
         self.wait(5)
       if self.__stop and len(self.pics) == 0:
         break
-      url = self.pics.pop(0)
+      data = self.pics.pop(0)
       img_path = f'{self.directory}/{count}.jpg'
       if os.path.exists(img_path):
         print(f'{img_path} already exists.')
       else:
-        print(f'{count}/{self.total}: {url}')
-        try:
+        print(f'{count}/{self.total}', end=': ')
+        def download_url(url):
+          print(url)
           result = requests.get(url, stream=True, headers={'User-agent': 'Mozilla/5.0'}, timeout=60)
           if result.status_code == 200:
             with open(img_path, 'wb') as f:
               result.raw.decode_content = True
               shutil.copyfileobj(result.raw, f)
-        except KeyboardInterrupt:
-          print('stop...')
+        def download_data(data):
+          print(len(data))
+          binary_data = a2b_base64(data)
+          with open(img_path, 'wb') as f:
+            f.write(binary_data)
+        dl = {
+          'url':  download_url,
+          'data': download_data,
+        }.get(self.type)
+        if dl:
+          try:
+            dl(data)
+          except KeyboardInterrupt:
+            print('stop...')
+            break
+          except Exception as e:
+            print(e)
+        else:
+          print('error type')
           break
-        except Exception as e:
-          print(e)
       count += 1
     self.__stop = False
 
@@ -101,25 +119,25 @@ class Crawler(object):
 
 params = {
   'stocksnap' : {
+    'img_type': 'url',
     'site': r'https://stocksnap.io/search/{0}',
     'xpath': [r'//*[@id="main"]/a[{}]/img', 1],
   },
   'visualhunt' : {
+    'img_type': 'url',
     'site': r'https://visualhunt.com/search/instant/?q={0}',
     'xpath': [r'//*[@id="layout"]/div[3]/div/div[1]/div[{}]/a[1]/img', 1],
   },
-  'pinterest' : {
-    'site': r'https://www.pinterest.com/search/pins/?q={0}&rs=typed&term_meta[]={0}%7Ctyped',
-    'xpath': [
-      r'/html/body/div[2]/div/div[1]/div/div[1]/div[1]/div[3]/div/div/div/div[2]/div[1]/div/div/div/div[1]/div[{}]/div/div/div/div/div/div/div[1]/a/div[1]/div[1]/div/div/div/div/img',
-      1
-    ],
+  'baidu' : {
+    'img_type': 'data',
+    'site': r'http://image.baidu.com/search/index?tn=baiduimage&ps=1&ct=201326592&lm=-1&cl=2&nc=1&ie=utf-8&word={0}',
+    'xpath': [r'//*[@id="imgid"]/div[{}]/ul/li[{}]/div/a/img', 2],
   },
-#  'baidu' : {
-#    'site': r'http://image.baidu.com/search/index?tn=baiduimage&ps=1&ct=201326592&lm=-1&cl=2&nc=1&ie=utf-8&word={0}',
-#    'xpath': [r'//*[@id="imgid"]/div[{}]/ul/li[{}]/div/a/img', 2],
-#    'directory': 'imgs/{}/baidu',
-#  },
+  'google' : {
+    'img_type': 'data',
+    'site': r'https://www.google.com/search?tbm=isch&q={0}',
+    'xpath': [r'//*[@id="rg_s"]/div[{}]/a[1]', 1],
+  },
 }
 
 def main(searches: list, number: int):
