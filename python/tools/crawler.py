@@ -51,7 +51,8 @@ class Crawler(object):
 var elementTop = arguments[0].getBoundingClientRect().top;
 window.scrollBy(0, elementTop - viewPortHeight / 3);'''
   SAVE_AS = [*(['down'] * 7), 'enter']
-  TRY_TIME = 10
+  INDEX_TRY_TIME = 10
+  TRY_TIME = 20
 
   def close_dialog(self):
     if not self.close_xpath:
@@ -82,7 +83,7 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
         if self.save_type == 'screenshot':
           pos += 500
           self.driver.execute_script(Crawler.SCROLL_DOWN.format(pos))
-        while True:
+        while try_time < Crawler.TRY_TIME:
           try:
             e = self.driver.find_element_by_xpath(self.xpath.format(*indexes))
             if self.save_type == 'click':
@@ -114,12 +115,13 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
             print(ex)
           except NoSuchElementException:
             for i in range(self.xpath_count - 1, 0, -1):
-              if indexes[i] >= Crawler.TRY_TIME:
+              if indexes[i] >= Crawler.INDEX_TRY_TIME:
                 indexes[i] = 1
                 indexes[i - 1] += 1
                 break
             else:
               indexes[-1] += 1
+              try_time += 1
           except Exception as e:
             print(e)
             break
