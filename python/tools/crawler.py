@@ -61,7 +61,7 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
       except:
         pass
       else:
-        if not e.is_enabled():
+        if not e.is_displayed():
           continue
         e.click()
 
