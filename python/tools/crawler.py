@@ -1,5 +1,7 @@
 import os
 import selenium.webdriver
+from selenium.webdriver.common.keys import Keys
+import pyautogui
 import requests
 import shutil
 import threading
@@ -7,7 +9,12 @@ import time
 import binascii
 
 class Crawler(object):
-  def __init__(self, site: str, xpath: str, directory: str, screenshot: bool = False, wait: bool = False):
+  def __init__(
+        self, site: str, xpath: str, directory: str,
+        name: str,
+        wait: bool = False, save_type: str = 'url'
+      ):
+    self.name = name
     self.site = site
     self.driver = selenium.webdriver.Chrome()
     self.xpath, self.xpath_count = xpath
@@ -15,7 +22,7 @@ class Crawler(object):
     self.directory = directory
     self.total = 1
     self.wait_key = wait
-    self.screen_shot = screenshot
+    self.save_type = save_type
     self.__stop = False
 
     if not os.path.exists(directory):
@@ -37,6 +44,7 @@ class Crawler(object):
   SCROLL_CENTER = '''var viewPortHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
 var elementTop = arguments[0].getBoundingClientRect().top;
 window.scrollBy(0, elementTop - viewPortHeight / 3);'''
+  SAVE_AS = [*(['down'] * 7), 'enter']
   TRY_TIME = 10
 
   def fetch(self, text: str, number: int):
@@ -51,23 +59,33 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
       indexes = [1] * self.xpath_count
       try_time = 0
       while self.total < number and try_time < Crawler.TRY_TIME:
-        pos += 500
-        if not self.screen_shot:
+        if self.save_type == 'screenshot':
+          pos += 500
           self.driver.execute_script(Crawler.SCROLL_DOWN.format(pos))
         curr_index = self.xpath_count - 1
         while True:
           try:
             e = self.driver.find_element_by_xpath(self.xpath.format(*indexes))
-            if e is None:
-              raise Exception()
-            if self.screen_shot:
+            if self.save_type == 'click':
+              self.wait(0.1)
+              selenium.webdriver.ActionChains(self.driver).move_to_element(e).context_click().perform()
+              self.wait(0.1)
+              pyautogui.typewrite(Crawler.SAVE_AS)
+              self.wait(0.1)
+              pyautogui.typewrite(f'{text}_{self.name}_' + '_'.join(map(str, indexes)), interval=0.1)
+              self.wait(0.1)
+              pyautogui.typewrite(['enter'])
+              self.wait(0.1)
+            elif self.save_type == 'screenshot':
               self.pics.append(e)
             else:
               self.pics.append(e.get_attribute('src'))
             try_time = 0
             self.total += 1
             indexes[-1] += 1
-          except:
+            print(indexes)
+          except Exception as e:
+            print(e)
             if curr_index > 0:
               indexes[curr_index] = 1
               curr_index -= 1
@@ -75,8 +93,9 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
             else:
               break
         try_time += 1
-        self.wait(10)
-      print(f'{self.total} >= {number} || {try_time} >= {Crawler.TRY_TIME}')
+        if self.save_type != 'click':
+          self.wait(10)
+      print(f'({self.total} >= {number}) || ({try_time} >= {Crawler.TRY_TIME})')
       print(f'{text}: close')
       self.driver.close()
     try:
@@ -87,6 +106,9 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
       self.__stop = True
 
   def download(self):
+    if self.save_type == 'click':
+      self.__stop = False
+      return
     count = 1
     while True:
       while len(self.pics) == 0:
@@ -97,13 +119,13 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
         break
       data = self.pics.pop(0)
       img_path = f'{self.directory}/{count}.'
-      if self.screen_shot:
+      if self.save_type == 'screenshot':
         img_path += 'png'
       else:
         img_path += 'jpg'
       if os.path.exists(img_path):
         print(f'{img_path} already exists.')
-        if self.screen_shot:
+        if self.save_type == 'screenshot':
           self.driver.execute_script(Crawler.SCROLL_BOTTOM)
       else:
         print(f'{count}/{self.total}', end=': ')
@@ -114,7 +136,7 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
             headers={
               'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.63 Safari/537.36'
             },
-            timeout=30
+            timeout=10
           )
           if result.status_code == 200:
             with open(path, 'wb') as f:
@@ -135,7 +157,7 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
           print('screenshot')
           element.screenshot(path)
         if data:
-          if self.screen_shot:
+          if self.save_type == 'screenshot':
             dl = screenshot
           else:
             # 判断data是网址还是图片数据
@@ -176,12 +198,12 @@ params = {
   'baidu' : {
     'site': r'http://image.baidu.com/search/index?tn=baiduimage&ps=1&ct=201326592&lm=-1&cl=2&nc=1&ie=utf-8&word={0}',
     'xpath': [r'//*[@id="imgid"]/div[{}]/ul/li[{}]/div/a/img', 2],
-    'screenshot': True,
+    'save_type': 'click',
   },
   'google' : {
     'site': r'https://www.google.com/search?tbm=isch&q={0}',
     'xpath': [r'//*[@id="rg_s"]/div[{}]/a[1]/img', 1],
-    'screenshot': True,
+    'save_type': 'screenshot',
   },
 }
 
@@ -190,7 +212,7 @@ def main(searches: list, number: int):
     if len(search) == 0:
       continue
     for name, param in params.items():
-      crawler = Crawler(**param, directory=f'imgs/{search}/{name}')
+      crawler = Crawler(**param, directory=f'imgs/{search}/{name}', name=name)
       fetch = threading.Thread(target=crawler.fetch, args=(search, number, ))
       download = threading.Thread(target=crawler.download)
       fetch.start()
