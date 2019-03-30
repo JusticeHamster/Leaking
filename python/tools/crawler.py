@@ -56,7 +56,6 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
       return
     for xpath in self.close_xpath:
       try:
-        print(xpath)
         e = self.driver.find_element_by_xpath(xpath)
       except:
         pass
