@@ -74,7 +74,7 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
               self.wait(0.1)
               pyautogui.typewrite(Crawler.SAVE_AS)
               self.wait(0.1)
-              pyautogui.typewrite(f'{text}_{self.name}_' + '_'.join(map(str, indexes)) + '.jpg')
+              pyautogui.typewrite(f'{text}_{self.name}_' + '_'.join(map(str, indexes)) + '.jpg', interval=0.01)
               self.wait(0.1)
               pyautogui.typewrite(['enter'])
               self.wait(0.1)
