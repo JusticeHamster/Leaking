@@ -8,6 +8,8 @@ import shutil
 import threading
 import time
 import binascii
+from xpinyin import Pinyin
+pinyin = Pinyin()
 
 class Crawler(object):
   def __init__(
@@ -75,7 +77,11 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
               self.wait(w)
               pyautogui.typewrite(Crawler.SAVE_AS)
               self.wait(w)
-              pyautogui.typewrite(f'{text}_{self.name}_' + '_'.join(map(str, indexes)) + '.jpg', interval=0.01)
+              cntext = pinyin.get_pinyin(text, '_')
+              pyautogui.typewrite(
+                f'{cntext}_{self.name}_' + '_'.join(map(str, indexes)) + '.jpg',
+                interval=0.01
+              )
               self.wait(w)
               pyautogui.typewrite(['enter'])
               self.wait(w)
