@@ -218,13 +218,19 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
   'stocksnap' : {
     'site': r'https://stocksnap.io/search/{0}',
     'xpath': [r'//*[@id="main"]/a[{}]/img', 1],
-    'screenshot': True,
+    'save_type': 'click',
   },
   'visualhunt' : {
     'site': r'https://visualhunt.com/search/instant/?q={0}',
     'xpath': [r'//*[@id="layout"]/div[3]/div/div[1]/div[{}]/a[1]/img', 1],
-    'screenshot': True,
+    'save_type': 'click',
   },
+  'pinterest' : {
+    'site': r'https://pinterest.com',
+    'xpath': [r'/html/body/div[2]/div/div[1]/div/div[1]/div[1]/div[3]/div/div/div/div/div[1]/div/div/div[1]/div[{}]/div/div/div/div/div/div[1]/a/div[1]/div[1]/div/div/div/div/img', 1],
+    'wait': True,
+    'save_type': 'click',
+  }
 '''
 
 params = {
