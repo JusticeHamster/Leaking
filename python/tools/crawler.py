@@ -1,6 +1,7 @@
 import os
 import selenium.webdriver
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import StaleElementReferenceException
 import pyautogui
 import requests
 import shutil
@@ -84,6 +85,8 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
             self.total += 1
             indexes[-1] += 1
             print(indexes)
+          except StaleElementReferenceException as ex:
+            print(ex)
           except Exception as e:
             print(e)
             if curr_index > 0:
