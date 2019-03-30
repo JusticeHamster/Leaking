@@ -50,7 +50,8 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
 
   def fetch(self, text: str, number: int):
     def __fetch(text: str, number: int):
-      self.driver.maximize_window()
+      if self.save_type != 'click':
+        self.driver.maximize_window()
       self.driver.get(self.site.format(text))
       self.wait_ready()
       if self.wait_key:
