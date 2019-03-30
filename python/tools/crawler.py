@@ -83,7 +83,7 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
         if self.save_type == 'screenshot':
           pos += 500
           self.driver.execute_script(Crawler.SCROLL_DOWN.format(pos))
-        while try_time < Crawler.TRY_TIME:
+        while self.total < number and try_time < Crawler.TRY_TIME:
           try:
             e = self.driver.find_element_by_xpath(self.xpath.format(*indexes))
             if self.save_type == 'click':
