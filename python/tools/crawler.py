@@ -11,6 +11,8 @@ import binascii
 from xpinyin import Pinyin
 pinyin = Pinyin()
 
+DELAY = 0.1
+
 class Crawler(object):
   def __init__(
         self, site: str, xpath: list, directory: str,
@@ -84,7 +86,7 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
           try:
             e = self.driver.find_element_by_xpath(self.xpath.format(*indexes))
             if self.save_type == 'click':
-              w = 1 if self.total == 1 else 0.1
+              w = 1 if self.total == 1 else DELAY
               self.wait(w)
               self.close_dialog()
               selenium.webdriver.ActionChains(self.driver).move_to_element(e).context_click().perform()
