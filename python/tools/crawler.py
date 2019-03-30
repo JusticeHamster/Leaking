@@ -96,7 +96,7 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
               self.wait(w)
               cntext = pinyin.get_pinyin(text, '_')
               pyautogui.typewrite(
-                f'{cntext}_{self.name}_' + '_'.join(map(str, indexes)) + '.jpg',
+                f'{cntext}_{self.name}_' + '_'.join(map(str, indexes)),
                 interval=0.01
               )
               self.wait(w)
