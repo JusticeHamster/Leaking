@@ -61,6 +61,8 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
       except:
         pass
       else:
+        if not e.is_enabled():
+          continue
         e.click()
 
   def fetch(self, text: str, number: int):
