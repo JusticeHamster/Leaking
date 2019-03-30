@@ -1,7 +1,7 @@
 import os
 import selenium.webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import StaleElementReferenceException, NoSuchElementException
 import pyautogui
 import requests
 import shutil
@@ -13,7 +13,7 @@ pinyin = Pinyin()
 
 class Crawler(object):
   def __init__(
-        self, site: str, xpath: str, directory: str,
+        self, site: str, xpath: list, directory: str,
         name: str,
         wait: bool = False, save_type: str = 'url'
       ):
@@ -66,7 +66,6 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
         if self.save_type == 'screenshot':
           pos += 500
           self.driver.execute_script(Crawler.SCROLL_DOWN.format(pos))
-        curr_index = self.xpath_count - 1
         while True:
           try:
             e = self.driver.find_element_by_xpath(self.xpath.format(*indexes))
@@ -95,14 +94,17 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
             print(indexes)
           except StaleElementReferenceException as ex:
             print(ex)
+          except NoSuchElementException:
+            for i in range(self.xpath_count - 1, 0, -1):
+              if indexes[i] >= Crawler.TRY_TIME:
+                indexes[i] = 1
+                indexes[i - 1] += 1
+                break
+            else:
+              indexes[-1] += 1
           except Exception as e:
             print(e)
-            if curr_index > 0:
-              indexes[curr_index] = 1
-              curr_index -= 1
-              indexes[curr_index] += 1
-            else:
-              break
+            break
         try_time += 1
         if self.save_type != 'click':
           self.wait(10)
