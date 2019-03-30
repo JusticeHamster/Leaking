@@ -207,7 +207,7 @@ params = {
   'google' : {
     'site': r'https://www.google.com/search?tbm=isch&q={0}',
     'xpath': [r'//*[@id="rg_s"]/div[{}]/a[1]/img', 1],
-    'save_type': 'screenshot',
+    'save_type': 'click',
   },
 }
 
