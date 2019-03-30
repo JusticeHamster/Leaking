@@ -65,11 +65,11 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
           pos += 500
           self.driver.execute_script(Crawler.SCROLL_DOWN.format(pos))
         curr_index = self.xpath_count - 1
-        w = 1 if self.total == 1 else 0.1
         while True:
           try:
             e = self.driver.find_element_by_xpath(self.xpath.format(*indexes))
             if self.save_type == 'click':
+              w = 1 if self.total == 1 else 0.1
               self.wait(w)
               selenium.webdriver.ActionChains(self.driver).move_to_element(e).context_click().perform()
               self.wait(w)
