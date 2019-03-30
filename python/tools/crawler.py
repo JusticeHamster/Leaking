@@ -227,7 +227,13 @@ params = {
     'site': r'http://image.baidu.com/search/index?tn=baiduimage&ps=1&ct=201326592&lm=-1&cl=2&nc=1&ie=utf-8&word={0}',
     'xpath': [r'//*[@id="imgid"]/div[{}]/ul/li[{}]/div/a/img', 2],
     'save_type': 'click',
-    'close': [r'//*[@id="fb_close_x"]']
+    'close': [r'//*[@id="fb_close_x"]'],
+  },
+  'google' : {
+    'site': r'https://www.google.com/search?tbm=isch&q={0}',
+    'xpath': [r'//*[@id="rg_s"]/div[{}]/a[1]/img', 1],
+    'save_type': 'click',
+    'close': [r'//*[@id="smb"]'],
   },
 }
 
