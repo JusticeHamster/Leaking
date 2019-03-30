@@ -14,7 +14,7 @@ pinyin = Pinyin()
 class Crawler(object):
   def __init__(
         self, site: str, xpath: list, directory: str,
-        name: str,
+        name: str, close: list = None,
         wait: bool = False, save_type: str = 'url'
       ):
     self.name = name
@@ -26,6 +26,7 @@ class Crawler(object):
     self.total = 1
     self.wait_key = wait
     self.save_type = save_type
+    self.close_xpath = close
     self.__stop = False
 
     if not os.path.exists(directory):
@@ -50,6 +51,18 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
   SAVE_AS = [*(['down'] * 7), 'enter']
   TRY_TIME = 10
 
+  def close_dialog(self):
+    if not self.close_xpath:
+      return
+    for xpath in self.close_xpath:
+      try:
+        print(xpath)
+        e = self.driver.find_element_by_xpath(xpath)
+      except:
+        pass
+      else:
+        e.click()
+
   def fetch(self, text: str, number: int):
     def __fetch(text: str, number: int):
       if self.save_type != 'click':
@@ -72,8 +85,10 @@ window.scrollBy(0, elementTop - viewPortHeight / 3);'''
             if self.save_type == 'click':
               w = 1 if self.total == 1 else 0.1
               self.wait(w)
+              self.close_dialog()
               selenium.webdriver.ActionChains(self.driver).move_to_element(e).context_click().perform()
               self.wait(w)
+              self.close_dialog()
               pyautogui.typewrite(Crawler.SAVE_AS)
               self.wait(w)
               cntext = pinyin.get_pinyin(text, '_')
@@ -212,11 +227,7 @@ params = {
     'site': r'http://image.baidu.com/search/index?tn=baiduimage&ps=1&ct=201326592&lm=-1&cl=2&nc=1&ie=utf-8&word={0}',
     'xpath': [r'//*[@id="imgid"]/div[{}]/ul/li[{}]/div/a/img', 2],
     'save_type': 'click',
-  },
-  'google' : {
-    'site': r'https://www.google.com/search?tbm=isch&q={0}',
-    'xpath': [r'//*[@id="rg_s"]/div[{}]/a[1]/img', 1],
-    'save_type': 'click',
+    'close': [r'//*[@id="fb_close_x"]']
   },
 }
 
