@@ -3,14 +3,14 @@ numpy
 """
 try:
   import numpy as np
-except Exception as e:
+except:
   print('numpy not loaded')
 """
 opencv
 """
 try:
   import cv2
-except Exception as e:
+except:
   print('opencv not loaded')
 """
 中文转拼音
@@ -18,19 +18,23 @@ except Exception as e:
 try:
   from xpinyin import Pinyin
   pinyin = Pinyin()
-except Exception as e:
+except:
   print('xpinyin not loaded')
 """
 lktools
 """
 import lktools.Timer
 import lktools.Checker
-import lktools.Vgg
 from lktools.PreProcess   import video_capture_size, bgr_to_hsv, gray_to_bgr, subtraction, matrix_within_rect, rect_size, rect_center
 from lktools.OpticalFlow  import optical_flow_rects
 from lktools.SIFT         import siftImageAlignment
 from lktools.Denoise      import denoise
 from lktools.FindObject   import findObject
+try:
+  import lktools.Vgg
+  from lktools.BSOFDataset  import BSOFDataset
+except:
+  print('vgg not loaded')
 """
 类别
 """
@@ -41,7 +45,7 @@ sklearn
 try:
   from sklearn import svm
   from sklearn.externals import joblib
-except Exception as e:
+except:
   print('sklearn not loaded')
 """
 reduce
