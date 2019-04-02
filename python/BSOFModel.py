@@ -25,6 +25,7 @@ lktools
 """
 import lktools.Timer
 import lktools.Checker
+import lktools.Vgg
 from lktools.PreProcess   import video_capture_size, bgr_to_hsv, gray_to_bgr, subtraction, matrix_within_rect, rect_size, rect_center
 from lktools.OpticalFlow  import optical_flow_rects
 from lktools.SIFT         import siftImageAlignment
@@ -596,6 +597,7 @@ class BSOFModel:
         self.foreach(self.one_video_classification, self.clear_classification)
         return
       self.logger.debug('训练模型')
+      # model = lktools.Vgg.vgg16(NUM_CLASSES)
     m = {
       'svm': svm,
       'vgg': vgg,
