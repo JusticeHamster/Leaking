@@ -1,16 +1,25 @@
 """
 numpy
 """
-import numpy as np
+try:
+  import numpy as np
+except Exception as e:
+  print('numpy not loaded')
 """
 opencv
 """
-import cv2
+try:
+  import cv2
+except Exception as e:
+  print('opencv not loaded')
 """
 中文转拼音
 """
-from xpinyin import Pinyin
-pinyin = Pinyin()
+try:
+  from xpinyin import Pinyin
+  pinyin = Pinyin()
+except Exception as e:
+  print('xpinyin not loaded')
 """
 lktools
 """
@@ -28,8 +37,11 @@ from resources.data import Abnormal
 """
 sklearn
 """
-from sklearn import svm
-from sklearn.externals import joblib
+try:
+  from sklearn import svm
+  from sklearn.externals import joblib
+except Exception as e:
+  print('sklearn not loaded')
 """
 reduce
 """
@@ -39,12 +51,13 @@ class BSOFModel:
   """
   整个模型
   """
-  def __init__(self, opencv_output, generation=False):
+  def __init__(self, opencv_output, model_t):
     """
     初始化必要变量
 
     初始化
       opencv_output:       是否利用cv2.imgshow()显示每一帧图片
+      model_t:             type of model
       generation:          是否训练模型
       settings:            一个字典，由Loader从用户自定义json文件中读取
       judge_cache:         为judge使用的cache，每个单独的视频有一个单独的cache
@@ -62,7 +75,8 @@ class BSOFModel:
     做一次clear
     """
     self.opencv_output      = opencv_output
-    self.generation         = generation
+    self.model_t            = model_t
+    self.generation         = model_t is not None
     self.settings           = lktools.Loader.get_settings()
     self.logger             = lktools.LoggerFactory.LoggerFactory(
       'BS_OF', level=self.settings['debug_level']
@@ -88,6 +102,7 @@ class BSOFModel:
     if not self.generation:
       self.logger.debug('测试model文件是否存在')
       self.checker.check(self.model_path, self.checker.exists_file)
+      self.model_t = self.model_path.split('.')[0] # svm.model or vgg.model
     if self.checker.dirty:
       self.thread_stop = True
       self.state = BSOFModel.STOPPED
@@ -258,12 +273,15 @@ class BSOFModel:
       """
       分类
       """
-      # self.logger.debug('首先准备一个该帧的HSV图像')
-      # _ = bgr_to_hsv(src)
-      X = [attributes(src, range_rect, rects, abnormal)]
-      y = self.classifier.predict_proba(X)
-      proba = dict(zip(self.classifier.classes_, y[0]))
-      return self.abnormals.accumulate_abnormals(proba), X
+      if self.model_t == 'svm':
+        X = [attributes(src, range_rect, rects, abnormal)]
+        y = self.classifier.predict_proba(X)
+        proba = dict(zip(self.classifier.classes_, y[0]))
+        return self.abnormals.accumulate_abnormals(proba), X
+      elif self.model_t == 'vgg':
+        # vgg model
+        pass
+      return None, None
     @lktools.Timer.timer_decorator
     def generate(src, range_rect, rects, abnormal):
       """
@@ -555,22 +573,35 @@ class BSOFModel:
     """
     对视频做异常帧检测并分类
     """
-    if not self.generation:
-      self.classifier = joblib.load(self.model_path)
-    self.foreach(self.one_video_classification, self.clear_classification)
-    if not self.generation:
-      return
-    self.logger.debug('训练模型')
-    kwargs = {
-      'gamma'                   : 'scale',
-      'decision_function_shape' : 'ovo',
-      'max_iter'                : self.max_iter,
-      'probability'             : True,
-    }
-    classifier = svm.SVC(**kwargs)
-    self.logger.info(kwargs)
-    classifier.fit(self.generation_cache['X'], self.generation_cache['Y'])
-    joblib.dump(classifier, self.model_path)
+    def svm():
+      if not self.generation:
+        self.classifier = joblib.load(self.model_path)
+      self.foreach(self.one_video_classification, self.clear_classification)
+      if not self.generation:
+        return
+      self.logger.debug('训练模型')
+      kwargs = {
+        'gamma'                   : 'scale',
+        'decision_function_shape' : 'ovo',
+        'max_iter'                : self.max_iter,
+        'probability'             : True,
+      }
+      classifier = svm.SVC(**kwargs)
+      self.logger.info(kwargs)
+      classifier.fit(self.generation_cache['X'], self.generation_cache['Y'])
+      joblib.dump(classifier, self.model_path)
+    def vgg():
+      if not self.generation:
+        self.classifier = None # load model
+        self.foreach(self.one_video_classification, self.clear_classification)
+        return
+      self.logger.debug('训练模型')
+    m = {
+      'svm': svm,
+      'vgg': vgg,
+    }.get(self.model_t)
+    if m:
+      m()
 
   @lktools.Timer.timer_decorator
   def foreach(self, single_func, clear_func):
@@ -647,7 +678,12 @@ class BSOFModel:
 if __name__ == '__main__':
   import sys
   nothing = len(sys.argv) == 0
-  show = '--show' in sys.argv
-  generate = '--model' in sys.argv
-  model = BSOFModel(nothing or show, generate)
+  show = 'show' in sys.argv
+  model_t = None
+  if 'model' in sys.argv:
+    if 'svm' in sys.argv:
+      model_t = 'svm'
+    elif 'vgg' in sys.argv:
+      model_t = 'vgg'
+  model = BSOFModel(nothing or show, model_t)
   model.classification()

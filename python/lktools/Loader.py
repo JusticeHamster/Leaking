@@ -32,7 +32,7 @@ template = """{
   "frame_range"       : [0, -1],          // 取[a, b]帧，b可以是负数，表示倒数第abs(b)帧
   "img_path"          : "images.tmp",     // 图片存取路径
   "video_path"        : "videos.tmp",     // 视频存取路径
-  "model_path"        : "BSOF.model",     // Model路径
+  "model_path"        : "?.model",        // Model路径, svm.model or vgg.model
   "file_output"       : false,            // 是否输出到文件夹
   "interval"          : 10,               // 用前N帧图片作为修正的标准
   "fps"               : 10,               // 保存视频帧数
