@@ -97,6 +97,5 @@ def vgg19_bn(**kwargs):
   return model
 
 if __name__ == '__main__':
-  # 'VGG', 'vgg11', 'vgg11_bn', 'vgg13', 'vgg13_bn', 'vgg16', 'vgg16_bn', 'vgg19_bn', 'vgg19'
-  net11 = vgg11()
-  print(net11)
+  model = vgg11()
+  print(model)
