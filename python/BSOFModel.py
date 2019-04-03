@@ -53,6 +53,7 @@ pytorch
 try:
   import torch.optim
   import torch.nn
+  from torch.utils.data import DataLoader
 except:
   print('torch not loaded')
 """
@@ -609,20 +610,28 @@ class BSOFModel:
         self.classifier = None # load model
         self.foreach(self.one_video_classification, self.clear_classification)
         return
-      def train(model, optim, criterion):
-        def info(epoch, start, end):
-          self.logger.info(f'{epoch}: {end - start:0f}s')
-        @lktools.Timer.timer_decorator(show=True, format=partial(epoch, info))
-        def train_one_epoch(epoch, model, optim, criterion):
+      def train(data, model, optim, scheduler, criterion):
+        def start_info(start):
+          self.logger.info(f'{start:.0f}s')
+        def end_info(start, end):
+          self.logger.info(f'{end - start:.0f}s')
+        @lktools.Timer.timer_decorator(show=True, start_info=start_info, end_info=end_info)
+        def train_one_epoch(epoch, data, model, optim, scheduler, criterion):
           pass
         for epoch in range(self.num_epochs):
-          train_one_epoch(epoch, model, optim, criterion)
+          train_one_epoch(epoch, data, model, optim, scheduler, criterion)
       self.logger.debug('训练模型')
+      data = {
+        name: DataLoader(
+          BSOFDataset(self.data[name]),
+          batch_size=self.batch_size, shuffle=True
+        ) for name in ('train', 'test')
+      }
       model = lktools.Vgg.vgg('16bn', self.num_classes)
       optim = torch.optim.SGD(model.parameters(), lr=self.learning_rate, momentum=self.momentum)
-      optim = torch.optim.lr_scheduler.StepLR(optim, step_size=self.step_size, gamma=self.gamma)
+      scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=self.step_size, gamma=self.gamma)
       criterion = torch.nn.CrossEntropyLoss()
-      train(model, optim, criterion)
+      train(data, model, optim, scheduler, criterion)
     m = {
       'svm': svm,
       'vgg': vgg,

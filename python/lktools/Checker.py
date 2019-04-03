@@ -27,7 +27,7 @@ class Checker:
     if isinstance(name, (tuple, list)):
       s = True
       for n in name:
-        s = s and __check(n, assert_type, *args)
+        s = __check(n, assert_type, *args) and s
       return s
     elif isinstance(name, str):
       return __check(name, assert_type, *args)
@@ -39,17 +39,35 @@ class Checker:
     if self.container is None:
       item = name
     else:
-      item = self.container.get(name)
+      names = name.split('.')
+      name  = ''
+      item  = self.container
+      for n in names:
+        name = n if len(name) == 0 else f'{name}.{n}'
+        if isinstance(item, dict):
+          item = item.get(n)
+        elif isinstance(item, (tuple, list)):
+          item = item[int(n)]
+        if item is None:
+          break
     if item is None:
       return f'"{name}" must exists', False
     return item, True
 
-  def len_not_zero(self, name):
+  def len_not(self, name, length):
     item, s = self.exist(name)
     if not s:
       return item, False
-    if len(item) == 0:
-      return f'size of "{name}" must > 0', False
+    if len(item) == length:
+      return f'size of "{name}" must != {length}', False
+    return item, True
+
+  def len_is(self, name, length):
+    item, s = self.exist(name)
+    if not s:
+      return item, False
+    if len(item) != length:
+      return f'size of "{name}" must == {length}', False
     return item, True
 
   def plus(self, name):
@@ -108,7 +126,8 @@ class Checker:
     if not s:
       return item, False
     if not os.path.exists(item):
-      return f'path "{name}" not exists', False
+      aka = f'(aka "{item}")' if item != name else ''
+      return f'path "{name}"{aka} not exists', False
     return item, True
 
   def is_dir(self, name):
@@ -116,7 +135,8 @@ class Checker:
     if not s:
       return item, False
     if not os.path.isdir(item):
-      return f'path "{name}" is not a directory', False
+      aka = f'(aka "{item}")' if item != name else ''
+      return f'path "{name}"{aka} is not a directory', False
     return item, True
 
   def has_file(self, name, file):

@@ -55,6 +55,10 @@ template = """{
   "momentum"          : 0.9,              // 神经网络SGD momentum
   "step_size"         : 10,               // StepLR scheduler step_size
   "gamma"             : 0.5,              // StepLR scheduler gamma
+  "data"              : {
+    "train" : "?",
+    "test"  : "?",
+  }                                       // 神经网络数据集位置
 }"""
 user_settings = None
 
@@ -102,6 +106,11 @@ def get_settings():
   )
   checker.check(
     (
+      'data'
+    ), dict
+  )
+  checker.check(
+    (
       'file_output', 'time_debug',
       'linux', 'sift', 'OF', 'detectShadows',
       'Retina', 'debug_per_frame',
@@ -125,10 +134,13 @@ def get_settings():
   logger.debug('check legal')
 
   class_info_exists = checker.check('path', checker.has_file, 'class_info_file')
-  checker.check('videos', checker.len_not_zero)
+  checker.check('videos', checker.len_not, 0)
   checker.check('frame_range', checker.range)
   checker.check('debug_level', checker.within, ('debug', 'info', 'warn', 'error', 'critical'))
   checker.check('max_iter', checker.plus_or_minus1)
+  checker.check('data', checker.len_is, 2)
+  checker.check('data.train', checker.is_dir)
+  checker.check('data.test', checker.is_dir)
   checker.check(
     (
       'delay', 'height',
