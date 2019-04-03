@@ -50,6 +50,11 @@ template = """{
   "Retina"            : false,            // 是否是Retina高清屏幕，它的像素数量不一样，会影响显示的计算
   "debug_per_frame"   : false,            // model逐帧调试，回车进入下一帧
   "max_iter"          : -1,               // SVC的最大迭代次数
+  "num_epochs"        : 100,              // 神经网络训练轮数
+  "learning_rate"     : 0.001,            // 神经网络学习率
+  "momentum"          : 0.9,              // 神经网络SGD momentum
+  "step_size"         : 10,               // StepLR scheduler step_size
+  "gamma"             : 0.1,              // StepLR scheduler gamma
 }"""
 user_settings = None
 
@@ -106,12 +111,14 @@ def get_settings():
     (
       'delay', 'height', 'interval',
       'fps', 'limit_size', 'app_fps',
-      'max_iter',
+      'max_iter', 'num_epochs', 'step_size',
     ), int
   )
   checker.check(
     (
       'compression_ratio', 'varThreshold',
+      'learning_rate', 'momentum',
+      'gamma',
     ), float
   )
 
@@ -128,6 +135,8 @@ def get_settings():
       'interval', 'fps',
       'limit_size', 'compression_ratio',
       'app_fps', 'varThreshold',
+      'num_epochs', 'learning_rate',
+      'momentum', 'step_size', 'gamma',
     ), checker.plus
   )
 

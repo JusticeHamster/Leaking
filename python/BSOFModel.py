@@ -48,6 +48,14 @@ try:
 except:
   print('sklearn not loaded')
 """
+pytorch
+"""
+try:
+  import torch.optim
+  import torch.nn
+except:
+  print('torch not loaded')
+"""
 reduce
 """
 from functools import reduce
@@ -601,7 +609,10 @@ class BSOFModel:
         self.foreach(self.one_video_classification, self.clear_classification)
         return
       self.logger.debug('训练模型')
-      # model = lktools.Vgg.vgg16(NUM_CLASSES)
+      model = lktools.Vgg.vgg('16bn', NUM_CLASSES)
+      optim = torch.optim.SGD(model.parameters(), lr=self.learning_rate, momentum=self.momentum)
+      scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=self.step_size, gamma=self.gamma)
+      criterion = torch.nn.CrossEntropyLoss()
     m = {
       'svm': svm,
       'vgg': vgg,

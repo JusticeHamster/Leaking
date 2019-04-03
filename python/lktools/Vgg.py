@@ -58,41 +58,22 @@ def make_layers(cfg, batch_norm=False):
   return nn.Sequential(*layers)
 
 cfg = {
-  'A': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
-  'B': [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
-  'D': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
-  'E': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'],
+  '11': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
+  '13': [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
+  '16': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
+  '19': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'],
 }
 
-def vgg11(**kwargs):
-  model = VGG(make_layers(cfg['A']), **kwargs)
-  return model
-
-def vgg11_bn(**kwargs):
-  model = VGG(make_layers(cfg['A'], batch_norm=True), **kwargs)
-  return model
-
-def vgg13(**kwargs):
-  model = VGG(make_layers(cfg['B']), **kwargs)
-  return model
-
-def vgg13_bn(**kwargs):
-  model = VGG(make_layers(cfg['B'], batch_norm=True), **kwargs)
-  return model
-
-def vgg16(**kwargs):
-  model = VGG(make_layers(cfg['D']), **kwargs)
-  return model
-
-def vgg16_bn(**kwargs):
-  model = VGG(make_layers(cfg['D'], batch_norm=True), **kwargs)
-  return model
-
-def vgg19(**kwargs):
-  model = VGG(make_layers(cfg['E']), **kwargs)
-  return model
-
-def vgg19_bn(**kwargs):
-  model = VGG(make_layers(cfg['E'], batch_norm=True), **kwargs)
-  return model
-
+"""
+  vgg 11/13/16/19 with or without bn
+"""
+def vgg(version, **kwargs):
+  if len(version) < 2:
+    return
+  return VGG(
+    make_layers(
+      cfg[version[:2]],
+      batch_norm = 'bn' in version
+    ),
+    **kwargs
+  )
