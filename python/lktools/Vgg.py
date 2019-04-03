@@ -64,16 +64,17 @@ cfg = {
   '19': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'],
 }
 
-"""
-  vgg 11/13/16/19 with or without bn
-"""
 def vgg(version, **kwargs):
+  """
+    vgg 11/13/16/19 with or without bn
+  """
   if len(version) < 2:
     return
+  _cfg = cfg.get(version[:2])
+  if _cfg is None:
+    print(f'{version} not found.')
+    return
   return VGG(
-    make_layers(
-      cfg[version[:2]],
-      batch_norm = 'bn' in version
-    ),
+    make_layers(_cfg, batch_norm='bn' in version),
     **kwargs
   )

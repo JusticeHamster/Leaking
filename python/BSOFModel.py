@@ -59,6 +59,7 @@ except:
 reduce
 """
 from functools import reduce
+from functools import partial
 
 class BSOFModel:
   """
@@ -608,11 +609,20 @@ class BSOFModel:
         self.classifier = None # load model
         self.foreach(self.one_video_classification, self.clear_classification)
         return
+      def train(model, optim, criterion):
+        def info(epoch, start, end):
+          self.logger.info(f'{epoch}: {end - start:0f}s')
+        @lktools.Timer.timer_decorator(show=True, format=partial(epoch, info))
+        def train_one_epoch(epoch, model, optim, criterion):
+          pass
+        for epoch in range(self.num_epochs):
+          train_one_epoch(epoch, model, optim, criterion)
       self.logger.debug('训练模型')
-      model = lktools.Vgg.vgg('16bn', NUM_CLASSES)
+      model = lktools.Vgg.vgg('16bn', self.num_classes)
       optim = torch.optim.SGD(model.parameters(), lr=self.learning_rate, momentum=self.momentum)
-      scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=self.step_size, gamma=self.gamma)
+      optim = torch.optim.lr_scheduler.StepLR(optim, step_size=self.step_size, gamma=self.gamma)
       criterion = torch.nn.CrossEntropyLoss()
+      train(model, optim, criterion)
     m = {
       'svm': svm,
       'vgg': vgg,
