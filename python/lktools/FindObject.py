@@ -11,7 +11,7 @@ from lktools.PreProcess import trim_to_rect
 
 logger = lktools.LoggerFactory.LoggerFactory('FindObject').logger
 
-@lktools.Timer.timer_decorator
+@lktools.Timer.timer_decorator()
 def findObject(binary, rect):
 
   logger.debug('计算图像中目标的轮廓')

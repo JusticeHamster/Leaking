@@ -20,6 +20,7 @@ class BSOFDataset(Dataset):
     self.path = path
     self.size = size
 
+    self.num_classes = 0
     '''
       结构：
         root -------- A --- a --- *.jpg
@@ -38,6 +39,7 @@ class BSOFDataset(Dataset):
       clazz_path = os.path.join(path, clazz)
       if not os.path.isdir(clazz_path):
         continue
+      self.num_classes += 1
       for site in os.listdir(clazz_path):
         site_path = os.path.join(clazz_path, site)
         if not os.path.isdir(site_path):

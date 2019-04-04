@@ -107,9 +107,11 @@ class BSOFModel:
     self.box_scale          = ((1 / 16, 1 / 4), (15 / 16, 2.9 / 4))
     self.generation_cache   = {'X': [], 'Y': []}
     self.debug_param        = {'continue': False, 'step': 0}
+    self.dataset            = None
+    self.dataloader         = None
     self.check()
 
-  @lktools.Timer.timer_decorator
+  @lktools.Timer.timer_decorator()
   def check(self):
     """
     测试，失败就关闭
@@ -144,7 +146,7 @@ class BSOFModel:
         from sys import exit
         exit(1)
 
-  @lktools.Timer.timer_decorator
+  @lktools.Timer.timer_decorator()
   def catch_abnormal(self, src):
     """
     对一帧图像进行处理，找到异常就用框圈出来。
@@ -206,7 +208,7 @@ class BSOFModel:
       abnormal['BS'] = gray_to_bgr(BS_binary) & src
     return rects, abnormal
 
-  @lktools.Timer.timer_decorator
+  @lktools.Timer.timer_decorator()
   def judge(self, src, rects, abnormal):
     """
     对识别出的异常区域进行分类或训练（根据self.generation）。
@@ -240,7 +242,7 @@ class BSOFModel:
         info = func(*args)
       self.logger.info(info)
       self.debug_param['continue'] = False
-    @lktools.Timer.timer_decorator
+    @lktools.Timer.timer_decorator()
     def attributes(src, range_rect, rects, abnormal):
       """
       生成特征
@@ -283,7 +285,7 @@ class BSOFModel:
       self.judge_cache['center'] = center
       # 返回
       return [hsv[0], hsv[1], len_area, self.judge_cache['max_area_rate'], center_offset]
-    @lktools.Timer.timer_decorator
+    @lktools.Timer.timer_decorator()
     def classify(src, range_rect, rects, abnormal):
       """
       分类
@@ -297,7 +299,7 @@ class BSOFModel:
         # vgg model
         pass
       return None, None
-    @lktools.Timer.timer_decorator
+    @lktools.Timer.timer_decorator()
     def generate(src, range_rect, rects, abnormal):
       """
       生成模型
@@ -311,12 +313,12 @@ class BSOFModel:
     func = generate if self.generation else classify
     return func(src, rects[0], rects[1:], abnormal)
 
-  @lktools.Timer.timer_decorator
+  @lktools.Timer.timer_decorator()
   def one_video_classification(self, path):
     """
     处理一个单独的视频
     """
-    @lktools.Timer.timer_decorator
+    @lktools.Timer.timer_decorator()
     def loop(size):
       """
       如果线程结束
@@ -355,7 +357,7 @@ class BSOFModel:
         self.lastn = frame
         return True
       return frame
-    @lktools.Timer.timer_decorator
+    @lktools.Timer.timer_decorator()
     def save(frame, frame_trim, frame_rects, abnormal, classes, attributes):
       """
       保存相关信息至self.now，便于其它类使用（如App）
@@ -375,7 +377,7 @@ class BSOFModel:
       self.now['abnormal']    = abnormal
       self.now['classes']     = classes
       self.now['attributes']  = attributes
-    @lktools.Timer.timer_decorator
+    @lktools.Timer.timer_decorator()
     def output(frame, size):
       """
       输出一帧处理过的图像（有异常框）
@@ -418,7 +420,7 @@ class BSOFModel:
         if cv2.waitKey(self.delay) == 27:
           self.logger.debug('ESC 停止')
           self.thread_stop = True
-    @lktools.Timer.timer_decorator
+    @lktools.Timer.timer_decorator()
     def update(original):
       """
       如果@nframes计数为@interval的整数倍:
@@ -435,7 +437,7 @@ class BSOFModel:
         )
         self.fgbg.apply(self.lastn)
       self.last = original
-    @lktools.Timer.timer_decorator
+    @lktools.Timer.timer_decorator()
     def trim(frame):
       """
       对图片进行裁剪
@@ -587,7 +589,13 @@ class BSOFModel:
   def is_cuda_available(self):
     return torch.cuda.is_available()
 
-  @lktools.Timer.timer_decorator
+  @property
+  def num_classes(self):
+    if self.dataset is None:
+      return 0
+    return min(map(lambda ds: ds.num_classes, self.dataset.values()))
+
+  @lktools.Timer.timer_decorator()
   def classification(self):
     """
     对视频做异常帧检测并分类
@@ -615,30 +623,48 @@ class BSOFModel:
         self.foreach(self.one_video_classification, self.clear_classification)
         return
       def train(data, model, optim, scheduler, criterion):
-        def start_info(start):
-          self.logger.info(f'{start:.0f}s')
-        def end_info(start, end):
-          self.logger.info(f'{end - start:.0f}s')
-        @lktools.Timer.timer_decorator(show=True, start_info=start_info, end_info=end_info)
+        def start(stime, args, kwargs):
+          self.logger.info(f'epoch {args[0]}:')
+        def end(result, stime, etime, args, kwargs):
+          self.logger.info(result)
+          self.logger.info(f'{etime - stime:.0f}s')
+        def acc(output, label):
+          return torch.sum(torch.max(output, 1)[1] == label)
+        @lktools.Timer.timer_decorator(show=True, start_info=start, end_info=end)
         def train_one_epoch(epoch, data, model, optim, scheduler, criterion):
-          for imgs, labels in data:
+          scheduler.step()
+          train_loss = 0
+          train_acc  = 0
+          for img, label in data:
             if self.is_cuda_available:
-              imgs   = imgs.cuda()
-              labels = labels.cuda()
+              img   = img.cuda()
+              label = label.cuda()
+            output = model(img)
+            loss   = criterion(output)
+            optim.zero_grad()
+            loss.backward()
+            optim.step()
+            train_loss += loss.data[0]
+            train_acc  += acc(output, label)
+          return train_loss, train_acc
         for epoch in range(self.num_epochs):
-          train_one_epoch(epoch, data, model, optim, scheduler, criterion)
+          train_one_epoch(epoch, data['train'], model, optim, scheduler, criterion)
       self.logger.debug('训练模型')
-      data = {
-        name: DataLoader(
-          BSOFDataset(self.data[name]),
-          batch_size=self.batch_size, shuffle=True
+      self.dataset = {
+        name: BSOFDataset(
+          self.data[name]
         ) for name in ('train', 'test')
+      }
+      self.dataloader = {
+        name: DataLoader(
+          dataset, batch_size=self.batch_size, shuffle=True
+        ) for name, dataset in self.dataset.items()
       }
       model = lktools.Vgg.vgg('16bn', num_classes=self.num_classes)
       optim = torch.optim.SGD(model.parameters(), lr=self.learning_rate, momentum=self.momentum)
       scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=self.step_size, gamma=self.gamma)
       criterion = torch.nn.CrossEntropyLoss()
-      train(data, model, optim, scheduler, criterion)
+      train(self.dataloader, model, optim, scheduler, criterion)
     m = {
       'svm': svm,
       'vgg': vgg,
@@ -646,7 +672,7 @@ class BSOFModel:
     if m:
       m()
 
-  @lktools.Timer.timer_decorator
+  @lktools.Timer.timer_decorator()
   def foreach(self, single_func, clear_func):
     """
     对每一个视频，运行single_func去处理该视频，最后用clear_func清理变量。
@@ -683,7 +709,7 @@ class BSOFModel:
       self.state = BSOFModel.RUNNING
 
   @property
-  @lktools.Timer.timer_decorator
+  @lktools.Timer.timer_decorator()
   def box(self):
     """
     计算当前蓝框的具体坐标

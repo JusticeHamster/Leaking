@@ -14,7 +14,7 @@ import lktools.LoggerFactory
 
 logger = lktools.LoggerFactory.LoggerFactory('Denoise').logger
 
-@lktools.Timer.timer_decorator
+@lktools.Timer.timer_decorator()
 def denoise(img, which=None, args=None):
   """
   四个不同的滤波器

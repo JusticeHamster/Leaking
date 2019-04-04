@@ -19,7 +19,7 @@ def get_good_match(des1,des2):
       good.append(m)
   return good
 
-@lktools.Timer.timer_decorator
+@lktools.Timer.timer_decorator()
 def siftImageAlignment(img1,img2):
   _,kp1,des1 = sift_kp(img1)
   _,kp2,des2 = sift_kp(img2)

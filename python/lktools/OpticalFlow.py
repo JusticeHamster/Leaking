@@ -26,7 +26,7 @@ def draw_hsv(flow):
   hsv[..., 2] = np.minimum(v * 4, 0xFF)
   return cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
-@lktools.Timer.timer_decorator
+@lktools.Timer.timer_decorator()
 def optical_flow_rects(prev, now, rect, color=(0, 0xFF, 0), thickness=4, limit_size=10, compression_ratio=1):
   """
   Params:
