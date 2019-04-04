@@ -583,6 +583,10 @@ class BSOFModel:
       detectShadows=self.detectShadows
     )
 
+  @property
+  def is_cuda_available(self):
+    return torch.cuda.is_available()
+
   @lktools.Timer.timer_decorator
   def classification(self):
     """
@@ -617,7 +621,10 @@ class BSOFModel:
           self.logger.info(f'{end - start:.0f}s')
         @lktools.Timer.timer_decorator(show=True, start_info=start_info, end_info=end_info)
         def train_one_epoch(epoch, data, model, optim, scheduler, criterion):
-          pass
+          for imgs, labels in data:
+            if self.is_cuda_available:
+              imgs   = imgs.cuda()
+              labels = labels.cuda()
         for epoch in range(self.num_epochs):
           train_one_epoch(epoch, data, model, optim, scheduler, criterion)
       self.logger.debug('训练模型')
@@ -627,7 +634,7 @@ class BSOFModel:
           batch_size=self.batch_size, shuffle=True
         ) for name in ('train', 'test')
       }
-      model = lktools.Vgg.vgg('16bn', self.num_classes)
+      model = lktools.Vgg.vgg('16bn', num_classes=self.num_classes)
       optim = torch.optim.SGD(model.parameters(), lr=self.learning_rate, momentum=self.momentum)
       scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=self.step_size, gamma=self.gamma)
       criterion = torch.nn.CrossEntropyLoss()
