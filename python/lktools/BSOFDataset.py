@@ -1,6 +1,5 @@
 import cv2
 import os
-import itertools
 import xpinyin
 pinyin = xpinyin.Pinyin()
 
@@ -30,39 +29,25 @@ class BSOFDataset(Dataset):
                       | --- b --- *.png
       结果：
         [
-          (A, 1.jpg), (A, 2.png),
-          (B, 1.jpg), (B, 2.png),
+          (root/A/a/1.jpg, A), (root/A/b/2.png, A),
+          (root/B/a/1.jpg, B), (root/B/b/2.png, B),
         ]
     '''
-    files = map(
-      lambda d: (
-        pinyin.get_pinyin(d, '_'),
-        f'{path}/{d}',
-        os.listdir(f'{path}/{d}')
-      ),
-      filter(
-        lambda p: os.path.isdir(f'{path}/{p}'), 
-        os.listdir(path)
-      )
-    )
-    files = map(
-      lambda t: (
-        t[0], itertools.chain.from_iterable(
-          map(
-            lambda p: os.listdir(f'{t[1]}/{p}'),
-            filter(
-              lambda p: os.path.isdir(f'{t[1]}/{p}'),
-              t[2]
-            )
-          )
-        )
-      ),
-      files
-    )
-    self.files = [(t, f) for t, fs in files for f in fs]
+    self.files = []
+    for clazz in os.listdir(path):
+      clazz_path = os.path.join(path, clazz)
+      if not os.path.isdir(clazz_path):
+        continue
+      for site in os.listdir(clazz_path):
+        site_path = os.path.join(clazz_path, site)
+        if not os.path.isdir(site_path):
+          continue
+        for img in os.listdir(site_path):
+          img_path = os.path.join(site_path, img)
+          self.files.append((img_path, clazz))
 
   def __getitem__(self, index):
-    label, img = self.files[index]
+    img, label = self.files[index]
     img        = cv2.imread(img)
     img        = cv2.resize(img, self.size)
     img        = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -76,4 +61,5 @@ class BSOFDataset(Dataset):
 if __name__ == '__main__':
   import sys
   if len(sys.argv) > 1:
-    BSOFDataset(sys.argv[1])
+    dataset = BSOFDataset(sys.argv[1])
+    print(dataset.files)
