@@ -13,12 +13,16 @@ class BSOFDataset(Dataset):
 
     path不为空
   """
-  def __init__(self, path, size=(224, 224)):
+  def __init__(
+    self, path, size=(224, 224),
+    exts=('.jpg', '.jpeg', '.png')
+  ):
     if path[-1] == '/':
       path = path[:-1]
 
     self.path = path
     self.size = size
+    self.exts = exts
 
     self.num_classes = 0
     '''
@@ -46,7 +50,7 @@ class BSOFDataset(Dataset):
           continue
         for img in os.listdir(site_path):
           _, ext = os.path.splitext(img)
-          if ext not in ('.jpg', '.jpeg'):
+          if ext not in self.exts:
             continue
           img_path = os.path.join(site_path, img)
           self.files.append((img_path, clazz))
