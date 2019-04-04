@@ -60,8 +60,10 @@ class BSOFDataset(Dataset):
     img        = cv2.imread(img)
     img        = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img        = cv2.resize(img, self.size)
+    img        = img.transpose((2, 0, 1))
     img        = torch.from_numpy(img)
-    img        = Variable(img.float(), requires_grad=True)
+    img        = img.float()
+    img        = Variable(img, requires_grad=True)
     return img, label
 
   def __len__(self):

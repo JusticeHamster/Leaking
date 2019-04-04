@@ -7,7 +7,7 @@ import math
 '''
 class VGG(nn.Module):
 
-  def __init__(self, features, num_classes=1000, init_weights=True):
+  def __init__(self, features, num_classes=0, init_weights=True):
     super(VGG, self).__init__()
     self.features = features
     self.classifier = nn.Sequential(
@@ -20,7 +20,7 @@ class VGG(nn.Module):
       nn.Linear(4096, num_classes),
     )
     if init_weights:
-      self._initialize_weights()
+      self.__init_weights()
 
   def forward(self, x):
     x = self.features(x)
@@ -28,7 +28,7 @@ class VGG(nn.Module):
     x = self.classifier(x)
     return x
 
-  def _initialize_weights(self):
+  def __init_weights(self):
     for m in self.modules():
       if isinstance(m, nn.Conv2d):
         n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels
