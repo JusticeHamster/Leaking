@@ -119,7 +119,7 @@ class BSOFModel:
     if not self.generation:
       self.logger.debug('测试model文件是否存在')
       self.checker.check(self.model_path, self.checker.exists_file)
-      self.model_t = self.model_path.split('.')[0] # svm.model or vgg.model
+      self.model_t = self.model_path.split('.')[0] # svm.model or vgg.pth
     if self.checker.dirty:
       self.thread_stop = True
       self.state = BSOFModel.STOPPED
