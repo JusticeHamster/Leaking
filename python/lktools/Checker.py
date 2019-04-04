@@ -35,6 +35,15 @@ class Checker:
       self.logger.error(f'error attribute name: {name}')
       return False
 
+  def cuda_check(self):
+    try:
+      import torch.cuda
+      cuda = torch.cuda.is_available()
+    except:
+      cuda = False
+    self.logger.info(f'cuda is "{cuda}"')
+    return cuda
+
   def exist(self, name):
     if self.container is None:
       item = name

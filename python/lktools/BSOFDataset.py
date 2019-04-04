@@ -17,7 +17,7 @@ class BSOFDataset(Dataset):
     self, path, size=(224, 224),
     exts=('.jpg', '.jpeg', '.png')
   ):
-    if path[-1] == '/':
+    if path[-1] in ('\\', '/'):
       path = path[:-1]
 
     self.path = path
@@ -26,13 +26,13 @@ class BSOFDataset(Dataset):
 
     self.num_classes = 0
     '''
-      结构：
+      结构：         class  site  images
         root -------- A --- a --- *.jpg
                 |     | --- b --- *.png
                 |
                 |---- B --- a --- *.jpg
                       | --- b --- *.png
-      结果：
+      结果：（相对路径）
         [
           (root/A/a/1.jpg, A), (root/A/b/2.png, A),
           (root/B/a/1.jpg, B), (root/B/b/2.png, B),
@@ -57,6 +57,7 @@ class BSOFDataset(Dataset):
 
   def __getitem__(self, index):
     img, label = self.files[index]
+    # PS: 最好保证路径中没有中文（可能导致opencv Assertion failed (scn == 3 || scn == 4)）
     img        = cv2.imread(img)
     img        = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img        = cv2.resize(img, self.size)

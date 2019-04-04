@@ -116,6 +116,7 @@ class BSOFModel:
     """
     测试，失败就关闭
     """
+    self.checker.cuda_check()
     if not self.generation:
       self.logger.debug('测试model文件是否存在')
       self.checker.check(self.model_path, self.checker.exists_file)
@@ -661,7 +662,8 @@ class BSOFModel:
         ) for name, dataset in self.dataset.items()
       }
       model = lktools.Vgg.vgg('19bn', num_classes=self.num_classes)
-      optim = torch.optim.SGD(model.parameters(), lr=self.learning_rate, momentum=self.momentum)
+      optim = torch.optim.SGD(
+          model.parameters(), lr=self.learning_rate, momentum=self.momentum)
       scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=self.step_size, gamma=self.gamma)
       criterion = torch.nn.CrossEntropyLoss()
       train(self.dataloader, model, optim, scheduler, criterion)
