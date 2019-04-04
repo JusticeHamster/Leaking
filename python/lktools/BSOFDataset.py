@@ -45,6 +45,9 @@ class BSOFDataset(Dataset):
         if not os.path.isdir(site_path):
           continue
         for img in os.listdir(site_path):
+          _, ext = os.path.splitext(img)
+          if ext not in ('.jpg', '.jpeg'):
+            continue
           img_path = os.path.join(site_path, img)
           self.files.append((img_path, clazz))
 

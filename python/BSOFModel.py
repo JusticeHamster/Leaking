@@ -660,7 +660,7 @@ class BSOFModel:
           dataset, batch_size=self.batch_size, shuffle=True
         ) for name, dataset in self.dataset.items()
       }
-      model = lktools.Vgg.vgg('16bn', num_classes=self.num_classes)
+      model = lktools.Vgg.vgg('19bn', num_classes=self.num_classes)
       optim = torch.optim.SGD(model.parameters(), lr=self.learning_rate, momentum=self.momentum)
       scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=self.step_size, gamma=self.gamma)
       criterion = torch.nn.CrossEntropyLoss()
