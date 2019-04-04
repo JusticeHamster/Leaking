@@ -624,7 +624,7 @@ class BSOFModel:
         return
       def train(data, model, optim, scheduler, criterion):
         def start(stime, args, kwargs):
-          self.logger.info(f'epoch {args[0]}:')
+          self.logger.info(f'epoch {args[0]}')
         def end(result, stime, etime, args, kwargs):
           self.logger.info(result)
           self.logger.info(f'{etime - stime:.0f}s')
