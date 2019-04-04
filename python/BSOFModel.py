@@ -641,7 +641,7 @@ class BSOFModel:
               label = label.cuda()
             optim.zero_grad()
             output = model(img)
-            loss   = criterion(output)
+            loss   = criterion(output, label)
             loss.backward()
             optim.step()
             train_loss += loss.data[0]
