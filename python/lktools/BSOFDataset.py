@@ -1,5 +1,6 @@
 import cv2
 import os
+import itertools
 import xpinyin
 pinyin = xpinyin.Pinyin()
 
@@ -20,18 +21,45 @@ class BSOFDataset(Dataset):
     self.path = path
     self.size = size
 
-    self.files = [
-      (name, _dir) for name, dirs in map(
+    '''
+      结构：
+        root -------- A --- a --- *.jpg
+                |     | --- b --- *.png
+                |
+                |---- B --- a --- *.jpg
+                      | --- b --- *.png
+      结果：
+        [
+          (A, 1.jpg), (A, 2.png),
+          (B, 1.jpg), (B, 2.png),
+        ]
+    '''
+    files = map(
       lambda d: (
         pinyin.get_pinyin(d, '_'),
+        f'{path}/{d}',
         os.listdir(f'{path}/{d}')
       ),
       filter(
         lambda p: os.path.isdir(f'{path}/{p}'), 
         os.listdir(path)
       )
-    ) for _dir in dirs
-    ]
+    )
+    files = map(
+      lambda t: (
+        t[0], itertools.chain.from_iterable(
+          map(
+            lambda p: os.listdir(f'{t[1]}/{p}'),
+            filter(
+              lambda p: os.path.isdir(f'{t[1]}/{p}'),
+              t[2]
+            )
+          )
+        )
+      ),
+      files
+    )
+    self.files = [(t, f) for t, fs in files for f in fs]
 
   def __getitem__(self, index):
     img, label = self.files[index]
