@@ -42,18 +42,17 @@ class VGG(nn.Module):
         m.weight.data.normal_(0, 0.01)
         m.bias.data.zero_()
 
-def make_layers(cfg, batch_norm=False):
+def make(cfg, batch_norm=False):
   layers = []
   in_channels = 3
   for v in cfg:
     if v == 'M':
-      layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
+      layers.append(nn.MaxPool2d(kernel_size=2, stride=2))
     else:
-      conv2d = nn.Conv2d(in_channels, v, kernel_size=3, padding=1)
+      layers.append(nn.Conv2d(in_channels, v, kernel_size=3, padding=1))
       if batch_norm:
-        layers += [conv2d, nn.BatchNorm2d(v), nn.ReLU(inplace=True)]
-      else:
-        layers += [conv2d, nn.ReLU(inplace=True)]
+        layers.append(nn.BatchNorm2d(v))
+      layers.append(nn.ReLU(inplace=True))
       in_channels = v
   return nn.Sequential(*layers)
 
@@ -75,6 +74,6 @@ def vgg(version, **kwargs):
     print(f'{version} not found.')
     return
   return VGG(
-    make_layers(_cfg, batch_norm='bn' in version),
+    make(_cfg, batch_norm='bn' in version),
     **kwargs
   )
