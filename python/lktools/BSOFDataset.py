@@ -62,7 +62,7 @@ class BSOFDataset(Dataset):
     self.files = [(t, f) for t, fs in files for f in fs]
 
   def __getitem__(self, index):
-    img, label = self.files[index]
+    label, img = self.files[index]
     img        = cv2.imread(img)
     img        = cv2.resize(img, self.size)
     img        = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
