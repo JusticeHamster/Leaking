@@ -646,7 +646,7 @@ class BSOFModel:
             loss   = criterion(output, label)
             loss.backward()
             optim.step()
-            train_loss += loss.data[0]
+            train_loss += loss.data
             train_acc  += acc(output, label)
           return train_loss, train_acc
         for epoch in range(self.num_epochs):
