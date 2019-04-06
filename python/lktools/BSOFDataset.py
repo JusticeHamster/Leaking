@@ -24,7 +24,7 @@ class BSOFDataset(Dataset):
     self.size = size
     self.exts = exts
 
-    self.num_classes = 0
+    self.num_classes = -1
     '''
       结构：         class  site  images
         root -------- A --- a --- *.jpg
@@ -38,11 +38,13 @@ class BSOFDataset(Dataset):
           (root/B/a/1.jpg, B), (root/B/b/2.png, B),
         ]
     '''
-    self.files = []
+    self.files    = []
+    self.classes  = []
     for clazz in os.listdir(path):
       clazz_path = os.path.join(path, clazz)
       if not os.path.isdir(clazz_path):
         continue
+      self.classes.append(clazz)
       self.num_classes += 1
       for site in os.listdir(clazz_path):
         site_path = os.path.join(clazz_path, site)
@@ -53,7 +55,7 @@ class BSOFDataset(Dataset):
           if ext not in self.exts:
             continue
           img_path = os.path.join(site_path, img)
-          self.files.append((img_path, clazz))
+          self.files.append((img_path, self.num_classes))
 
   def __getitem__(self, index):
     img, label = self.files[index]
@@ -69,6 +71,9 @@ class BSOFDataset(Dataset):
 
   def __len__(self):
     return len(self.files)
+
+  def get_str(self, clazz_index):
+    return self.classes[clazz_index]
 
 if __name__ == '__main__':
   import sys
