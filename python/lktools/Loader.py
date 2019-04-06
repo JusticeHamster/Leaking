@@ -60,6 +60,7 @@ template = """{
     "train" : "?",
     "test"  : "?",
   },                                      // 神经网络数据集位置
+  "cuda"              : true,             // 如果有cuda，就自动开启cuda
 }"""
 user_settings = None
 
@@ -115,6 +116,7 @@ def get_settings():
       'file_output', 'time_debug',
       'linux', 'sift', 'OF', 'detectShadows',
       'Retina', 'debug_per_frame',
+      'cuda',
     ), bool
   )
   checker.check(

@@ -41,7 +41,7 @@ class Checker:
       cuda = torch.cuda.is_available()
     except:
       cuda = False
-    self.logger.info(f'cuda is "{cuda}"')
+    self.logger.info(f'system cuda is "{cuda}"')
     return cuda
 
   def exist(self, name):

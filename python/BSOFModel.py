@@ -116,7 +116,8 @@ class BSOFModel:
     """
     测试，失败就关闭
     """
-    self.checker.cuda_check()
+    if self.cuda:
+      self.checker.cuda_check()
     if not self.generation:
       self.logger.debug('测试model文件是否存在')
       self.checker.check(self.model_path, self.checker.exists_file)
@@ -588,7 +589,7 @@ class BSOFModel:
 
   @property
   def is_cuda_available(self):
-    return torch.cuda.is_available()
+    return self.cuda and torch.cuda.is_available()
 
   @property
   def num_classes(self):
