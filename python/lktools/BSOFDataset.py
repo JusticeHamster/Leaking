@@ -56,6 +56,7 @@ class BSOFDataset(Dataset):
             continue
           img_path = os.path.join(site_path, img)
           self.files.append((img_path, self.num_classes))
+    self.num_classes += 1
 
   def __getitem__(self, index):
     img, label = self.files[index]
