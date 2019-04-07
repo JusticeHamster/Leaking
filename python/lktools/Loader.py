@@ -56,7 +56,7 @@ template = """{
   "batch_size"        : 64,               // 神经网络 batch_size
   "step_size"         : 10,               // StepLR scheduler step_size
   "gamma"             : 0.5,              // StepLR scheduler gamma
-  "num_workers"       : 4,                // DataLoader 线程数
+  "num_workers"       : 0,                // DataLoader 线程数
   "data"              : {
     "train" : "?",
     "test"  : "?",

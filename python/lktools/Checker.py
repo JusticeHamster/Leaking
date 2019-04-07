@@ -79,24 +79,34 @@ class Checker:
       return f'size of "{name}" must == {length}', False
     return item, True
 
-  def plus(self, name):
+  def __number(self, name, predicate, info):
     item, s = self.exist(name)
     if not s:
       return item, False
-    if not (item > 0):
-      return f'"{name}" must > 0', False
+    if not predicate(item):
+      return f'"{name}" must {info}', False
     return item, True
 
+  def plus(self, name):
+    return self.__number(
+      name,
+      lambda n: n > 0,
+      '> 0'
+    )
+
   def plus_or_minus1(self, name):
-    item, s = self.plus(name)
-    if s:
-      return item, True
-    item, s = self.exist(name)
-    if not s:
-      return item, False
-    if not (item == -1):
-      return f'"{name}" must > 0 or == -1', False
-    return item, True
+    return self.__number(
+      name,
+      lambda n: n > 0 or n == -1,
+      '> 0 or == -1'
+    )
+
+  def plus_or_zero(self, name):
+    return self.__number(
+      name,
+      lambda n: n >= 0,
+      '>= 0'
+    )
 
   def range(self, name):
     item, s = self.exist(name)

@@ -5,7 +5,6 @@ pinyin = xpinyin.Pinyin()
 
 import torch
 from torch.utils.data import Dataset, DataLoader
-from torch.autograd import Variable
 
 class BSOFDataset(Dataset):
   """
@@ -67,7 +66,6 @@ class BSOFDataset(Dataset):
     img        = img.transpose((2, 0, 1))
     img        = torch.from_numpy(img)
     img        = img.float()
-    img        = Variable(img, requires_grad=True)
     return img, label
 
   def __len__(self):
