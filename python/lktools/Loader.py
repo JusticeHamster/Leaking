@@ -143,6 +143,7 @@ def get_settings():
   checker.check('frame_range', checker.range)
   checker.check('debug_level', checker.within, ('debug', 'info', 'warn', 'error', 'critical'))
   checker.check('max_iter', checker.plus_or_minus1)
+  checker.check('num_workers', checker.plus_or_zero)
   checker.check('data', checker.len_is, 2)
   checker.check('data.train', checker.is_dir)
   checker.check('data.test', checker.is_dir)
@@ -154,7 +155,7 @@ def get_settings():
       'app_fps', 'varThreshold',
       'num_epochs', 'learning_rate',
       'momentum', 'step_size', 'gamma',
-      'batch_size', 'num_workers',
+      'batch_size'
     ), checker.plus
   )
 
