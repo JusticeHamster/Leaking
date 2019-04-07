@@ -302,8 +302,8 @@ class BSOFModel:
         proba = dict(zip(self.classifier.classes_, y[0]))
         return self.abnormals.accumulate_abnormals(proba), X
       elif self.model_t == 'vgg':
-        # vgg model
-        pass
+        img = BSOFDataset.load_img(src)
+        output = self.classifier(img)
       return None, None
     @lktools.Timer.timer_decorator()
     def generate(src, range_rect, rects, abnormal):

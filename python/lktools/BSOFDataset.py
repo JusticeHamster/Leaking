@@ -61,18 +61,20 @@ class BSOFDataset(Dataset):
     img, label = self.files[index]
     # PS: 最好保证路径中没有中文（可能导致opencv Assertion failed (scn == 3 || scn == 4)）
     img        = cv2.imread(img)
-    img        = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    img        = cv2.resize(img, self.size)
-    img        = img.transpose((2, 0, 1))
-    img        = torch.from_numpy(img)
-    img        = img.float()
+    img        = BSOFDataset.load_img(img, self.size)
     return img, label
 
   def __len__(self):
     return len(self.files)
 
-  def get_str(self, clazz_index):
-    return self.classes[clazz_index]
+  @staticmethod
+  def load_img(img, size):
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    img = cv2.resize(img, size)
+    img = img.transpose((2, 0, 1))
+    img = torch.from_numpy(img)
+    img = img.float()
+    return img
 
 if __name__ == '__main__':
   import sys
