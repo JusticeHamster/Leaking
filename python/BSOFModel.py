@@ -631,7 +631,7 @@ class BSOFModel:
           self.logger.info(result)
           self.logger.info(f'{etime - stime:.0f}s')
         def acc(output, label):
-          return torch.sum(torch.max(output, 1)[1] == label)
+          return (output.max(1)[1] == label).sum()
         @lktools.Timer.timer_decorator(show=True, start_info=start, end_info=end)
         def train_one_epoch(epoch, data, model, optim, scheduler, criterion):
           scheduler.step()
@@ -646,7 +646,10 @@ class BSOFModel:
             loss   = criterion(output, label)
             loss.backward()
             optim.step()
-            train_loss += loss.data
+            if torch.isnan(loss.data):
+              print(loss.data)
+            else:
+              train_loss += loss.data
             train_acc  += acc(output, label)
           return train_loss, train_acc
         for epoch in range(self.num_epochs):
@@ -659,7 +662,8 @@ class BSOFModel:
       }
       self.dataloader = {
         name: DataLoader(
-          dataset, batch_size=self.batch_size, shuffle=True
+          dataset, batch_size=self.batch_size, shuffle=True,
+          num_workers=self.num_workers,
         ) for name, dataset in self.dataset.items()
       }
       model = lktools.Vgg.vgg('19bn', num_classes=self.num_classes)

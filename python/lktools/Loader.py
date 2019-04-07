@@ -51,11 +51,12 @@ template = """{
   "debug_per_frame"   : false,            // model逐帧调试，回车进入下一帧
   "max_iter"          : -1,               // SVC的最大迭代次数
   "num_epochs"        : 100,              // 神经网络训练轮数
-  "learning_rate"     : 0.1,              // 神经网络学习率
+  "learning_rate"     : 0.01,             // 神经网络学习率
   "momentum"          : 0.9,              // 神经网络 SGD momentum
   "batch_size"        : 64,               // 神经网络 batch_size
   "step_size"         : 10,               // StepLR scheduler step_size
   "gamma"             : 0.5,              // StepLR scheduler gamma
+  "num_workers"       : 4,                // DataLoader 线程数
   "data"              : {
     "train" : "?",
     "test"  : "?",
@@ -124,7 +125,7 @@ def get_settings():
       'delay', 'height', 'interval',
       'fps', 'limit_size', 'app_fps',
       'max_iter', 'num_epochs', 'step_size',
-      'batch_size',
+      'batch_size', 'num_workers',
     ), int
   )
   checker.check(
@@ -153,7 +154,7 @@ def get_settings():
       'app_fps', 'varThreshold',
       'num_epochs', 'learning_rate',
       'momentum', 'step_size', 'gamma',
-      'batch_size',
+      'batch_size', 'num_workers',
     ), checker.plus
   )
 
