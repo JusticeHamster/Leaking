@@ -66,7 +66,7 @@ class BSOFModel:
   """
   整个模型
   """
-  def __init__(self, opencv_output, model_t):
+  def __init__(self, opencv_output, generation, model_t):
     """
     初始化必要变量
 
@@ -90,8 +90,8 @@ class BSOFModel:
     做一次clear
     """
     self.opencv_output      = opencv_output
+    self.generation         = generation
     self.model_t            = model_t
-    self.generation         = model_t is not None
     self.settings           = lktools.Loader.get_settings()
     self.logger             = lktools.LoggerFactory.LoggerFactory(
       'BS_OF', level=self.settings['debug_level']
@@ -120,8 +120,12 @@ class BSOFModel:
       self.checker.cuda_check()
     if not self.generation:
       self.logger.debug('测试model文件是否存在')
-      self.checker.check(self.model_path, self.checker.exists_file)
-      self.model_t = self.model_path.split('.')[0] # svm.model or vgg.pth
+      path = {
+        'svm': self.svm_model_path,
+        'vgg': self.vgg_model_path,
+      }.get(self.model_t)
+      if path:
+        self.checker.check(path, self.checker.exists_file)
     if self.checker.dirty:
       self.thread_stop = True
       self.state = BSOFModel.STOPPED
@@ -621,7 +625,9 @@ class BSOFModel:
       joblib.dump(classifier, self.model_path)
     def vgg():
       if not self.generation:
-        self.classifier = None # load model
+        model = torch.load(self.vgg_model_path)
+        model.eval()
+        self.classifier = model
         self.foreach(self.one_video_classification, self.clear_classification)
         return
       def train(data, model, optim, scheduler, criterion):
@@ -650,7 +656,7 @@ class BSOFModel:
               print(loss.data)
             else:
               train_loss += loss.data
-            train_acc  += acc(output, label)
+            train_acc += acc(output, label)
           return train_loss, train_acc
         for epoch in range(self.num_epochs):
           train_one_epoch(epoch, data['train'], model, optim, scheduler, criterion)
@@ -667,11 +673,11 @@ class BSOFModel:
         ) for name, dataset in self.dataset.items()
       }
       model = lktools.Vgg.vgg('19bn', num_classes=self.num_classes)
-      optim = torch.optim.SGD(
-          model.parameters(), lr=self.learning_rate, momentum=self.momentum)
+      optim = torch.optim.SGD(model.parameters(), lr=self.learning_rate, momentum=self.momentum)
       scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=self.step_size, gamma=self.gamma)
       criterion = torch.nn.CrossEntropyLoss()
       train(self.dataloader, model, optim, scheduler, criterion)
+      torch.save(model, self.vgg_model_path)
     m = {
       'svm': svm,
       'vgg': vgg,
@@ -755,11 +761,10 @@ if __name__ == '__main__':
   import sys
   nothing = len(sys.argv) == 0
   show = 'show' in sys.argv
-  model_t = None
-  if 'model' in sys.argv:
-    if 'svm' in sys.argv:
-      model_t = 'svm'
-    elif 'vgg' in sys.argv:
-      model_t = 'vgg'
-  model = BSOFModel(nothing or show, model_t)
+  model = 'model' in sys.argv
+  if 'svm' in sys.argv:
+    model_t = 'svm'
+  elif 'vgg' in sys.argv:
+    model_t = 'vgg'
+  model = BSOFModel(nothing or show, model, model_t)
   model.classification()

@@ -32,7 +32,8 @@ template = """{
   "frame_range"       : [0, -1],          // 取[a, b]帧，b可以是负数，表示倒数第abs(b)帧
   "img_path"          : "images.tmp",     // 图片存取路径
   "video_path"        : "videos.tmp",     // 视频存取路径
-  "model_path"        : "?.model",        // Model路径, svm.model or vgg.model
+  "svm_model_path"    : "svm.model",      // svm Model路径
+  "vgg_model_path"    : "vgg.model",      // vgg Model路径
   "file_output"       : false,            // 是否输出到文件夹
   "interval"          : 10,               // 用前N帧图片作为修正的标准
   "fps"               : 10,               // 保存视频帧数
@@ -99,7 +100,8 @@ def get_settings():
     (
       'path', 'debug_level',
       'img_path', 'video_path',
-      'language', 'model_path'
+      'language',
+      'svm_model_path', 'vgg_model_path',
     ), str
   )
   checker.check(
@@ -139,7 +141,15 @@ def get_settings():
   logger.debug('check legal')
 
   class_info_exists = checker.check('path', checker.has_file, 'class_info_file')
-  checker.check('videos', checker.len_not, 0)
+  checker.check(
+    (
+      'videos', 'resource_path',
+      'img_path', 'video_path',
+      'svm_model_path', 'vgg_model_path',
+      'language',
+    ),
+    checker.len_not, 0
+  )
   checker.check('frame_range', checker.range)
   checker.check('debug_level', checker.within, ('debug', 'info', 'warn', 'error', 'critical'))
   checker.check('max_iter', checker.plus_or_minus1)
