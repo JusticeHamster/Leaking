@@ -678,7 +678,7 @@ class BSOFModel:
           num_workers=self.num_workers,
         ) for name, dataset in self.dataset.items()
       }
-      model = lktools.Vgg.vgg('19bn', num_classes=self.num_classes)
+      model = lktools.Vgg.vgg(self.vgg, num_classes=self.num_classes)
       optim = torch.optim.SGD(model.parameters(), lr=self.learning_rate, momentum=self.momentum)
       scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=self.step_size, gamma=self.gamma)
       criterion = torch.nn.CrossEntropyLoss()
@@ -689,6 +689,8 @@ class BSOFModel:
           'classes': self.dataset.classes,
         }, self.vgg_model_path
       )
+    if self.thread_stop:
+      return
     m = {
       'svm': svm,
       'vgg': vgg,
@@ -777,5 +779,8 @@ if __name__ == '__main__':
     model_t = 'svm'
   elif 'vgg' in sys.argv:
     model_t = 'vgg'
+  else:
+    print('you must specify <svm> or <vgg>')
+    sys.exit(-1)
   model = BSOFModel(nothing or show, model, model_t)
   model.classification()
