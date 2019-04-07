@@ -303,7 +303,9 @@ class BSOFModel:
         return self.abnormals.accumulate_abnormals(proba), X
       elif self.model_t == 'vgg':
         img = BSOFDataset.load_img(src)
-        output = self.classifier(img)
+        output = self.classifier(img).tolist()
+        proba  = dict(zip(self.vgg_classes, output))
+        return self.abnormals.accumulate_abnormals(proba), None
       return None, None
     @lktools.Timer.timer_decorator()
     def generate(src, range_rect, rects, abnormal):
@@ -625,9 +627,13 @@ class BSOFModel:
       joblib.dump(classifier, self.model_path)
     def vgg():
       if not self.generation:
-        model = torch.load(self.vgg_model_path)
+        mc = torch.load(self.vgg_model_path)
+        model   = mc['model']
         model.eval()
-        self.classifier = model
+        classes = mc['classes']
+        classes = tuple(map(Abnormal.Abnormal.abnormal, classes))
+        self.classifier  = model
+        self.vgg_classes = classes
         self.foreach(self.one_video_classification, self.clear_classification)
         return
       def train(data, model, optim, scheduler, criterion):
@@ -677,7 +683,12 @@ class BSOFModel:
       scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=self.step_size, gamma=self.gamma)
       criterion = torch.nn.CrossEntropyLoss()
       train(self.dataloader, model, optim, scheduler, criterion)
-      torch.save(model, self.vgg_model_path)
+      torch.save(
+        {
+          'model'  : model,
+          'classes': self.dataset.classes,
+        }, self.vgg_model_path
+      )
     m = {
       'svm': svm,
       'vgg': vgg,
