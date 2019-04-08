@@ -686,7 +686,7 @@ class BSOFModel:
       torch.save(
         {
           'model'  : model,
-          'classes': self.dataset.classes,
+          'classes': self.dataset['train'].classes,
         }, self.vgg_model_path
       )
     if self.thread_stop:
