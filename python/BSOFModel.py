@@ -105,7 +105,7 @@ class BSOFModel:
     self.thread_stop        = False
     self.state              = BSOFModel.RUNNING
     self.box_scale          = ((1 / 16, 1 / 4), (15 / 16, 2.9 / 4))
-    self.generation_cache   = {'X': [], 'Y': []}
+    self.generation_cache   = {'X': [], 'Y': [], 'src': []}
     self.debug_param        = {'continue': False, 'step': 0}
     self.dataset            = None
     self.dataloader         = None
@@ -302,9 +302,16 @@ class BSOFModel:
         proba = dict(zip(self.classifier.classes_, y[0]))
         return self.abnormals.accumulate_abnormals(proba), X
       elif self.model_t == 'vgg':
-        img = BSOFDataset.load_img(src, (224, 224))
-        output = self.classifier(img).tolist()
-        proba  = dict(zip(self.vgg_classes, output))
+        img = BSOFDataset.load_img(abnormal['BS'].copy(), (224, 224))
+        self.generation_cache['src'].append(img)
+        if len(self.generation_cache['src']) < 64:
+          return None, None
+        output = torch.stack(self.generation_cache['src'])
+        output = self.classifier(output).sum(0)
+        self.generation_cache['src'] = []
+        output[output < 0] = 0
+        output = output / output.sum()
+        proba  = dict(zip(self.vgg_classes, output.tolist()))
         return self.abnormals.accumulate_abnormals(proba), None
       return None, None
     @lktools.Timer.timer_decorator()
