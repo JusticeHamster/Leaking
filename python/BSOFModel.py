@@ -701,11 +701,11 @@ class BSOFModel:
           loss.backward()
           loss   = loss.data
           _acc   = acc(output, label)
-          self.logger.info(f'loss: {loss:.4f} 正确率：{_acc / 64:.4f}%')
+          self.logger.info(f'loss: {loss:.4f} 正确率：{_acc * 100 / 64:.2f}%')
           loss_sum += loss
           acc_sum  += _acc
         self.logger.info(f'avgloss : {loss_sum / len(data):.4f}')
-        self.logger.info(f'总正确率 : {acc_sum  / len(data):.4f}')
+        self.logger.info(f'总正确率 : {acc_sum * 100 / len(data):.2f}%')
       self.logger.debug('测试模型' if need_test else '训练模型')
       self.dataset = {
         name: BSOFDataset(
