@@ -302,7 +302,7 @@ class BSOFModel:
         proba = dict(zip(self.classifier.classes_, y[0]))
         return self.abnormals.accumulate_abnormals(proba), X
       elif self.model_t == 'vgg':
-        img = BSOFDataset.load_img(src)
+        img = BSOFDataset.load_img(src, (224, 224))
         output = self.classifier(img).tolist()
         proba  = dict(zip(self.vgg_classes, output))
         return self.abnormals.accumulate_abnormals(proba), None

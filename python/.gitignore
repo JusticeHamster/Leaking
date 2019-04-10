@@ -1,3 +1,6 @@
 
 # model
 *.model
+
+# temp
+temp/
