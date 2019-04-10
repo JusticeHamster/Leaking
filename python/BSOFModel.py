@@ -659,8 +659,10 @@ class BSOFModel:
           self.logger.info(f'epoch {args[0]}')
         # 结束打印信息
         def end(result, stime, etime, args, kwargs):
-          self.logger.info(result)
-          self.logger.info(f'{etime - stime:.0f}s')
+          loss_sum, acc_sum = result
+          self.logger.info(f'avgloss: {loss_sum / len(data):.4f}')
+          self.logger.info(f'总正确率：{acc_sum * 100 / len(data):.2f}%')
+          self.logger.info(f'花费时间：{etime - stime:.0f}s')
         # 训练一轮
         @lktools.Timer.timer_decorator(show=True, start_info=start, end_info=end)
         def train_one_epoch(epoch, data, model, optim, scheduler, criterion):
