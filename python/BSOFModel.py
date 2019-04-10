@@ -644,7 +644,7 @@ class BSOFModel:
         return model, classes
       # 计算acc
       def acc(output, label):
-        return (output.max(1)[1] == label).sum()
+        return (output.max(1)[1] == label).sum().float()
       # 载入模型并运行
       if not self.generation:
         self.classifier, self.vgg_classes = load()
@@ -676,9 +676,7 @@ class BSOFModel:
             loss   = criterion(output, label)
             loss.backward()
             optim.step()
-            if torch.isnan(loss.data):
-              print(loss.data)
-            else:
+            if not torch.isnan(loss.data):
               train_loss += loss.data
             train_acc += acc(output, label)
           return train_loss, train_acc
