@@ -61,6 +61,7 @@ reduce
 """
 from functools import reduce
 from functools import partial
+import os
 
 class BSOFModel:
   """
@@ -633,24 +634,34 @@ class BSOFModel:
       classifier.fit(self.generation_cache['X'], self.generation_cache['Y'])
       joblib.dump(classifier, self.model_path)
     def vgg():
-      if not self.generation:
-        mc = torch.load(self.vgg_model_path)
-        model   = mc['model']
+      # 载入模型
+      def load():
+        data    = torch.load(self.vgg_model_path)
+        model   = data['model']
         model.eval()
-        classes = mc['classes']
+        classes = data['classes']
         classes = tuple(map(Abnormal.Abnormal.abnormal, classes))
-        self.classifier  = model
-        self.vgg_classes = classes
+        return model, classes
+      # 计算acc
+      def acc(output, label):
+        return (output.max(1)[1] == label).sum()
+      # 载入模型并运行
+      if not self.generation:
+        self.classifier, self.vgg_classes = load()
         self.foreach(self.one_video_classification, self.clear_classification)
         return
+      # 是否测试
+      need_test = os.path.exists(self.vgg_model_path)
+      # 训练
       def train(data, model, optim, scheduler, criterion):
+        # 初始化打印信息
         def start(stime, args, kwargs):
           self.logger.info(f'epoch {args[0]}')
+        # 结束打印信息
         def end(result, stime, etime, args, kwargs):
           self.logger.info(result)
           self.logger.info(f'{etime - stime:.0f}s')
-        def acc(output, label):
-          return (output.max(1)[1] == label).sum()
+        # 训练一轮
         @lktools.Timer.timer_decorator(show=True, start_info=start, end_info=end)
         def train_one_epoch(epoch, data, model, optim, scheduler, criterion):
           scheduler.step()
@@ -672,8 +683,33 @@ class BSOFModel:
             train_acc += acc(output, label)
           return train_loss, train_acc
         for epoch in range(self.num_epochs):
-          train_one_epoch(epoch, data['train'], model, optim, scheduler, criterion)
-      self.logger.debug('训练模型')
+          train_one_epoch(epoch, data, model, optim, scheduler, criterion)
+        torch.save(
+          {
+            'model'  : model,
+            'classes': data.classes,
+          }, self.vgg_model_path
+        )
+      # 测试模型
+      def test(data, model, classes, criterion):
+        loss_sum = 0
+        acc_sum  = 0
+        for img, label in data:
+          if self.is_cuda_available:
+            img   = img.cuda()
+            label = label.cuda()
+          output = model(img)
+          loss   = criterion(output, label)
+          loss.backward()
+          loss   = loss.data
+          _acc   = acc(output, label)
+          self.logger.info(loss)
+          self.logger.info(_acc)
+          loss_sum += loss
+          acc_sum  += _acc
+        self.logger.info(f'average loss: {loss_sum / len(data)}')
+        self.logger.info(f'average  acc: {acc_sum  / len(data)}')
+      self.logger.debug('测试模型' if need_test else '训练模型')
       self.dataset = {
         name: BSOFDataset(
           self.data[name]
@@ -685,17 +721,14 @@ class BSOFModel:
           num_workers=self.num_workers,
         ) for name, dataset in self.dataset.items()
       }
-      model = lktools.Vgg.vgg(self.vgg, num_classes=self.num_classes)
-      optim = torch.optim.SGD(model.parameters(), lr=self.learning_rate, momentum=self.momentum)
-      scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=self.step_size, gamma=self.gamma)
-      criterion = torch.nn.CrossEntropyLoss()
-      train(self.dataloader, model, optim, scheduler, criterion)
-      torch.save(
-        {
-          'model'  : model,
-          'classes': self.dataset['train'].classes,
-        }, self.vgg_model_path
-      )
+      if need_test:
+        test(self.dataloader['test'], *load(), torch.nn.CrossEntropyLoss())
+      else:
+        model = lktools.Vgg.vgg(self.vgg, num_classes=self.num_classes)
+        optim = torch.optim.SGD(model.parameters(), lr=self.learning_rate, momentum=self.momentum)
+        scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=self.step_size, gamma=self.gamma)
+        criterion = torch.nn.CrossEntropyLoss()
+        train(self.dataloader['train'], model, optim, scheduler, criterion)
     if self.thread_stop:
       return
     m = {
@@ -780,7 +813,7 @@ class BSOFModel:
 if __name__ == '__main__':
   import sys
   nothing = len(sys.argv) == 0
-  show = 'show' in sys.argv
+  show  = 'show'  in sys.argv
   model = 'model' in sys.argv
   if 'svm' in sys.argv:
     model_t = 'svm'
