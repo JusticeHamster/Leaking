@@ -653,15 +653,15 @@ class BSOFModel:
       # 是否测试
       need_test = os.path.exists(self.vgg_model_path)
       # 训练
-      def train(data, model, optim, scheduler, criterion):
+      def train(data, length, model, optim, scheduler, criterion):
         # 初始化打印信息
         def start(stime, args, kwargs):
           self.logger.info(f'epoch {args[0]}')
         # 结束打印信息
         def end(result, stime, etime, args, kwargs):
           loss_sum, acc_sum = result
-          self.logger.info(f'avgloss: {loss_sum / len(data):.4f}')
-          self.logger.info(f'总正确率：{acc_sum * 100 / len(data):.2f}%')
+          self.logger.info(f'avgloss: {loss_sum / length:.4f}')
+          self.logger.info(f'总正确率：{acc_sum * 100 / length:.2f}%')
           self.logger.info(f'花费时间：{etime - stime:.0f}s')
         # 训练一轮
         @lktools.Timer.timer_decorator(show=True, start_info=start, end_info=end)
@@ -691,7 +691,7 @@ class BSOFModel:
           }, self.vgg_model_path
         )
       # 测试模型
-      def test(data, model, classes, criterion):
+      def test(data, length, model, classes, criterion):
         loss_sum = 0
         acc_sum  = 0
         for img, label in data:
@@ -706,8 +706,8 @@ class BSOFModel:
           self.logger.info(f'loss: {loss:.4f} 正确率：{_acc * 100 / 64:.2f}%')
           loss_sum += loss
           acc_sum  += _acc
-        self.logger.info(f'avgloss : {loss_sum / len(data):.4f}')
-        self.logger.info(f'总正确率 : {acc_sum * 100 / len(data):.2f}%')
+        self.logger.info(f'avgloss : {loss_sum / length:.4f}')
+        self.logger.info(f'总正确率 : {acc_sum * 100 / length:.2f}%')
       self.logger.debug('测试模型' if need_test else '训练模型')
       self.dataset = {
         name: BSOFDataset(
@@ -721,13 +721,19 @@ class BSOFModel:
         ) for name, dataset in self.dataset.items()
       }
       if need_test:
-        test(self.dataloader['test'], *load(), torch.nn.CrossEntropyLoss())
+        test(
+          self.dataloader['test'], len(self.dataset['test']),
+          *load(), torch.nn.CrossEntropyLoss()
+        )
       else:
         model = lktools.Vgg.vgg(self.vgg, num_classes=self.num_classes)
         optim = torch.optim.SGD(model.parameters(), lr=self.learning_rate, momentum=self.momentum)
         scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=self.step_size, gamma=self.gamma)
         criterion = torch.nn.CrossEntropyLoss()
-        train(self.dataloader['train'], model, optim, scheduler, criterion)
+        train(
+          self.dataloader['train'], len(self.dataset['train']),
+          model, optim, scheduler, criterion
+        )
     if self.thread_stop:
       return
     m = {
