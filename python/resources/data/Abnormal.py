@@ -76,6 +76,18 @@ class Abnormal:
       for k, v in self.__abnormals.items()
     }
 
+  @staticmethod
+  def abnormals(probabilities):
+    """
+    非累积
+
+    返回概率的dict
+    """
+    return {
+      c: 100 * probabilities.get(c, 0)
+      for c in Abnormal.classes()
+    }
+
   """
   不同分类对应的颜色
   """
