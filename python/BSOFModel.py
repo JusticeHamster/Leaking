@@ -303,7 +303,7 @@ class BSOFModel:
         proba = dict(zip(self.classifier.classes_, y[0]))
         return self.abnormals.accumulate_abnormals(proba), X
       elif self.model_t == 'vgg':
-        img = BSOFDataset.load_img(matrix_within_rect(src, range_rect), (224, 224))
+        img = BSOFDataset.load_img(matrix_within_rect(abnormal['BS'], range_rect), (224, 224))
         self.generation_cache['src'].append(img)
         if len(self.generation_cache['src']) < 64:
           return None, None
@@ -687,7 +687,7 @@ class BSOFModel:
         torch.save(
           {
             'model'  : model,
-            'classes': data.classes,
+            'classes': data.dataset.classes,
           }, self.vgg_model_path
         )
       # 测试模型
