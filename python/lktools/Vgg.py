@@ -19,7 +19,6 @@ class VGG(nn.Module):
       nn.Dropout(),
       nn.Linear(4096, num_classes),
     )
-    self.softmax = nn.Softmax(dim=1)
     if init_weights:
       self.__init_weights()
 
