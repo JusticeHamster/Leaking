@@ -661,9 +661,10 @@ class BSOFModel:
           self.logger.info(f'epoch {args[0]}')
         # 结束打印信息
         def end(result, stime, etime, args, kwargs):
-          loss_sum, acc_sum = result
+          loss_sum, acc_sum, nan = result
           self.logger.info(f'avgloss: {loss_sum / length:.4f}')
           self.logger.info(f'总正确率：{acc_sum * 100 / length:.2f}%')
+          self.logger.info(f'nan: {nan}')
           self.logger.info(f'花费时间：{etime - stime:.0f}s')
         # 训练一轮
         @lktools.Timer.timer_decorator(show=True, start_info=start, end_info=end)
@@ -671,6 +672,7 @@ class BSOFModel:
           scheduler.step()
           train_loss = 0
           train_acc  = 0
+          nan        = 0
           for img, label in data:
             if self.is_cuda_available:
               img   = img.cuda()
@@ -682,8 +684,10 @@ class BSOFModel:
             optim.step()
             if not torch.isnan(loss.data):
               train_loss += loss.data
+            else:
+              nan += 1
             train_acc += acc(output, label)
-          return train_loss, train_acc
+          return train_loss, train_acc, nan
         for epoch in range(self.num_epochs):
           train_one_epoch(epoch, data, model, optim, scheduler, criterion)
         torch.save(
