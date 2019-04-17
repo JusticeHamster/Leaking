@@ -9,6 +9,9 @@ cpp/static
 # VScode 文件
 .vscode
 
+# idea 文件
+.idea
+
 # MacOS 文件
 .DS_Store
 *.icloud
