@@ -308,10 +308,10 @@ class BSOFModel:
         if len(self.generation_cache['src']) < 64:
           return None, None
         output = torch.stack(self.generation_cache['src'])
-        output = self.classifier(output).sum(0)
         self.generation_cache['src'] = []
-        output[output < 0] = 0
-        output = output / output.sum()
+        output = self.classifier(output)
+        output = self.classifier.softmax(output)
+        output = output.sum(0) / len(output)
         proba  = dict(zip(self.vgg_classes, output.tolist()))
         return Abnormal.Abnormal.abnormals(proba), None
       return None, None
