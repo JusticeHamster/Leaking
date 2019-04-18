@@ -303,18 +303,19 @@ class BSOFModel:
         proba = dict(zip(self.classifier.classes_, y[0]))
         return self.abnormals.accumulate_abnormals(proba), X
       elif self.model_t == 'vgg':
+        cache = self.generation_cache
         img = BSOFDataset.load_img(matrix_within_rect(src, union_bounds(rects)), (224, 224))
-        self.generation_cache['src'].append(img)
-        if len(self.generation_cache['src']) < 64:
+        cache['src'].append(img)
+        if len(cache['src']) < 64:
           return None, None
-        output = torch.stack(self.generation_cache['src'])
+        output = torch.stack(cache['src'])
         output = self.classifier(output)
         output = self.classifier.softmax(output)
         if self.debug:
-          self.generation_cache['debug'].extend(zip(self.generation_cache['src'], output))
+          cache['debug'].extend(zip(cache['src'], output))
         output = output.sum(0) / len(output)
         proba  = dict(zip(self.vgg_classes, output.tolist()))
-        self.generation_cache['src'].clear()
+        cache['src'].clear()
         return Abnormal.Abnormal.abnormals(proba), None
       return None, None
     @lktools.Timer.timer_decorator()
@@ -449,11 +450,13 @@ class BSOFModel:
             os.mkdir('temp')
           while len(items) != 0:
             img, mat = items.pop(0)
-            clz = '\n'.join(map(
+            img = img.numpy().transpose((1, 2, 0))
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+            mat = '\n'.join(map(
               lambda t: f'{t[0]}: {t[1] * 100:.1f}%',
               zip(self.vgg_classes, mat.tolist())
             ))
-            img = cv2.putText(img.numpy(), clz, (0, 0), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0))
+            img = cv2.putText(img, mat, (0, 0), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0))
             cv2.imwrite(f'temp/{cache["debug_count"]}.jpg', img)
             cache['debug_count'] += 1
     @lktools.Timer.timer_decorator()
