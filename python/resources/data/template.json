@@ -41,4 +41,5 @@
   },                                      // 神经网络数据集位置
   "cuda"              : true,             // 如果有cuda，就自动开启cuda
   "vgg"               : "19bn",           // 选择vgg网络的类型
+  "model_t"           : "vgg",            // 选择model类型
 }

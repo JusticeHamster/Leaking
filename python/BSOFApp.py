@@ -63,7 +63,7 @@ class BSOFApp(kivy.app.App):
     """
     self.settings = lktools.Loader.get_settings()
     self.logger   = lktools.LoggerFactory.LoggerFactory('App').logger
-    self.model    = BSOFModel(False, False, 'vgg')
+    self.model    = BSOFModel(False, False, False)
     self.textures = {}
     self.clock    = kivy.clock.Clock.schedule_interval(self.on_clock, 1 / self.settings['app_fps'])
     self.dirty    = {'frame': False, 'video': False, 'classes': False}

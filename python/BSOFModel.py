@@ -67,13 +67,12 @@ class BSOFModel:
   """
   整个模型
   """
-  def __init__(self, opencv_output, generation, model_t):
+  def __init__(self, opencv_output, generation, debug):
     """
     初始化必要变量
 
     初始化
       opencv_output:       是否利用cv2.imgshow()显示每一帧图片
-      model_t:             type of model
       generation:          是否训练模型
       settings:            一个字典，由Loader从用户自定义json文件中读取
       judge_cache:         为judge使用的cache，每个单独的视频有一个单独的cache
@@ -87,13 +86,15 @@ class BSOFModel:
       box_scale:           蓝框的比例(<leftdown>, <rightup>)
       generation_cache     generation cache
       debug_param          debug相关参数
+      debug                是否进行model debug
 
     做一次clear
     """
     self.opencv_output      = opencv_output
     self.generation         = generation
-    self.model_t            = model_t
+    self.debug              = debug
     self.settings           = lktools.Loader.get_settings()
+    self.model_t            = self.settings['model_t']
     self.logger             = lktools.LoggerFactory.LoggerFactory(
       'BS_OF', level=self.settings['debug_level']
     ).logger
@@ -106,7 +107,7 @@ class BSOFModel:
     self.thread_stop        = False
     self.state              = BSOFModel.RUNNING
     self.box_scale          = ((1 / 16, 1 / 4), (15 / 16, 2.9 / 4))
-    self.generation_cache   = {'X': [], 'Y': [], 'src': []}
+    self.generation_cache   = {'X': [], 'Y': [], 'src': [], 'debug': [], 'debug_count': 0}
     self.debug_param        = {'continue': False, 'step': 0}
     self.dataset            = None
     self.dataloader         = None
@@ -308,11 +309,13 @@ class BSOFModel:
         if len(self.generation_cache['src']) < 64:
           return None, None
         output = torch.stack(self.generation_cache['src'])
-        self.generation_cache['src'] = []
         output = self.classifier(output)
         output = self.classifier.softmax(output)
+        if self.debug:
+          self.generation_cache['debug'].extend(zip(self.generation_cache['src'], output))
         output = output.sum(0) / len(output)
         proba  = dict(zip(self.vgg_classes, output.tolist()))
+        self.generation_cache['src'].clear()
         return Abnormal.Abnormal.abnormals(proba), None
       return None, None
     @lktools.Timer.timer_decorator()
@@ -404,6 +407,9 @@ class BSOFModel:
       否则，如果要打印在opencv窗口@opencv_output:
         显示一个新窗口，名为视频名称，将图片显示，其中延迟为@delay
         ESC键退出
+      如果是要进行模型的@debug:
+        模型会保存值到self.generation_cache['debug']中，
+        根据需要读取并使用。
       """
       name = self.now['name']
       if self.file_output:
@@ -436,6 +442,18 @@ class BSOFModel:
         if cv2.waitKey(self.delay) == 27:
           self.logger.debug('ESC 停止')
           self.thread_stop = True
+      elif self.debug:
+        if self.model_t == 'vgg':
+          cache = self.generation_cache
+          items = cache['debug']
+          if not os.path.exists('temp'):
+            os.mkdir('temp')
+          while len(items) != 0:
+            img, mat = items.pop(0)
+            clz = dict(zip(self.vgg_classes, mat))
+            img = cv2.putText(img, str(clz), (0, 0), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0))
+            cv2.imwrite(f'temp/{cache["debug_count"]}.jpg', img)
+            cache['debug_count'] += 1
     @lktools.Timer.timer_decorator()
     def update(original):
       """
@@ -828,12 +846,6 @@ if __name__ == '__main__':
   nothing = len(sys.argv) == 0
   show  = 'show'  in sys.argv
   model = 'model' in sys.argv
-  if 'svm' in sys.argv:
-    model_t = 'svm'
-  elif 'vgg' in sys.argv:
-    model_t = 'vgg'
-  else:
-    print('you must specify <svm> or <vgg>')
-    sys.exit(-1)
-  model = BSOFModel(nothing or show, model, model_t)
+  debug = 'debug' in sys.argv
+  model = BSOFModel(nothing or show, not debug and model, debug)
   model.classification()
