@@ -637,9 +637,11 @@ class BSOFModel:
       # 载入模型
       def load():
         data    = torch.load(self.vgg_model_path)
-        model   = data['model']
-        model.eval()
+        state   = data['state']
         classes = data['classes']
+
+        model = lktools.Vgg.vgg(self.vgg, num_classes=len(classes))
+        model.load_state_dict(state)
         classes = tuple(map(Abnormal.Abnormal.abnormal, classes))
         return model, classes
       # 计算acc
@@ -690,7 +692,7 @@ class BSOFModel:
           train_one_epoch(epoch, data, model, optim, scheduler, criterion)
         torch.save(
           {
-            'model'  : model,
+            'state'  : model.state_dict(),
             'classes': data.dataset.classes,
           }, self.vgg_model_path
         )
