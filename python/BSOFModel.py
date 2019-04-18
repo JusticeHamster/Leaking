@@ -454,9 +454,9 @@ class BSOFModel:
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             label = ';'.join(map(
               lambda t: f'{t[0]}_{t[1] * 100:.0f}%',
-              zip(self.vgg_classes, label.tolist())
+              zip(self.vgg_rclasses, label.tolist())
             ))
-            cv2.imwrite(f'temp/{label}_{cache["debug_count"]}.jpg', img)
+            cv2.imwrite(f'temp/{cache["debug_count"]}_{label}.jpg', img)
             cache['debug_count'] += 1
     @lktools.Timer.timer_decorator()
     def update(original):
@@ -665,14 +665,15 @@ class BSOFModel:
         model = lktools.Vgg.vgg(self.vgg, num_classes=len(classes))
         model.load_state_dict(state)
         model.eval()
-        classes = tuple(map(Abnormal.Abnormal.abnormal, classes))
-        return model, classes
+        rclasses = classes
+        classes = tuple(map(Abnormal.Abnormal.abnormal, rclasses))
+        return model, classes, rclasses
       # 计算acc
       def acc(output, label):
         return (output.max(1)[1] == label).sum().float()
       # 载入模型并运行
       if not self.generation:
-        self.classifier, self.vgg_classes = load()
+        self.classifier, self.vgg_classes, self.vgg_rclasses = load()
         self.foreach(self.one_video_classification, self.clear_classification)
         return
       # 是否测试
@@ -750,9 +751,10 @@ class BSOFModel:
         ) for name, dataset in self.dataset.items()
       }
       if need_test:
+        model, classes, *_ = load()
         test(
           self.dataloader['test'], len(self.dataset['test']),
-          *load(), torch.nn.CrossEntropyLoss()
+          model, classes, torch.nn.CrossEntropyLoss()
         )
       else:
         model = lktools.Vgg.vgg(self.vgg, num_classes=self.num_classes)
