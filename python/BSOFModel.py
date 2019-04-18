@@ -449,15 +449,14 @@ class BSOFModel:
           if not os.path.exists('temp'):
             os.mkdir('temp')
           while len(items) != 0:
-            img, mat = items.pop(0)
+            img, label = items.pop(0)
             img = img.numpy().transpose((1, 2, 0))
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-            mat = '\n'.join(map(
-              lambda t: f'{t[0]}: {t[1] * 100:.1f}%',
-              zip(self.vgg_classes, mat.tolist())
+            label = ';'.join(map(
+              lambda t: f'{t[0]}_{t[1] * 100:.0f}%',
+              zip(self.vgg_classes, label.tolist())
             ))
-            img = cv2.putText(img, mat, (0, 0), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 0, 0))
-            cv2.imwrite(f'temp/{cache["debug_count"]}.jpg', img)
+            cv2.imwrite(f'temp/{label}_{cache["debug_count"]}.jpg', img)
             cache['debug_count'] += 1
     @lktools.Timer.timer_decorator()
     def update(original):
