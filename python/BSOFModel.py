@@ -94,7 +94,6 @@ class BSOFModel:
     self.generation         = generation
     self.debug              = debug
     self.settings           = lktools.Loader.get_settings()
-    self.model_t            = self.settings['model_t']
     self.logger             = lktools.LoggerFactory.LoggerFactory(
       'BS_OF', level=self.settings['debug_level']
     ).logger
