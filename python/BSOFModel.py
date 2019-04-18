@@ -642,6 +642,7 @@ class BSOFModel:
 
         model = lktools.Vgg.vgg(self.vgg, num_classes=len(classes))
         model.load_state_dict(state)
+        model.eval()
         classes = tuple(map(Abnormal.Abnormal.abnormal, classes))
         return model, classes
       # 计算acc
@@ -736,6 +737,7 @@ class BSOFModel:
         optim = torch.optim.SGD(model.parameters(), lr=self.learning_rate, momentum=self.momentum)
         scheduler = torch.optim.lr_scheduler.StepLR(optim, step_size=self.step_size, gamma=self.gamma)
         criterion = torch.nn.CrossEntropyLoss()
+        model.train()
         train(
           self.dataloader['train'], len(self.dataset['train']),
           model, optim, scheduler, criterion
