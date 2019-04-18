@@ -60,6 +60,20 @@ def min_max(rect):
     y_max = y1
   return (x_min, y_min), (x_max, y_max)
 
+def union_bounds(rects):
+  (minx, miny), (maxx, maxy) = min_max(rects[0])
+  for rect in rects[1:]:
+    (x_min, y_min), (x_max, y_max) = min_max(rect)
+    if x_min < minx:
+      minx = x_min
+    if y_min < miny:
+      miny = y_min
+    if x_max > maxx:
+      maxx = x_max
+    if y_max > maxy:
+      maxy = y_max
+  return (minx, miny), (maxx, maxy)
+
 def matrix_within_rect(matrix, rect):
   """
   取出matrix中，rect部分的值

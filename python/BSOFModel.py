@@ -25,7 +25,7 @@ lktools
 """
 import lktools.Timer
 import lktools.Checker
-from lktools.PreProcess   import video_capture_size, bgr_to_hsv, gray_to_bgr, subtraction, matrix_within_rect, rect_size, rect_center
+from lktools.PreProcess   import video_capture_size, bgr_to_hsv, gray_to_bgr, subtraction, matrix_within_rect, rect_size, rect_center, union_bounds
 from lktools.OpticalFlow  import optical_flow_rects
 from lktools.SIFT         import siftImageAlignment
 from lktools.Denoise      import denoise
@@ -303,7 +303,7 @@ class BSOFModel:
         proba = dict(zip(self.classifier.classes_, y[0]))
         return self.abnormals.accumulate_abnormals(proba), X
       elif self.model_t == 'vgg':
-        img = BSOFDataset.load_img(matrix_within_rect(abnormal['BS'], range_rect), (224, 224))
+        img = BSOFDataset.load_img(matrix_within_rect(src, union_bounds(rects)), (224, 224))
         self.generation_cache['src'].append(img)
         if len(self.generation_cache['src']) < 64:
           return None, None
