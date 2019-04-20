@@ -95,7 +95,7 @@ class BSOFModel:
     self.debug              = debug
     self.settings           = lktools.Loader.get_settings()
     self.logger             = lktools.LoggerFactory.LoggerFactory(
-      'BS_OF', level=self.settings['debug_level']
+      'BS_OF', level=self.debug_level
     ).logger
     self.checker            = lktools.Checker.Checker(self.logger)
     self.judge_cache        = None
@@ -105,7 +105,7 @@ class BSOFModel:
     self.before_every_video = None
     self.thread_stop        = False
     self.state              = BSOFModel.RUNNING
-    self.box_scale          = ((1 / 16, 1 / 4), (15 / 16, 2.9 / 4))
+    self.box_scale          = self.init_box_scale
     self.generation_cache   = {'X': [], 'Y': [], 'src': [], 'debug': [], 'debug_count': 0}
     self.debug_param        = {'continue': False, 'step': 0}
     self.dataset            = None

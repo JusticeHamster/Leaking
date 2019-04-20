@@ -29,6 +29,7 @@ def check(logger, checker, user_settings, test):
   checker.check(
     (
       'videos', 'frame_range',
+      'init_box_scale',
     ), list
   )
   checker.check(
@@ -57,6 +58,10 @@ def check(logger, checker, user_settings, test):
       'compression_ratio', 'varThreshold',
       'learning_rate', 'momentum',
       'gamma',
+      'init_box_scale.0.0',
+      'init_box_scale.0.1',
+      'init_box_scale.1.0',
+      'init_box_scale.1.1',
     ), float
   )
 

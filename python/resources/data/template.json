@@ -42,4 +42,7 @@
   "cuda"              : true,             // 如果有cuda，就自动开启cuda
   "vgg"               : "19bn",           // 选择vgg网络的类型
   "model_t"           : "vgg",            // 选择model类型
+  "init_box_scale"    : [
+    [0.0625, 0.25], [0.9375, 0.725]
+  ],                                      // 框box的初始大小
 }
