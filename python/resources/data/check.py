@@ -83,7 +83,7 @@ def check(logger, checker, user_settings, test):
     '11', '11bn', '13', '13bn',
     '16', '16bn', '19', '19bn',
   ))
-  checker.check('model_t', checker.within, ('vgg', 'svm'))
+  checker.check('model_t', checker.within, ('vgg', 'svm', 'none'))
   checker.check('max_iter', checker.plus_or_minus1)
   checker.check('num_workers', checker.plus_or_zero)
   checker.check('data', checker.len_is, 2)

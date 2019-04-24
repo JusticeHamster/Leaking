@@ -766,11 +766,14 @@ class BSOFModel:
           self.dataloader['train'], len(self.dataset['train']),
           model, optim, scheduler, criterion
         )
+    def none():
+      self.foreach(self.one_video_classification, self.clear_classification)
     if self.thread_stop:
       return
     m = {
-      'svm': svm,
-      'vgg': vgg,
+      'svm' : svm,
+      'vgg' : vgg,
+      'none': none,
     }.get(self.model_t)
     if m:
       m()
