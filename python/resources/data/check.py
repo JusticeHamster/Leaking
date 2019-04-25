@@ -137,6 +137,7 @@ def check(logger, checker, user_settings, test):
   videos = user_settings['videos']
 
   __videos = []
+  class_info = user_settings['class_info'].keys()
   for video in videos:
     for f in glob.glob(f'{path}/{video}'):
       f = f.replace('\\', '/')
@@ -150,6 +151,9 @@ def check(logger, checker, user_settings, test):
       name = splits[-2].split('/')[-1]
       if len(name) == 0:
         logger.debug('无名特殊文件')
+        continue
+      if name not in class_info:
+        logger.debug(f'配置文件不包含文件"{name}"')
         continue
       __videos.append((name, f))
 
