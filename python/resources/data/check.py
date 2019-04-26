@@ -23,7 +23,7 @@ def check(logger, checker, user_settings, test):
       'img_path', 'video_path',
       'language', 'vgg',
       'svm_model_path', 'vgg_model_path',
-      'model_t',
+      'model_t', 'generation_t',
     ), str
   )
   checker.check(
@@ -84,6 +84,7 @@ def check(logger, checker, user_settings, test):
     '16', '16bn', '19', '19bn',
   ))
   checker.check('model_t', checker.within, ('vgg', 'svm', 'none'))
+  checker.check('generation_t', checker.within, ('video', 'image'))
   checker.check('max_iter', checker.plus_or_minus1)
   checker.check('num_workers', checker.plus_or_zero)
   checker.check('data', checker.len_is, 2)

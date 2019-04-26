@@ -641,9 +641,15 @@ class BSOFModel:
     def svm():
       if not self.generation:
         self.classifier = joblib.load(self.model_path)
-      self.foreach(self.one_video_classification, self.clear_classification)
-      if not self.generation:
+        self.foreach(self.one_video_classification, self.clear_classification)
         return
+      if self.generation_t == 'video':
+        self.foreach(self.one_video_classification, self.clear_classification)
+      elif self.generation_t == 'image':
+        dataset = BSOFDataset(self.data['train'])
+        for i in range(len(dataset)):
+          img = dataset.raw_img(i)
+          raise NotImplementedError
       self.logger.debug('训练模型')
       kwargs = {
         'gamma'                   : 'scale',

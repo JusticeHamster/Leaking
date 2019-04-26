@@ -58,14 +58,18 @@ class BSOFDataset(Dataset):
     self.num_classes += 1
 
   def __getitem__(self, index):
-    img, label = self.files[index]
-    # PS: 最好保证路径中没有中文（可能导致opencv Assertion failed (scn == 3 || scn == 4)）
-    img        = cv2.imread(img)
+    img, label = self.raw_img(index)
     img        = BSOFDataset.load_img(img, self.size)
     return img, label
 
   def __len__(self):
     return len(self.files)
+
+  def raw_img(self, index):
+    img, label = self.files[index]
+    # PS: 最好保证路径中没有中文（可能导致opencv Assertion failed (scn == 3 || scn == 4)）
+    img        = cv2.imread(img)
+    return img, label
 
   @staticmethod
   def load_img(img, size):
