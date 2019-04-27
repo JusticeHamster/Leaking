@@ -822,6 +822,7 @@ class BSOFModel:
       X = []
       Y = []
       vgg = load_attribute()
+      count = 0
       for d in range(length):
         img, label = self.dataset.raw_img(d)
         attr       = self.attributes(img)
