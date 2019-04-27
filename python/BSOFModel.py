@@ -835,8 +835,7 @@ class BSOFModel:
           self.logger.info(f'{100 * count / length:.0f}%')
         count += 1
       params = {
-        'booster': 'gbtree',
-        'objective': 'multi:softmax',
+        'objective': 'multi:softprob',
         'num_class': self.num_classes,
         'nthread': self.nthread,
       }
