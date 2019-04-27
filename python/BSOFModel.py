@@ -827,7 +827,7 @@ class BSOFModel:
       for d in range(length):
         img, label = self.dataset.raw_img(d)
         attr       = self.attributes(img)
-        attr.append(vgg(BSOFDataset.load_img(img.unsqueeze(0), (224, 224))))
+        attr.append(vgg(BSOFDataset.load_img(img, (224, 224)).unsqueeze(0)))
         X.append(attr)
         Y.append(label)
         if count % 100 == 0:
