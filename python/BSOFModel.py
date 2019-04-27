@@ -670,6 +670,7 @@ class BSOFModel:
       elif self.generation_t == 'image':
         self.dataset = BSOFDataset(self.data['train'])
         length = len(self.dataset)
+        length_100 = max(length // 100, 1)
         X = []
         Y = []
         count = 0
@@ -677,7 +678,7 @@ class BSOFModel:
           img, label = self.dataset.raw_img(i)
           X.append(self.attributes(img))
           Y.append(label)
-          if count % 100 == 0:
+          if count % length_100 == 0:
             self.logger.info(f'{100 * count / length:.0f}%')
           count += 1
         cache = self.generation_cache
@@ -821,6 +822,7 @@ class BSOFModel:
         return
       self.dataset = BSOFDataset(self.data['train'])
       length = len(self.dataset)
+      length_100 = max(length // 100, 1)
       X = []
       Y = []
       vgg = load_attribute()
@@ -831,7 +833,7 @@ class BSOFModel:
         attr.append(vgg(BSOFDataset.load_img(img, (224, 224)).unsqueeze(0)))
         X.append(attr)
         Y.append(label)
-        if count % 100 == 0:
+        if count % length_100 == 0:
           self.logger.info(f'{100 * count / length:.0f}%')
         count += 1
       params = {
