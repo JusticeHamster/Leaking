@@ -48,6 +48,13 @@ try:
 except:
   print('sklearn not loaded')
 """
+xgboost
+"""
+try:
+  import xgboost as xgb
+except:
+  print('xgboost not loaded')
+"""
 pytorch
 """
 try:
@@ -106,7 +113,7 @@ class BSOFModel:
     self.thread_stop        = False
     self.state              = BSOFModel.RUNNING
     self.box_scale          = self.init_box_scale
-    self.generation_cache   = {'X': [], 'Y': [], 'src': [], 'debug': [], 'debug_count': 0}
+    self.generation_cache   = {'X': [], 'Y': [], 'debug': [], 'debug_count': 0}
     self.debug_param        = {'continue': False, 'step': 0}
     self.dataset            = None
     self.dataloader         = None
@@ -215,6 +222,63 @@ class BSOFModel:
       abnormal['BS'] = gray_to_bgr(BS_binary) & src
     return rects, abnormal
 
+  def attributes(self, img):
+    """
+      对一张图片进行特征提取
+
+      返回特征
+    """
+    def debug(*args, func=None):
+      """
+      debug
+      """
+      if not self.debug_per_frame:
+        return
+      if func is None:
+        info = args
+      else:
+        info = func(*args)
+      self.logger.info(info)
+      self.debug_param['continue'] = False
+    attr = []
+    # ⬇️颜色
+    self.logger.debug('转换为HSV')
+    hsv_mat = bgr_to_hsv(mat)
+    self.logger.debug('求均值')
+    hsv = hsv_mat.mean(axis=(0, 1))
+    debug(max_rect)
+    debug(hsv, func=lambda c: f'h: {c[0]:.2f}, s: {c[1]:.2f}, v: {c[2]:.2f}')
+    attr.extend(hsv)
+    # ⬇️周长面积比
+    binary = matrix_within_rect(abnormal['BS_Binary'], max_rect)
+    _, contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    def length_of_area(c):
+      length = cv2.arcLength(c, True)
+      area = cv2.contourArea(c)
+      if area == 0:
+        return 0
+      return length / area
+    len_area = np.mean(tuple(map(length_of_area, contours)))
+    attr.append(len_area)
+    if self.model_t == 'svm' and self.generation_t == 'video':
+      # ⬇️面积增长率
+      area = sum(map(cv2.contourArea, contours))
+      last_area = self.judge_cache['area']
+      if area > last_area > 0:
+        self.judge_cache['max_area_rate'] = max((area - last_area) / last_area, self.judge_cache['max_area_rate'])
+      self.judge_cache['area'] = area
+      attr.append(self.judge_cache['max_area_rate'])
+      # ⬇️中心相对移动
+      center = rect_center(max_rect)
+      last_center = self.judge_cache.get('center')
+      center_offset = 0.0
+      if last_center is not None:
+        center_offset = np.linalg.norm((center[0] - last_center[0], center[1] - last_center[1]))
+      self.judge_cache['center'] = center
+      attr.append(center_offset)
+    # 返回
+    return attr
+
   @lktools.Timer.timer_decorator()
   def judge(self, src, rects, abnormal):
     """
@@ -237,18 +301,6 @@ class BSOFModel:
     if len(rects) <= 1:
       return None, None
     self.logger.debug('第一个框是检测范围，不是异常')
-    def debug(*args, func=None):
-      """
-      debug
-      """
-      if not self.debug_per_frame:
-        return
-      if func is None:
-        info = args
-      else:
-        info = func(*args)
-      self.logger.info(info)
-      self.debug_param['continue'] = False
     @lktools.Timer.timer_decorator()
     def attributes(src, range_rect, rects, abnormal):
       """
@@ -256,68 +308,39 @@ class BSOFModel:
       """
       # 选择最大的矩形
       max_rect = max(rects, key=rect_size)
-      mat = matrix_within_rect(abnormal['BS'], max_rect)
-      if mat is None or mat.size == 0:
+      img = matrix_within_rect(abnormal['BS'], max_rect)
+      if img is None or img.size == 0:
         self.logger.debug('矩阵没有正确取区域或是区域内为空则返回')
         return
-      # ⬇️颜色
-      self.logger.debug('转换为HSV')
-      hsv_mat = bgr_to_hsv(mat)
-      self.logger.debug('求均值')
-      hsv = hsv_mat.mean(axis=(0, 1))
-      debug(max_rect)
-      debug(hsv, func=lambda c: f'h: {c[0]:.2f}, s: {c[1]:.2f}, v: {c[2]:.2f}')
-      # ⬇️周长面积比
-      binary = matrix_within_rect(abnormal['BS_Binary'], max_rect)
-      _, contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-      def length_of_area(c):
-        length = cv2.arcLength(c, True)
-        area = cv2.contourArea(c)
-        if area == 0:
-          return 0
-        return length / area
-      len_area = np.mean(tuple(map(length_of_area, contours)))
-      # ⬇️面积增长率
-      area = sum(map(cv2.contourArea, contours))
-      last_area = self.judge_cache['area']
-      if area > last_area > 0:
-        self.judge_cache['max_area_rate'] = max((area - last_area) / last_area, self.judge_cache['max_area_rate'])
-      self.judge_cache['area'] = area
-      # ⬇️中心相对移动
-      center = rect_center(max_rect)
-      last_center = self.judge_cache.get('center')
-      center_offset = 0.0
-      if last_center is not None:
-        center_offset = np.linalg.norm((center[0] - last_center[0], center[1] - last_center[1]))
-      self.judge_cache['center'] = center
-      # 返回
-      return [hsv[0], hsv[1], len_area, self.judge_cache['max_area_rate'], center_offset]
+      return self.attributes(img)
     @lktools.Timer.timer_decorator()
     def classify(src, range_rect, rects, abnormal):
       """
       分类
       """
-      if self.model_t == 'svm':
-        X = [attributes(src, range_rect, rects, abnormal)]
-        y = self.classifier.predict_proba(X)
+      def sklearn_style():
+        X = attributes(src, range_rect, rects, abnormal)
+        if self.model_t == 'xgboost':
+          x = BSOFDataset.load_img(matrix_within_rect(src, union_bounds(rects)), (224, 224))
+          x = self.vgg_attribute(x.unsqueeze(0))
+          X.append(x)
+        y = self.classifier.predict_proba([X])
         proba = dict(zip(self.classifier.classes_, y[0]))
         return self.abnormals.accumulate_abnormals(proba), X
-      elif self.model_t == 'vgg':
-        cache = self.generation_cache
-        img = BSOFDataset.load_img(matrix_within_rect(src, union_bounds(rects)), (224, 224))
-        cache['src'].append(img)
-        if len(cache['src']) < 64:
-          return None, None
-        output = torch.stack(cache['src'])
-        output = self.classifier(output)
+      def pytorch_style():
+        img    = BSOFDataset.load_img(matrix_within_rect(src, union_bounds(rects)), (224, 224))
+        output = self.classifier(img.unsqueeze(0))
         output = self.classifier.softmax(output)
-        if self.debug:
-          cache['debug'].extend(zip(cache['src'], output))
         output = output.sum(0) / len(output)
         proba  = dict(zip(self.vgg_classes, output.tolist()))
-        cache['src'].clear()
-        return Abnormal.Abnormal.abnormals(proba), None
-      return None, None
+        return Abnormal.Abnormal.abnormals(proba), (img, proba.items())
+      def none():
+        return None, None
+      return {
+        'vgg'    : pytorch_style,
+        'svm'    : sklearn_style,
+        'xgboost': sklearn_style,
+      }.get(self.model_t, none)()
     @lktools.Timer.timer_decorator()
     def generate(src, range_rect, rects, abnormal):
       """
@@ -445,19 +468,17 @@ class BSOFModel:
       elif self.debug:
         if self.model_t == 'vgg':
           cache = self.generation_cache
-          items = cache['debug']
           if not os.path.exists('temp'):
             os.mkdir('temp')
-          while len(items) != 0:
-            img, label = items.pop(0)
-            img = img.numpy().transpose((1, 2, 0))
-            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-            label = ';'.join(map(
-              lambda t: f'{t[0]}_{t[1] * 100:.0f}%',
-              zip(self.vgg_rclasses, label.tolist())
-            ))
-            cv2.imwrite(f'temp/{cache["debug_count"]}_{label}.jpg', img)
-            cache['debug_count'] += 1
+          img, proba = self.now['attributes']
+          img = img.numpy().transpose((1, 2, 0))
+          img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+          proba = ';'.join(map(
+            lambda t: f'{t[0]}_{t[1] * 100:.0f}%',
+            proba
+          ))
+          cv2.imwrite(f'temp/{cache["debug_count"]}_{proba}.jpg', img)
+          cache['debug_count'] += 1
     @lktools.Timer.timer_decorator()
     def update(original):
       """
@@ -640,16 +661,26 @@ class BSOFModel:
     """
     def svm():
       if not self.generation:
-        self.classifier = joblib.load(self.model_path)
+        self.classifier = joblib.load(self.svm_model_path)
         self.foreach(self.one_video_classification, self.clear_classification)
         return
       if self.generation_t == 'video':
         self.foreach(self.one_video_classification, self.clear_classification)
       elif self.generation_t == 'image':
-        dataset = BSOFDataset(self.data['train'])
-        for i in range(len(dataset)):
-          img = dataset.raw_img(i)
-          raise NotImplementedError
+        self.dataset = BSOFDataset(self.data['train'])
+        length = len(self.dataset)
+        X = []
+        Y = []
+        count = 0
+        for i in range(length):
+          img, label = dataset.raw_img(i)
+          X.append(self.attributes(img))
+          Y.append(label)
+          if count % 100 == 0:
+            self.logger.info(f'{100 * count / length:.0f}%...')
+        cache = self.generation_cache
+        cache['X'] = X
+        cache['Y'] = Y
       self.logger.debug('训练模型')
       kwargs = {
         'gamma'                   : 'scale',
@@ -772,17 +803,54 @@ class BSOFModel:
           self.dataloader['train'], len(self.dataset['train']),
           model, optim, scheduler, criterion
         )
+    def xgboost():
+      def load_attribute():
+        state = torch.load(self.vgg_model_path)
+        vgg = lktools.Vgg.vgg(self.vgg, classify=False)
+        vgg.load_state_dict(state)
+        vgg.eval()
+        return vgg
+      if not self.generation:
+        bst = xgb.Booster({'nthread': self.nthread})
+        bst.load_model(self.xgboost_model_path)
+        self.classifier = bst
+        self.vgg_attribute = load_attribute()
+        self.foreach(self.one_video_classification, self.clear_classification)
+        return
+      self.dataset = BSOFDataset(self.data['train'])
+      length = len(self.dataset)
+      X = []
+      Y = []
+      vgg = load_attribute()
+      count = 0
+      for d in range(length):
+        img, label = dataset.raw_img(d)
+        attr       = self.attributes(img)
+        attr.append(vgg(BSOFDataset.load_img(img, (224, 224))))
+        X.append(attr)
+        Y.append(label)
+        if count % 100 == 0:
+          self.logger.info(f'{100 * count / length:.0f}%...')
+      params = {
+        'booster': 'gbtree',
+        'objective': 'multi:softmax',
+        'num_class': self.num_classes,
+        'nthread': self.nthread,
+      }
+      bst = xgb.train(params, xgb.DMatrix(X, Y), self.num_round)
+      self.logger.info('save xgboost model')
+      bst.save_model(self.xgboost_model_path)
+      bst.dump_model(f'{self.xgboost_model_path}.txt')
     def none():
-      self.foreach(self.one_video_classification, self.clear_classification)
+      if not self.generation:
+        self.foreach(self.one_video_classification, self.clear_classification)
     if self.thread_stop:
       return
     m = {
-      'svm' : svm,
-      'vgg' : vgg,
-      'none': none,
-    }.get(self.model_t)
-    if m:
-      m()
+      'svm'     : svm,
+      'vgg'     : vgg,
+      'xgboost' : xgboost,
+    }.get(self.model_t, none)()
 
   @lktools.Timer.timer_decorator()
   def foreach(self, single_func, clear_func):

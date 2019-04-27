@@ -7,7 +7,7 @@ import math
 '''
 class VGG(nn.Module):
 
-  def __init__(self, features, num_classes=0, init_weights=True):
+  def __init__(self, features, num_classes=0, init_weights=True, classify=True):
     super(VGG, self).__init__()
     self.features = features
     self.classifier = nn.Sequential(
@@ -26,7 +26,8 @@ class VGG(nn.Module):
   def forward(self, x):
     x = self.features(x)
     x = x.view(x.size(0), -1)
-    x = self.classifier(x)
+    if self.classify:
+      x = self.classifier(x)
     return x
 
   def __init_weights(self):

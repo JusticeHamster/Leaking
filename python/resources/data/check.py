@@ -22,7 +22,7 @@ def check(logger, checker, user_settings, test):
       'path', 'debug_level',
       'img_path', 'video_path',
       'language', 'vgg',
-      'svm_model_path', 'vgg_model_path',
+      'svm_model_path', 'vgg_model_path', 'xgboost_model_path',
       'model_t', 'generation_t',
     ), str
   )
@@ -50,7 +50,8 @@ def check(logger, checker, user_settings, test):
       'delay', 'height', 'interval',
       'fps', 'limit_size', 'app_fps',
       'max_iter', 'num_epochs', 'step_size',
-      'batch_size', 'num_workers',
+      'batch_size', 'num_workers', 'nthread',
+      'num_round',
     ), int
   )
   checker.check(
@@ -72,7 +73,7 @@ def check(logger, checker, user_settings, test):
     (
       'videos', 'resource_path',
       'img_path', 'video_path',
-      'svm_model_path', 'vgg_model_path',
+      'svm_model_path', 'vgg_model_path', 'xgboost_model_path',
       'language',
     ),
     checker.len_not, 0
@@ -83,7 +84,7 @@ def check(logger, checker, user_settings, test):
     '11', '11bn', '13', '13bn',
     '16', '16bn', '19', '19bn',
   ))
-  checker.check('model_t', checker.within, ('vgg', 'svm', 'none'))
+  checker.check('model_t', checker.within, ('xgboost', 'vgg', 'svm', 'none'))
   checker.check('generation_t', checker.within, ('video', 'image'))
   checker.check('max_iter', checker.plus_or_minus1)
   checker.check('num_workers', checker.plus_or_zero)
@@ -98,7 +99,7 @@ def check(logger, checker, user_settings, test):
       'app_fps', 'varThreshold',
       'num_epochs', 'learning_rate',
       'momentum', 'step_size', 'gamma',
-      'batch_size'
+      'batch_size', 'nthread', 'num_round',
     ), checker.plus
   )
 

@@ -11,6 +11,7 @@
   "video_path"        : "videos.tmp",     // 视频存取路径
   "svm_model_path"    : "svm.model",      // svm Model路径
   "vgg_model_path"    : "vgg.model",      // vgg Model路径
+  "xgboost_model_path": "xgb.model",      // xgboost Model路径
   "file_output"       : false,            // 是否输出到文件夹
   "interval"          : 10,               // 用前N帧图片作为修正的标准
   "fps"               : 10,               // 保存视频帧数
@@ -41,9 +42,11 @@
   },                                      // 神经网络数据集位置
   "cuda"              : true,             // 如果有cuda，就自动开启cuda
   "vgg"               : "19bn",           // 选择vgg网络的类型
-  "model_t"           : "vgg",            // 选择model类型
+  "model_t"           : "xgboost",        // 选择model类型
   "init_box_scale"    : [
     [0.0625, 0.25], [0.9375, 0.725]
   ],                                      // 框box的初始大小
   "generation_t"      : "image",          // 通过什么方式训练模型
+  "nthread"           : 4,                // xgboost 线程数
+  "num_round"         : 10,               // xgboost 训练轮数
 }
