@@ -10,6 +10,7 @@ class VGG(nn.Module):
   def __init__(self, features, num_classes=0, init_weights=True, classify=True):
     super(VGG, self).__init__()
     self.features = features
+    self.classify = classify
     self.classifier = nn.Sequential(
       nn.Linear(512 * 7 * 7, 4096),
       nn.ReLU(True),
