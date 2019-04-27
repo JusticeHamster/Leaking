@@ -25,7 +25,7 @@ lktools
 """
 import lktools.Timer
 import lktools.Checker
-from lktools.PreProcess   import video_capture_size, bgr_to_hsv, gray_to_bgr, subtraction, matrix_within_rect, rect_size, rect_center, union_bounds
+from lktools.PreProcess   import video_capture_size, bgr_to_hsv, gray_to_bgr, bgr_to_gray, subtraction, matrix_within_rect, rect_size, rect_center, union_bounds
 from lktools.OpticalFlow  import optical_flow_rects
 from lktools.SIFT         import siftImageAlignment
 from lktools.Denoise      import denoise
@@ -222,12 +222,14 @@ class BSOFModel:
       abnormal['BS'] = gray_to_bgr(BS_binary) & src
     return rects, abnormal
 
-  def attributes(self, img):
+  def attributes(self, img, binary=None):
     """
       对一张图片进行特征提取
 
       返回特征
     """
+    if binary is None:
+      binary = bgr_to_gray(img)
     def debug(*args, func=None):
       """
       debug
@@ -243,14 +245,12 @@ class BSOFModel:
     attr = []
     # ⬇️颜色
     self.logger.debug('转换为HSV')
-    hsv_mat = bgr_to_hsv(mat)
+    hsv_mat = bgr_to_hsv(img)
     self.logger.debug('求均值')
     hsv = hsv_mat.mean(axis=(0, 1))
-    debug(max_rect)
     debug(hsv, func=lambda c: f'h: {c[0]:.2f}, s: {c[1]:.2f}, v: {c[2]:.2f}')
     attr.extend(hsv)
     # ⬇️周长面积比
-    binary = matrix_within_rect(abnormal['BS_Binary'], max_rect)
     _, contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     def length_of_area(c):
       length = cv2.arcLength(c, True)
@@ -287,7 +287,7 @@ class BSOFModel:
     Args:
       src:    原图
       rects:  框的list
-      abnormal: 异常部分的dict，有'OF'和'BS'两个属性
+      abnormal: 异常部分的dict，有'OF'和'BS'以及加上后缀'_binary'共四个属性
 
     Self:
       judge_cache:   可长期持有的缓存，如果需要处理多帧的话
@@ -312,7 +312,8 @@ class BSOFModel:
       if img is None or img.size == 0:
         self.logger.debug('矩阵没有正确取区域或是区域内为空则返回')
         return
-      return self.attributes(img)
+      binary = matrix_within_rect(abnormal['BS_binary'], max_rect)
+      return self.attributes(img, binary)
     @lktools.Timer.timer_decorator()
     def classify(src, range_rect, rects, abnormal):
       """
@@ -826,7 +827,7 @@ class BSOFModel:
       for d in range(length):
         img, label = self.dataset.raw_img(d)
         attr       = self.attributes(img)
-        attr.append(vgg(BSOFDataset.load_img(img, (224, 224))))
+        attr.append(vgg(BSOFDataset.load_img(img.unsqueeze(0), (224, 224))))
         X.append(attr)
         Y.append(label)
         if count % 100 == 0:
