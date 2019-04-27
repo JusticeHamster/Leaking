@@ -673,7 +673,7 @@ class BSOFModel:
         Y = []
         count = 0
         for i in range(length):
-          img, label = dataset.raw_img(i)
+          img, label = self.dataset.raw_img(i)
           X.append(self.attributes(img))
           Y.append(label)
           if count % 100 == 0:
@@ -805,9 +805,9 @@ class BSOFModel:
         )
     def xgboost():
       def load_attribute():
-        state = torch.load(self.vgg_model_path)
-        vgg = lktools.Vgg.vgg(self.vgg, classify=False)
-        vgg.load_state_dict(state)
+        data = torch.load(self.vgg_model_path)
+        vgg = lktools.Vgg.vgg(self.vgg, num_classes=len(data['classes']), classify=False)
+        vgg.load_state_dict(data['state'])
         vgg.eval()
         return vgg
       if not self.generation:
@@ -822,9 +822,8 @@ class BSOFModel:
       X = []
       Y = []
       vgg = load_attribute()
-      count = 0
       for d in range(length):
-        img, label = dataset.raw_img(d)
+        img, label = self.dataset.raw_img(d)
         attr       = self.attributes(img)
         attr.append(vgg(BSOFDataset.load_img(img, (224, 224))))
         X.append(attr)
