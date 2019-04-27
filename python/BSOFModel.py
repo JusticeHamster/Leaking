@@ -679,6 +679,7 @@ class BSOFModel:
           Y.append(label)
           if count % 100 == 0:
             self.logger.info(f'{100 * count / length:.0f}%...')
+          count += 1
         cache = self.generation_cache
         cache['X'] = X
         cache['Y'] = Y
@@ -832,6 +833,7 @@ class BSOFModel:
         Y.append(label)
         if count % 100 == 0:
           self.logger.info(f'{100 * count / length:.0f}%...')
+        count += 1
       params = {
         'booster': 'gbtree',
         'objective': 'multi:softmax',
