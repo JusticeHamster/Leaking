@@ -678,7 +678,7 @@ class BSOFModel:
           X.append(self.attributes(img))
           Y.append(label)
           if count % 100 == 0:
-            self.logger.info(f'{100 * count / length:.0f}%...')
+            self.logger.info(f'{100 * count / length:.0f}%')
           count += 1
         cache = self.generation_cache
         cache['X'] = X
@@ -832,7 +832,7 @@ class BSOFModel:
         X.append(attr)
         Y.append(label)
         if count % 100 == 0:
-          self.logger.info(f'{100 * count / length:.0f}%...')
+          self.logger.info(f'{100 * count / length:.0f}%')
         count += 1
       params = {
         'booster': 'gbtree',
