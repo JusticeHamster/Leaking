@@ -312,7 +312,7 @@ class BSOFModel:
       if img is None or img.size == 0:
         self.logger.debug('矩阵没有正确取区域或是区域内为空则返回')
         return
-      binary = matrix_within_rect(abnormal['BS_binary'], max_rect)
+      binary = matrix_within_rect(abnormal['BS_Binary'], max_rect)
       return self.attributes(img, binary)
     @lktools.Timer.timer_decorator()
     def classify(src, range_rect, rects, abnormal):
@@ -320,14 +320,18 @@ class BSOFModel:
       分类
       """
       def sklearn_style():
-        X = attributes(src, range_rect, rects, abnormal)
-        if self.model_t == 'xgboost':
-          x = BSOFDataset.load_img(matrix_within_rect(src, union_bounds(rects)), (224, 224))
-          x = self.vgg_attribute(x.unsqueeze(0))
-          X.append(x)
-        y = self.classifier.predict_proba([X])
+        X = [attributes(src, range_rect, rects, abnormal)]
+        y = self.classifier.predict_proba(X)
         proba = dict(zip(self.classifier.classes_, y[0]))
         return self.abnormals.accumulate_abnormals(proba), X
+      def xgboost_style():
+        X = attributes(src, range_rect, rects, abnormal)
+        x = BSOFDataset.load_img(matrix_within_rect(src, union_bounds(rects)), (224, 224))
+        x = self.vgg_attribute(x.unsqueeze(0))
+        X.append(x.sum())
+        y = self.classifier.predict(xgb.DMatrix(np.array([X])))
+        proba = dict(zip(self.classes, y))
+        return Abnormal.Abnormal.abnormals(proba), X
       def pytorch_style():
         img    = BSOFDataset.load_img(matrix_within_rect(src, union_bounds(rects)), (224, 224))
         output = self.classifier(img.unsqueeze(0))
@@ -340,7 +344,7 @@ class BSOFModel:
       return {
         'vgg'    : pytorch_style,
         'svm'    : sklearn_style,
-        'xgboost': sklearn_style,
+        'xgboost': xgboost_style,
       }.get(self.model_t, none)()
     @lktools.Timer.timer_decorator()
     def generate(src, range_rect, rects, abnormal):
@@ -653,7 +657,10 @@ class BSOFModel:
   def num_classes(self):
     if self.dataset is None:
       return 0
-    return min(map(lambda ds: ds.num_classes, self.dataset.values()))
+    if isinstance(self.dataset, dict):
+      return min(map(lambda ds: ds.num_classes, self.dataset.values()))
+    else:
+      return self.dataset.num_classes
 
   @lktools.Timer.timer_decorator()
   def classification(self):
@@ -812,25 +819,26 @@ class BSOFModel:
         vgg = lktools.Vgg.vgg(self.vgg, num_classes=len(data['classes']), classify=False)
         vgg.load_state_dict(data['state'])
         vgg.eval()
-        return vgg
+        return vgg, data['classes']
       if not self.generation:
         bst = xgb.Booster({'nthread': self.nthread})
         bst.load_model(self.xgboost_model_path)
         self.classifier = bst
-        self.vgg_attribute = load_attribute()
+        self.vgg_attribute, self.classes = load_attribute()
         self.foreach(self.one_video_classification, self.clear_classification)
         return
-      self.dataset = BSOFDataset(self.data['train'])
+      vgg, classes = load_attribute()
+      self.dataset = BSOFDataset(self.data['train'], classes=classes)
       length = len(self.dataset)
       length_100 = max(length // 100, 1)
       X = []
       Y = []
-      vgg = load_attribute()
       count = 0
       for d in range(length):
         img, label = self.dataset.raw_img(d)
         attr       = self.attributes(img)
-        attr.append(vgg(BSOFDataset.load_img(img, (224, 224)).unsqueeze(0)))
+        vgg_attr   = vgg(BSOFDataset.load_img(img, (224, 224)).unsqueeze(0)).data.numpy()
+        attr.append(vgg_attr.sum())
         X.append(attr)
         Y.append(label)
         if count % length_100 == 0:
@@ -841,7 +849,8 @@ class BSOFModel:
         'num_class': self.num_classes,
         'nthread': self.nthread,
       }
-      bst = xgb.train(params, xgb.DMatrix(X, Y), self.num_round)
+      data = xgb.DMatrix(np.array(X), np.array(Y))
+      bst = xgb.train(params, data, self.num_round, evals=[(data, 'train')])
       self.logger.info('save xgboost model')
       bst.save_model(self.xgboost_model_path)
       bst.dump_model(f'{self.xgboost_model_path}.txt')

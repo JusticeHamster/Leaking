@@ -14,7 +14,8 @@ class BSOFDataset(Dataset):
   """
   def __init__(
     self, path, size=(224, 224),
-    exts=('.jpg', '.jpeg', '.png')
+    exts=('.jpg', '.jpeg', '.png'),
+    classes=None
   ):
     if path[-1] in ('\\', '/'):
       path = path[:-1]
@@ -23,7 +24,6 @@ class BSOFDataset(Dataset):
     self.size = size
     self.exts = exts
 
-    self.num_classes = -1
     '''
       结构：         class  site  images
         root -------- A --- a --- *.jpg
@@ -38,13 +38,19 @@ class BSOFDataset(Dataset):
         ]
     '''
     self.files    = []
-    self.classes  = []
+    if classes is None:
+      self.num_classes = -1
+      self.classes     = []
+    else:
+      self.num_classes = len(classes)
+      self.classes     = classes
     for clazz in os.listdir(path):
       clazz_path = os.path.join(path, clazz)
       if not os.path.isdir(clazz_path):
         continue
-      self.classes.append(clazz)
-      self.num_classes += 1
+      if classes is None:
+        self.classes.append(clazz)
+        self.num_classes += 1
       for site in os.listdir(clazz_path):
         site_path = os.path.join(clazz_path, site)
         if not os.path.isdir(site_path):
@@ -54,8 +60,13 @@ class BSOFDataset(Dataset):
           if ext not in self.exts:
             continue
           img_path = os.path.join(site_path, img)
-          self.files.append((img_path, self.num_classes))
-    self.num_classes += 1
+          if classes is None:
+            label = self.num_classes
+          else:
+            label = classes.index(clazz)
+          self.files.append((img_path, label))
+    if classes is None:
+      self.num_classes += 1
 
   def __getitem__(self, index):
     img, label = self.raw_img(index)
