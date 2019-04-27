@@ -330,7 +330,7 @@ class BSOFModel:
         x = self.vgg_attribute(x.unsqueeze(0))
         X.append(x.sum())
         y = self.classifier.predict(xgb.DMatrix(np.array([X])))
-        proba = dict(zip(self.classes, y))
+        proba = dict(zip(self.classes, y[0]))
         return Abnormal.Abnormal.abnormals(proba), X
       def pytorch_style():
         img    = BSOFDataset.load_img(matrix_within_rect(src, union_bounds(rects)), (224, 224))
@@ -819,7 +819,7 @@ class BSOFModel:
         vgg = lktools.Vgg.vgg(self.vgg, num_classes=len(data['classes']), classify=False)
         vgg.load_state_dict(data['state'])
         vgg.eval()
-        return vgg, data['classes']
+        return vgg, tuple(map(Abnormal.Abnormal.abnormal, data['classes']))
       if not self.generation:
         bst = xgb.Booster({'nthread': self.nthread})
         bst.load_model(self.xgboost_model_path)
@@ -845,7 +845,7 @@ class BSOFModel:
           self.logger.info(f'{100 * count / length:.0f}%')
         count += 1
       params = {
-        'objective': 'multi:softmax',
+        'objective': 'multi:softprob',
         'num_class': self.num_classes,
         'nthread': self.nthread,
       }
