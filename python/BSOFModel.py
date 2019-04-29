@@ -327,7 +327,7 @@ class BSOFModel:
         X = attributes(src, range_rect, rects, abnormal)
         x = BSOFDataset.load_img(matrix_within_rect(src, union_bounds(rects)), (224, 224))
         x = self.vgg_attribute(x.unsqueeze(0))
-        X.append(x.sum())
+        X.append(nn.Linear(4096)(x))
         y = self.classifier.predict(xgb.DMatrix(np.array([X])))
         proba = dict(zip(self.classes, y[0]))
         return Abnormal.Abnormal.abnormals(proba), X
@@ -821,7 +821,7 @@ class BSOFModel:
 
         classes = data['classes']
         if classToEnum:
-	  classes = tuple(map(Abnormal.Abnormal.abnormal, classes))
+          classes = tuple(map(Abnormal.Abnormal.abnormal, classes))
 
         return vgg, classes
       if not self.generation:
