@@ -43,7 +43,7 @@ from resources.data import Abnormal
 sklearn
 """
 try:
-  from sklearn import svm
+  import sklearn.svm
   from sklearn.externals import joblib
 except:
   print('sklearn not loaded')
@@ -697,10 +697,10 @@ class BSOFModel:
         'max_iter'                : self.max_iter,
         'probability'             : True,
       }
-      classifier = svm.SVC(**kwargs)
+      classifier = sklearn.svm.SVC(**kwargs)
       self.logger.info(kwargs)
       classifier.fit(self.generation_cache['X'], self.generation_cache['Y'])
-      joblib.dump(classifier, self.model_path)
+      joblib.dump(classifier, self.svm_model_path)
     def vgg():
       # 载入模型
       def load():
