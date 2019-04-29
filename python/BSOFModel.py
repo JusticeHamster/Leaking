@@ -859,7 +859,7 @@ class BSOFModel:
         self.foreach(self.one_video_classification, self.clear_classification)
     if self.thread_stop:
       return
-    m = {
+    {
       'svm'     : svm,
       'vgg'     : vgg,
       'xgboost' : xgboost,
