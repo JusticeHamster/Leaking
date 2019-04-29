@@ -813,12 +813,17 @@ class BSOFModel:
           model, optim, scheduler, criterion
         )
     def xgboost():
-      def load_attribute():
+      def load_attribute(classToEnum=True):
         data = torch.load(self.vgg_model_path)
         vgg = lktools.Vgg.vgg(self.vgg, num_classes=len(data['classes']), classify=False)
         vgg.load_state_dict(data['state'])
         vgg.eval()
-        return vgg, tuple(map(Abnormal.Abnormal.abnormal, data['classes']))
+
+        classes = data['classes']
+        if classToEnum:
+	  classes = tuple(map(Abnormal.Abnormal.abnormal, classes))
+
+        return vgg, classes
       if not self.generation:
         bst = xgb.Booster({'nthread': self.nthread})
         bst.load_model(self.xgboost_model_path)
@@ -826,7 +831,7 @@ class BSOFModel:
         self.vgg_attribute, self.classes = load_attribute()
         self.foreach(self.one_video_classification, self.clear_classification)
         return
-      vgg, classes = load_attribute()
+      vgg, classes = load_attribute(classToEnum=False)
       self.dataset = BSOFDataset(self.data['train'], classes=classes)
       length = len(self.dataset)
       length_100 = max(length // 100, 1)
