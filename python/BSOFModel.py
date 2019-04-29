@@ -29,7 +29,7 @@ from lktools.PreProcess   import video_capture_size, bgr_to_hsv, gray_to_bgr, bg
 from lktools.OpticalFlow  import optical_flow_rects
 from lktools.SIFT         import siftImageAlignment
 from lktools.Denoise      import denoise
-from lktools.FindObject   import findObject
+from lktools.FindObject   import getContours, findObject
 try:
   import lktools.Vgg
   from lktools.BSOFDataset  import BSOFDataset
@@ -251,14 +251,13 @@ class BSOFModel:
     debug(hsv, func=lambda c: f'h: {c[0]:.2f}, s: {c[1]:.2f}, v: {c[2]:.2f}')
     attr.extend(hsv)
     # ⬇️周长面积比
-    _, contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     def length_of_area(c):
       length = cv2.arcLength(c, True)
       area = cv2.contourArea(c)
       if area == 0:
         return 0
       return length / area
-    len_area = np.mean(tuple(map(length_of_area, contours)))
+    len_area = np.mean(tuple(map(length_of_area, getContours(binary))))
     attr.append(len_area)
     if self.model_t == 'svm' and self.generation_t == 'video':
       # ⬇️面积增长率
