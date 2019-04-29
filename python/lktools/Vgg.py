@@ -20,6 +20,9 @@ class VGG(nn.Module):
       nn.Dropout(),
       nn.Linear(4096, num_classes),
     )
+    self.attributer = nn.Sequential(
+      nn.Linear(512 * 7 * 7, 4096),
+    )
     self.softmax = nn.Softmax(dim=1)
     if init_weights:
       self.__init_weights()
@@ -29,6 +32,8 @@ class VGG(nn.Module):
     x = x.view(x.size(0), -1)
     if self.classify:
       x = self.classifier(x)
+    else:
+      x = self.attributer(x)
     return x
 
   def __init_weights(self):

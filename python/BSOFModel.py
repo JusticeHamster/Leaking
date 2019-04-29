@@ -326,8 +326,8 @@ class BSOFModel:
       def xgboost_style():
         X = attributes(src, range_rect, rects, abnormal)
         x = BSOFDataset.load_img(matrix_within_rect(src, union_bounds(rects)), (224, 224))
-        x = self.vgg_attribute(x.unsqueeze(0))
-        X.append(nn.Linear(4096)(x))
+        x = self.vgg_attribute(x.unsqueeze(0)).data.numpy()
+        X.extend(x.tolist())
         y = self.classifier.predict(xgb.DMatrix(np.array([X])))
         proba = dict(zip(self.classes, y[0]))
         return Abnormal.Abnormal.abnormals(proba), X
@@ -842,7 +842,7 @@ class BSOFModel:
         img, label = self.dataset.raw_img(d)
         attr       = self.attributes(img)
         vgg_attr   = vgg(BSOFDataset.load_img(img, (224, 224)).unsqueeze(0)).data.numpy()
-        attr.append(vgg_attr.sum())
+        attr.extend(vgg_attr.tolist())
         X.append(attr)
         Y.append(label)
         if count % length_100 == 0:
