@@ -326,7 +326,10 @@ class BSOFModel:
       def sklearn_style():
         X = [attributes(src, range_rect, rects, abnormal)]
         y = self.classifier.predict_proba(X)
-        proba = dict(zip(self.classifier.classes_, y[0]))
+        proba = dict(zip(map(
+          Abnormal.Abnormal.ABNORMAL.__getitem__,
+          self.classifier.classes_), y[0]
+        ))
         return Abnormal.Abnormal.abnormals(proba), X
       def xgboost_style():
         X = attributes(src, range_rect, rects, abnormal)
