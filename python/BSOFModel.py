@@ -131,6 +131,10 @@ class BSOFModel:
       path = {
         'svm': self.svm_model_path,
         'vgg': self.vgg_model_path,
+        'xgboost': (
+          self.vgg_model_path,
+          self.xgboost_model_path,
+        ),
       }.get(self.model_t)
       if path:
         self.checker.check(path, self.checker.exists_file)
