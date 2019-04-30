@@ -263,7 +263,7 @@ class BSOFModel:
       return length / area
     len_area = np.mean(tuple(map(length_of_area, getContours(binary))))
     attr.append(len_area)
-    if self.model_t == 'svm' and self.generation_t == 'video':
+    if self.model_t == 'svm' and (not self.generation or self.generation_t == 'video'):
       # ⬇️面积增长率
       area = sum(map(cv2.contourArea, contours))
       last_area = self.judge_cache['area']
