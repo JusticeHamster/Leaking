@@ -261,9 +261,10 @@ class BSOFModel:
       if area == 0:
         return 0
       return length / area
-    len_area = np.mean(tuple(map(length_of_area, getContours(binary))))
+    contours = getContours(binary)
+    len_area = np.mean(tuple(map(length_of_area, contours)))
     attr.append(len_area)
-    if self.model_t == 'svm' and (not self.generation or self.generation_t == 'video'):
+    if self.model_t == 'svm' and self.generation_t == 'video':
       # ⬇️面积增长率
       area = sum(map(cv2.contourArea, contours))
       last_area = self.judge_cache['area']
@@ -326,7 +327,7 @@ class BSOFModel:
         X = [attributes(src, range_rect, rects, abnormal)]
         y = self.classifier.predict_proba(X)
         proba = dict(zip(self.classifier.classes_, y[0]))
-        return self.abnormals.accumulate_abnormals(proba), X
+        return Abnormal.Abnormal.abnormals(proba), X
       def xgboost_style():
         X = attributes(src, range_rect, rects, abnormal)
         x = BSOFDataset.load_img(matrix_within_rect(src, union_bounds(rects)), (224, 224))
@@ -687,7 +688,7 @@ class BSOFModel:
         for i in range(length):
           img, label = self.dataset.raw_img(i)
           X.append(self.attributes(img))
-          Y.append(label)
+          Y.append(self.dataset.classes[label])
           if count % length_100 == 0:
             self.logger.info(f'{100 * count / length:.0f}%')
           count += 1

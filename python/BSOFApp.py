@@ -183,15 +183,24 @@ class BSOFApp(kivy.app.App):
     if self.settings['model_t'] == 'svm':
       attributes = self.model.now['attributes']
       if attributes is not None:
-        h, s, v, l, m, s, *_ = attributes[0]
-        self.form.ids.get('mean_color').text = f'''
-          H: {h:.2f}
-          S: {s:.2f}
-          V: {v:.2f}
-          周长面积比: {l:.2f}
-          面积增长率: {m:.2f}
-          中心相对移动: {s:.2f}
-        '''
+        if self.settings['generation_t'] == 'video':
+          h, s, v, l, m, s, *_ = attributes[0]
+          self.form.ids.get('mean_color').text = f'''
+            H: {h:.2f}
+            S: {s:.2f}
+            V: {v:.2f}
+            周长面积比: {l:.2f}
+            面积增长率: {m:.2f}
+            中心相对移动: {s:.2f}
+          '''
+        else:
+          h, s, v, l, *_ = attributes[0]
+          self.form.ids.get('mean_color').text = f'''
+            H: {h:.2f}
+            S: {s:.2f}
+            V: {v:.2f}
+            周长面积比: {l:.2f}
+          '''
 
   def before_every_video(self):
     """
