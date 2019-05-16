@@ -729,7 +729,7 @@ class BSOFModel:
             self.logger.info(
               f'avg auc: {error * 100 / count:.2f}%; {100 * count / length:.0f}%'
             )
-        self.logger.info(f'auc: {error * 100 / length:.2f}%')
+        self.logger.info(f'auc: {error * 100 / length:.2f}% of {length}')
       if need_test:
         test()
       else:
@@ -815,7 +815,7 @@ class BSOFModel:
           self.logger.info(f'loss: {loss:.4f} 正确率：{_acc * 100 / len(label):.2f}%')
           loss_sum += loss
           acc_sum  += _acc
-        self.logger.info(f'avgloss : {loss_sum / length:.4f}')
+        self.logger.info(f'avgloss : {loss_sum / length:.4f} of {length}')
         self.logger.info(f'总正确率 : {acc_sum * 100 / length:.2f}%')
       self.logger.debug('测试模型' if need_test else '训练模型')
       self.dataset = {
@@ -916,7 +916,7 @@ class BSOFModel:
             self.logger.info(
               f'avg auc: {error * 100 / count:.2f}%; {100 * count / length:.0f}%'
             )
-        self.logger.info(f'auc: {error * 100 / length:.2f}%')
+        self.logger.info(f'auc: {error * 100 / length:.2f}% of {length}.')
       if need_test:
         test()
       else:
