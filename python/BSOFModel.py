@@ -914,9 +914,9 @@ class BSOFModel:
           count += 1
           if count % length_100 == 0:
             self.logger.info(
-              f'avg auc: {error * 100 / count:.2f}; {100 * count / length:.0f}%'
+              f'avg auc: {error * 100 / count:.2f}%; {100 * count / length:.0f}%'
             )
-        self.logger.info(f'auc: {error * 100 / length:.2f}')
+        self.logger.info(f'auc: {error * 100 / length:.2f}%')
       if need_test:
         test()
       else:
