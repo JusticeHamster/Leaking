@@ -812,7 +812,7 @@ class BSOFModel:
           loss.backward()
           loss   = loss.data
           _acc   = acc(output, label)
-          self.logger.info(f'loss: {loss:.4f} 正确率：{_acc * 100 / 64:.2f}%')
+          self.logger.info(f'loss: {loss:.4f} 正确率：{_acc * 100 / len(label):.2f}%')
           loss_sum += loss
           acc_sum  += _acc
         self.logger.info(f'avgloss : {loss_sum / length:.4f}')
