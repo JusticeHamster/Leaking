@@ -679,36 +679,61 @@ class BSOFModel:
         self.classifier = joblib.load(self.svm_model_path)
         self.foreach(self.one_video_classification, self.clear_classification)
         return
-      if self.generation_t == 'video':
-        self.foreach(self.one_video_classification, self.clear_classification)
-      elif self.generation_t == 'image':
-        self.dataset = BSOFDataset(self.data['train'])
+      # 是否测试
+      need_test = os.path.exists(self.svm_model_path)
+      def train():
+        if self.generation_t == 'video':
+          self.foreach(self.one_video_classification, self.clear_classification)
+        elif self.generation_t == 'image':
+          self.dataset = BSOFDataset(self.data['train'])
+          length = len(self.dataset)
+          length_100 = max(length // 100, 1)
+          X = []
+          Y = []
+          count = 0
+          for i in range(length):
+            img, label = self.dataset.raw_img(i)
+            X.append(self.attributes(img))
+            Y.append(self.dataset.classes[label])
+            if count % length_100 == 0:
+              self.logger.info(f'{100 * count / length:.0f}%')
+            count += 1
+          cache = self.generation_cache
+          cache['X'] = X
+          cache['Y'] = Y
+        self.logger.debug('训练模型')
+        kwargs = {
+          'gamma'                   : 'scale',
+          'decision_function_shape' : 'ovo',
+          'max_iter'                : self.max_iter,
+          'probability'             : True,
+        }
+        classifier = sklearn.svm.SVC(**kwargs)
+        self.logger.info(kwargs)
+        classifier.fit(self.generation_cache['X'], self.generation_cache['Y'])
+        joblib.dump(classifier, self.svm_model_path)
+      def test():
+        self.classifier = joblib.load(self.svm_model_path)
+        self.dataset = BSOFDataset(self.data['test'])
         length = len(self.dataset)
         length_100 = max(length // 100, 1)
-        X = []
-        Y = []
         count = 0
+        error = 0
         for i in range(length):
           img, label = self.dataset.raw_img(i)
-          X.append(self.attributes(img))
-          Y.append(self.dataset.classes[label])
-          if count % length_100 == 0:
-            self.logger.info(f'{100 * count / length:.0f}%')
+          x = [self.attributes(img)]
+          y = self.dataset.classes[label]
+          error += (y != self.classifier.predict(x))[0]
           count += 1
-        cache = self.generation_cache
-        cache['X'] = X
-        cache['Y'] = Y
-      self.logger.debug('训练模型')
-      kwargs = {
-        'gamma'                   : 'scale',
-        'decision_function_shape' : 'ovo',
-        'max_iter'                : self.max_iter,
-        'probability'             : True,
-      }
-      classifier = sklearn.svm.SVC(**kwargs)
-      self.logger.info(kwargs)
-      classifier.fit(self.generation_cache['X'], self.generation_cache['Y'])
-      joblib.dump(classifier, self.svm_model_path)
+          if count % length_100 == 0:
+            self.logger.info(
+              f'avg auc: {error * 100 / count:.2f}%; {100 * count / length:.0f}%'
+            )
+        self.logger.info(f'auc: {error * 100 / length:.2f}%')
+      if need_test:
+        test()
+      else:
+        train()
     def vgg():
       # 载入模型
       def load():
@@ -839,33 +864,63 @@ class BSOFModel:
         self.vgg_attribute, self.classes = load_attribute()
         self.foreach(self.one_video_classification, self.clear_classification)
         return
-      vgg, classes = load_attribute(classToEnum=False)
-      self.dataset = BSOFDataset(self.data['train'], classes=classes)
-      length = len(self.dataset)
-      length_100 = max(length // 100, 1)
-      X = []
-      Y = []
-      count = 0
-      for d in range(length):
-        img, label = self.dataset.raw_img(d)
-        attr       = self.attributes(img)
-        vgg_attr   = vgg(BSOFDataset.load_img(img, (224, 224)).unsqueeze(0)).data.numpy()
-        attr.extend(vgg_attr[0])
-        X.append(attr)
-        Y.append(label)
-        if count % length_100 == 0:
-          self.logger.info(f'{100 * count / length:.0f}%')
-        count += 1
-      params = {
-        'objective': 'multi:softprob',
-        'num_class': self.num_classes,
-        'nthread': self.nthread,
-      }
-      data = xgb.DMatrix(np.array(X), np.array(Y))
-      bst = xgb.train(params, data, self.num_round, evals=[(data, 'train')])
-      self.logger.info('save xgboost model')
-      bst.save_model(self.xgboost_model_path)
-      bst.dump_model(f'{self.xgboost_model_path}.txt')
+      # 是否测试
+      need_test = os.path.exists(self.xgboost_model_path)
+      def train():
+        vgg, classes = load_attribute(classToEnum=False)
+        self.dataset = BSOFDataset(self.data['train'], classes=classes)
+        length = len(self.dataset)
+        length_100 = max(length // 100, 1)
+        X = []
+        Y = []
+        count = 0
+        for d in range(length):
+          img, label = self.dataset.raw_img(d)
+          attr       = self.attributes(img)
+          vgg_attr   = vgg(BSOFDataset.load_img(img, (224, 224)).unsqueeze(0)).data.numpy()
+          attr.extend(vgg_attr[0])
+          X.append(attr)
+          Y.append(label)
+          if count % length_100 == 0:
+            self.logger.info(f'{100 * count / length:.0f}%')
+          count += 1
+        params = {
+          'objective': 'multi:softprob',
+          'num_class': self.num_classes,
+          'nthread': self.nthread,
+        }
+        data = xgb.DMatrix(np.array(X), np.array(Y))
+        bst = xgb.train(params, data, self.num_round, evals=[(data, 'train')])
+        self.logger.info('save xgboost model')
+        bst.save_model(self.xgboost_model_path)
+        bst.dump_model(f'{self.xgboost_model_path}.txt')
+      def test():
+        bst = xgb.Booster({'nthread': self.nthread})
+        bst.load_model(self.xgboost_model_path)
+        self.classifier = bst
+        vgg, classes = load_attribute()
+        self.dataset = BSOFDataset(self.data['test'], classes=classes)
+        length = len(self.dataset)
+        length_100 = max(length // 100, 1)
+        count = 0
+        error = 0
+        for d in range(length):
+          img, label = self.dataset.raw_img(d)
+          attr       = self.attributes(img)
+          vgg_attr   = vgg(BSOFDataset.load_img(img, (224, 224)).unsqueeze(0)).data.numpy()
+          attr.extend(vgg_attr[0])
+          predict = self.classifier.predict(xgb.DMatrix(np.array([attr])))[0]
+          error += (label != predict)
+          count += 1
+          if count % length_100 == 0:
+            self.logger.info(
+              f'avg auc: {error * 100 / count:.2f}; {100 * count / length:.0f}%'
+            )
+        self.logger.info(f'auc: {error * 100 / length:.2f}')
+      if need_test:
+        test()
+      else:
+        train()
     def none():
       if not self.generation:
         self.foreach(self.one_video_classification, self.clear_classification)
