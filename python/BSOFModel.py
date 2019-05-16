@@ -898,7 +898,7 @@ class BSOFModel:
         bst = xgb.Booster({'nthread': self.nthread})
         bst.load_model(self.xgboost_model_path)
         self.classifier = bst
-        vgg, classes = load_attribute()
+        vgg, classes = load_attribute(classToEnum=False)
         self.dataset = BSOFDataset(self.data['test'], classes=classes)
         length = len(self.dataset)
         length_100 = max(length // 100, 1)
@@ -910,7 +910,7 @@ class BSOFModel:
           vgg_attr   = vgg(BSOFDataset.load_img(img, (224, 224)).unsqueeze(0)).data.numpy()
           attr.extend(vgg_attr[0])
           predict = self.classifier.predict(xgb.DMatrix(np.array([attr])))[0]
-          error += (label != predict)
+          error += (label != predict.argmax())
           count += 1
           if count % length_100 == 0:
             self.logger.info(
