@@ -719,14 +719,17 @@ class BSOFModel:
         length_100 = max(length // 100, 1)
         count = 0
         error = 0
-        matrix = {c: 0 for c in self.dataset.classes}
+        matrix = {
+          c: {cc: 0 for cc in self.dataset.classes}
+          for c in self.dataset.classes
+        }
         for i in range(length):
           img, label = self.dataset.raw_img(i)
           x = [self.attributes(img)]
           y = self.dataset.classes[label]
           predict = self.classifier.predict(x)[0]
           error += (y != predict)
-          matrix[predict] += 1
+          matrix[y][predict] += 1
           count += 1
           if count % length_100 == 0:
             self.logger.info(
@@ -807,7 +810,10 @@ class BSOFModel:
       def test(data, length, model, classes, criterion):
         loss_sum = 0
         acc_sum  = 0
-        matrix = {c: 0 for c in classes}
+        matrix = {
+          c: {cc: 0 for cc in classes}
+          for c in classes
+        }
         for img, label in data:
           if self.is_cuda_available:
             img   = img.cuda()
@@ -817,8 +823,8 @@ class BSOFModel:
           loss.backward()
           loss   = loss.data
           _acc   = acc(output, label)
-          for c in output.max(1)[1]:
-            matrix[classes[c]] += 1
+          for c, l in zip(output.max(1)[1], label):
+            matrix[classes[l]][classes[c]] += 1
           self.logger.info(f'loss: {loss:.4f} 正确率：{_acc * 100 / len(label):.2f}%')
           loss_sum += loss
           acc_sum  += _acc
@@ -912,7 +918,10 @@ class BSOFModel:
         length_100 = max(length // 100, 1)
         count = 0
         error = 0
-        matrix = {c: 0 for c in classes}
+        matrix = {
+          c: {cc: 0 for cc in classes}
+          for c in classes
+        }
         for d in range(length):
           img, label = self.dataset.raw_img(d)
           attr       = self.attributes(img)
@@ -921,7 +930,7 @@ class BSOFModel:
           predict = self.classifier.predict(xgb.DMatrix(np.array([attr])))[0]
           predict = predict.argmax()
           error += (label != predict)
-          matrix[classes[predict]] += 1
+          matrix[classes[label]][classes[predict]] += 1
           count += 1
           if count % length_100 == 0:
             self.logger.info(
