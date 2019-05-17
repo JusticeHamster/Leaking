@@ -715,19 +715,18 @@ class BSOFModel:
       def test():
         self.classifier = joblib.load(self.svm_model_path)
         self.dataset = BSOFDataset(self.data['test'])
-        classes = self.dataset.classes
         length = len(self.dataset)
         length_100 = max(length // 100, 1)
         count = 0
         error = 0
-        matrix = {c: 0 for c in classes}
+        matrix = {c: 0 for c in self.dataset.classes}
         for i in range(length):
           img, label = self.dataset.raw_img(i)
           x = [self.attributes(img)]
           y = self.dataset.classes[label]
-          predict = self.classifier.predict(x)
-          error += (y != predict)[0]
-          matrix[classes[predict]] += 1
+          predict = self.classifier.predict(x)[0]
+          error += (y != predict)
+          matrix[predict] += 1
           count += 1
           if count % length_100 == 0:
             self.logger.info(
