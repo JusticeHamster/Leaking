@@ -715,21 +715,26 @@ class BSOFModel:
       def test():
         self.classifier = joblib.load(self.svm_model_path)
         self.dataset = BSOFDataset(self.data['test'])
+        classes = self.dataset.classes
         length = len(self.dataset)
         length_100 = max(length // 100, 1)
         count = 0
         error = 0
+        matrix = {c: 0 for c in classes}
         for i in range(length):
           img, label = self.dataset.raw_img(i)
           x = [self.attributes(img)]
           y = self.dataset.classes[label]
-          error += (y != self.classifier.predict(x))[0]
+          predict = self.classifier.predict(x)
+          error += (y != predict)[0]
+          matrix[classes[predict]] += 1
           count += 1
           if count % length_100 == 0:
             self.logger.info(
               f'avg auc: {error * 100 / count:.2f}%; {100 * count / length:.0f}%'
             )
         self.logger.info(f'auc: {error * 100 / length:.2f}% of {length}')
+        self.logger.info(matrix)
       if need_test:
         test()
       else:
@@ -803,6 +808,7 @@ class BSOFModel:
       def test(data, length, model, classes, criterion):
         loss_sum = 0
         acc_sum  = 0
+        matrix = {c: 0 for c in classes}
         for img, label in data:
           if self.is_cuda_available:
             img   = img.cuda()
@@ -812,11 +818,14 @@ class BSOFModel:
           loss.backward()
           loss   = loss.data
           _acc   = acc(output, label)
+          for c in output.max(1)[1]:
+            matrix[classes[c]] += 1
           self.logger.info(f'loss: {loss:.4f} 正确率：{_acc * 100 / len(label):.2f}%')
           loss_sum += loss
           acc_sum  += _acc
         self.logger.info(f'avgloss : {loss_sum / length:.4f} of {length}')
         self.logger.info(f'总正确率 : {acc_sum * 100 / length:.2f}%')
+        self.logger.info(matrix)
       self.logger.debug('测试模型' if need_test else '训练模型')
       self.dataset = {
         name: BSOFDataset(
@@ -904,19 +913,23 @@ class BSOFModel:
         length_100 = max(length // 100, 1)
         count = 0
         error = 0
+        matrix = {c: 0 for c in classes}
         for d in range(length):
           img, label = self.dataset.raw_img(d)
           attr       = self.attributes(img)
           vgg_attr   = vgg(BSOFDataset.load_img(img, (224, 224)).unsqueeze(0)).data.numpy()
           attr.extend(vgg_attr[0])
           predict = self.classifier.predict(xgb.DMatrix(np.array([attr])))[0]
-          error += (label != predict.argmax())
+          predict = predict.argmax()
+          error += (label != predict)
+          matrix[classes[predict]] += 1
           count += 1
           if count % length_100 == 0:
             self.logger.info(
               f'avg auc: {error * 100 / count:.2f}%; {100 * count / length:.0f}%'
             )
         self.logger.info(f'auc: {error * 100 / length:.2f}% of {length}.')
+        self.logger.info(matrix)
       if need_test:
         test()
       else:
