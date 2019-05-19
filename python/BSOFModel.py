@@ -723,11 +723,17 @@ class BSOFModel:
           c: {cc: 0 for cc in self.dataset.classes}
           for c in self.dataset.classes
         }
+        if self.file_output:
+          path = f'{self.img_path}/svm'
+          if not os.path.exists(path):
+            os.mkdir(path)
         for i in range(length):
           img, label = self.dataset.raw_img(i)
           x = [self.attributes(img)]
           y = self.dataset.classes[label]
           predict = self.classifier.predict(x)[0]
+          if self.file_output:
+            cv2.imwrite(f'{path}/{i}_{predict}.jpg', img)
           error += (y != predict)
           matrix[y][predict] += 1
           count += 1
@@ -814,6 +820,11 @@ class BSOFModel:
           c: {cc: 0 for cc in classes}
           for c in classes
         }
+        if self.file_output:
+          i = 0
+          path = f'{self.img_path}/vgg'
+          if not os.path.exists(path):
+            os.mkdir(path)
         for img, label in data:
           if self.is_cuda_available:
             img   = img.cuda()
@@ -824,6 +835,9 @@ class BSOFModel:
           loss   = loss.data
           _acc   = acc(output, label)
           for c, l in zip(output.max(1)[1], label):
+            if self.file_output:
+              cv2.imwrite(f'{path}/{i}_{classes[c]}.jpg', img)
+              i += 1
             matrix[classes[l]][classes[c]] += 1
           self.logger.info(f'loss: {loss:.4f} 正确率：{_acc * 100 / len(label):.2f}%')
           loss_sum += loss
@@ -922,13 +936,19 @@ class BSOFModel:
           c: {cc: 0 for cc in classes}
           for c in classes
         }
-        for d in range(length):
-          img, label = self.dataset.raw_img(d)
+        if self.file_output:
+          path = f'{self.img_path}/xgboost'
+          if not os.path.exists(path):
+            os.mkdir(path)
+        for i in range(length):
+          img, label = self.dataset.raw_img(i)
           attr       = self.attributes(img)
           vgg_attr   = vgg(BSOFDataset.load_img(img, (224, 224)).unsqueeze(0)).data.numpy()
           attr.extend(vgg_attr[0])
           predict = self.classifier.predict(xgb.DMatrix(np.array([attr])))[0]
           predict = predict.argmax()
+          if self.file_output:
+            cv2.imwrite(f'{path}/{i}_{classes[predict]}.jpg', img)
           error += (label != predict)
           matrix[classes[label]][classes[predict]] += 1
           count += 1
