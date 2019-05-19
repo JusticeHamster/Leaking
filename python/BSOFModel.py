@@ -724,9 +724,9 @@ class BSOFModel:
           for c in self.dataset.classes
         }
         if self.file_output:
-          path = f'{self.img_path}/svm'
+          path = 'temp/svm'
           if not os.path.exists(path):
-            os.mkdir(path)
+            os.makedirs(path)
         for i in range(length):
           img, label = self.dataset.raw_img(i)
           x = [self.attributes(img)]
@@ -822,9 +822,9 @@ class BSOFModel:
         }
         if self.file_output:
           i = 0
-          path = f'{self.img_path}/vgg'
+          path = 'temp/vgg'
           if not os.path.exists(path):
-            os.mkdir(path)
+            os.makedirs(path)
         for img, label in data:
           if self.is_cuda_available:
             img   = img.cuda()
@@ -836,7 +836,7 @@ class BSOFModel:
           _acc   = acc(output, label)
           for c, l in zip(output.max(1)[1], label):
             if self.file_output:
-              cv2.imwrite(f'{path}/{i}_{classes[c]}.jpg', img)
+              cv2.imwrite(f'{path}/{i}_{classes[c]}.jpg', img.numpy())
               i += 1
             matrix[classes[l]][classes[c]] += 1
           self.logger.info(f'loss: {loss:.4f} 正确率：{_acc * 100 / len(label):.2f}%')
@@ -937,9 +937,9 @@ class BSOFModel:
           for c in classes
         }
         if self.file_output:
-          path = f'{self.img_path}/xgboost'
+          path = 'temp/xgboost'
           if not os.path.exists(path):
-            os.mkdir(path)
+            os.makedirs(path)
         for i in range(length):
           img, label = self.dataset.raw_img(i)
           attr       = self.attributes(img)
