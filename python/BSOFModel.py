@@ -491,6 +491,16 @@ class BSOFModel:
           ))
           cv2.imwrite(f'temp/{cache["debug_count"]}_{proba}.jpg', img)
           cache['debug_count'] += 1
+        elif self.model_t == 'none':
+          if self.opnum is None:
+            self.opnum = 0
+          print('---------------------')
+          if not os.path.exists('/Users/wzy/Downloads/temp'):
+            os.mkdir('/Users/wzy/Downloads/temp')
+          img = self.now['abnormal']['OF_Binary']
+          cv2.imwrite(f'/Users/wzy/Downloads/temp/op{self.opnum}.jpg', img)
+          cv2.imwrite(f'/Users/wzy/Downloads/temp/src{self.opnum}.jpg', self.now['frame'])
+          self.opnum = self.opnum + 1
     @lktools.Timer.timer_decorator()
     def update(original):
       """
