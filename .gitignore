@@ -28,3 +28,6 @@ nohup.*
 # 设置文件
 *.settings
 settings.json
+python/.VSCodeCounter/results.csv
+python/.VSCodeCounter/results.md
+python/.VSCodeCounter/results.txt
